@@ -254,6 +254,39 @@
       transform: scale(.98);
     }
 
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-row .generate-btn {
+      flex: 1;
+    }
+
+    .clear-btn {
+      padding: 14px 20px;
+      background: var(--white);
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+    }
+
+    .clear-btn:active {
+      transform: scale(.98);
+    }
+
     /* Right Panel */
     .output-panel {
       padding: 24px 32px;
@@ -549,7 +582,10 @@
       <div class="char-count"><span id="charCount">0</span> 文字</div>
     </div>
 
-    <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+    <div class="btn-row">
+      <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+      <button class="clear-btn" onclick="clearAll()">クリア</button>
+    </div>
   </div>
 
   <!-- Right: Output Panel -->
@@ -1102,6 +1138,24 @@ function getConditionSupplement(condition) {
   };
 
   return supplements[condition] || null;
+}
+
+function clearAll() {
+  document.getElementById('memoInput').value = '';
+  document.getElementById('ageGroup').value = '';
+  document.getElementById('infectionRoute').value = '';
+  document.getElementById('condition').value = '';
+  document.getElementById('channel').value = '';
+
+  document.querySelectorAll('.tag-btn.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  updateCharCount();
+
+  document.getElementById('scriptOutput').style.display = 'none';
+  document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('emptyState').style.display = '';
 }
 
 function copySection(btn) {
