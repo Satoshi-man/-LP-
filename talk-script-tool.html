@@ -516,6 +516,7 @@
           <label>顧客の年代</label>
           <select id="ageGroup">
             <option value="">選択してください</option>
+            <option value="30s">30代</option>
             <option value="40s">40代</option>
             <option value="50s">50代</option>
             <option value="60s">60代</option>
@@ -541,6 +542,7 @@
             <option value="chronic">慢性肝炎</option>
             <option value="cirrhosis">肝硬変</option>
             <option value="cancer">肝がん</option>
+            <option value="inheritance">相続相談</option>
             <option value="unknown">不明・未診断</option>
           </select>
         </div>
@@ -1124,6 +1126,15 @@ function getConditionSupplement(condition) {
         label: 'point',
         labelText: '病状別補足',
         text: '肝がんの方の場合、給付金額は<strong>最大3,600万円</strong>となります。<strong>治療に専念していただくためにも</strong>、面倒なお手続きはすべて当事務所にお任せください。資料収集から申請まで、全力でサポートいたします。'
+      }]
+    },
+    inheritance: {
+      title: '相続人（ご遺族）の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相続相談補足',
+        text: 'B型肝炎給付金は、<strong>感染されたご本人が亡くなられている場合でも、ご遺族（相続人）の方が請求できます</strong>。給付金額は病状に応じて最大<strong>3,600万円</strong>に加え、訴訟手当金等が支給される場合もございます。<strong>必要な資料の収集もすべて無料で代行</strong>いたしますので、まずはお気軽にご相談ください。'
       }]
     },
     unknown: {
