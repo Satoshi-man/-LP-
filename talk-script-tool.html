@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B型肝炎給付金 トークスクリプト支援ツール</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2b4a;
+      --navy-dark: #0f1e35;
+      --gold: #c8a951;
+      --gold-light: #e8d080;
+      --gray-bg: #f5f6f8;
+      --text: #2d2d2d;
+      --text-light: #666;
+      --white: #fff;
+      --green: #27ae60;
+      --green-light: #eafaf1;
+      --blue: #2980b9;
+      --blue-light: #ebf5fb;
+      --orange: #e67e22;
+      --orange-light: #fef5e7;
+      --red: #c0392b;
+      --border: #dde1e8;
+    }
+
+    body {
+      font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+      background: var(--gray-bg);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-header .badge {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: .05em;
+    }
+
+    .app-header .internal {
+      font-size: .7rem;
+      color: var(--gold-light);
+      font-weight: 400;
+    }
+
+    /* Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Left Panel */
+    .input-panel {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* Quick tags */
+    .quick-tags {
+      margin-bottom: 20px;
+    }
+
+    .quick-tags-label {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-btn {
+      background: var(--gray-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    .tag-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .tag-btn.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    /* Memo area */
+    .memo-area {
+      margin-bottom: 20px;
+    }
+
+    .memo-area label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .memo-area textarea {
+      width: 100%;
+      height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: .88rem;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color .2s;
+    }
+
+    .memo-area textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,169,81,.15);
+    }
+
+    .memo-area textarea::placeholder {
+      color: #aab;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: .7rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Customer info */
+    .customer-info {
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .info-field {
+      flex: 1;
+    }
+
+    .info-field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .info-field select,
+    .info-field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: .82rem;
+      font-family: inherit;
+      background: var(--white);
+    }
+
+    .info-field select:focus,
+    .info-field input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    /* Generate button */
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s;
+      font-family: inherit;
+      letter-spacing: .03em;
+    }
+
+    .generate-btn:hover {
+      opacity: .85;
+    }
+
+    .generate-btn:active {
+      transform: scale(.98);
+    }
+
+    /* Right Panel */
+    .output-panel {
+      padding: 24px 32px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+    }
+
+    /* Script cards */
+    .script-section {
+      margin-bottom: 28px;
+    }
+
+    .script-section-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--navy);
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .script-section-title .icon {
+      font-size: 1rem;
+    }
+
+    .script-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    }
+
+    .script-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .label-concern {
+      background: #fdecea;
+      color: var(--red);
+    }
+
+    .label-response {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .label-point {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .label-close {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .script-text {
+      font-size: .9rem;
+      line-height: 2;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .script-text strong {
+      color: var(--navy);
+      background: linear-gradient(transparent 60%, rgba(200,169,81,.25) 60%);
+    }
+
+    .script-text .emphasis {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .script-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 16px 0;
+    }
+
+    /* Strength badge */
+    .strength-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* Tip box */
+    .tip-box {
+      background: #fffbf0;
+      border: 1px solid var(--gold);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .tip-box-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+      font-size: .78rem;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: .72rem;
+      cursor: pointer;
+      color: var(--text-light);
+      font-family: inherit;
+      transition: all .15s;
+      float: right;
+    }
+
+    .copy-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .copy-btn.copied {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--text-light);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: .4;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: .85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        position: relative;
+        top: 0;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .output-panel {
+        max-height: none;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .script-section {
+      animation: fadeInUp .3s ease-out;
+    }
+
+    .script-section:nth-child(2) { animation-delay: .05s; }
+    .script-section:nth-child(3) { animation-delay: .1s; }
+    .script-section:nth-child(4) { animation-delay: .15s; }
+    .script-section:nth-child(5) { animation-delay: .2s; }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>
+    B型肝炎給付金 トークスクリプト支援ツール
+    <span class="badge">社内用</span>
+  </h1>
+  <span class="internal">対応者向け支援システム</span>
+</div>
+
+<div class="app-container">
+
+  <!-- Left: Input Panel -->
+  <div class="input-panel">
+    <div class="panel-title">顧客情報・懸念事項入力</div>
+
+    <div class="customer-info">
+      <div class="info-row">
+        <div class="info-field">
+          <label>顧客の年代</label>
+          <select id="ageGroup">
+            <option value="">選択してください</option>
+            <option value="40s">40代</option>
+            <option value="50s">50代</option>
+            <option value="60s">60代</option>
+            <option value="70s">70代以上</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>感染経路（分かれば）</label>
+          <select id="infectionRoute">
+            <option value="">不明・未確認</option>
+            <option value="vaccination">集団予防接種</option>
+            <option value="mother">母子感染</option>
+            <option value="unknown">本人も不明</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-field">
+          <label>現在の病状</label>
+          <select id="condition">
+            <option value="">選択してください</option>
+            <option value="carrier">無症候性キャリア</option>
+            <option value="chronic">慢性肝炎</option>
+            <option value="cirrhosis">肝硬変</option>
+            <option value="cancer">肝がん</option>
+            <option value="unknown">不明・未診断</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>相談経緯</label>
+          <select id="channel">
+            <option value="">選択してください</option>
+            <option value="web">Web検索</option>
+            <option value="cm">TV・CM</option>
+            <option value="referral">知人紹介</option>
+            <option value="hospital">病院で聞いた</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-tags">
+      <div class="quick-tags-label">よくある懸念事項（クリックで追加）</div>
+      <div class="tag-group">
+        <button class="tag-btn" data-tag="費用が心配">費用が心配</button>
+        <button class="tag-btn" data-tag="手続きが面倒そう">手続きが面倒</button>
+        <button class="tag-btn" data-tag="対象か分からない">対象か不明</button>
+        <button class="tag-btn" data-tag="時効が心配">時効が心配</button>
+        <button class="tag-btn" data-tag="家族に知られたくない">家族バレ不安</button>
+        <button class="tag-btn" data-tag="証拠・資料がない">証拠がない</button>
+        <button class="tag-btn" data-tag="他の事務所と比較中">他事務所比較</button>
+        <button class="tag-btn" data-tag="給付金額を知りたい">金額知りたい</button>
+        <button class="tag-btn" data-tag="忙しくて時間がない">時間がない</button>
+        <button class="tag-btn" data-tag="本当にもらえるか不安">本当にもらえる？</button>
+        <button class="tag-btn" data-tag="裁判が怖い">裁判が怖い</button>
+        <button class="tag-btn" data-tag="高齢で体調が不安">高齢・体調不安</button>
+      </div>
+    </div>
+
+    <div class="memo-area">
+      <label for="memoInput">フリーメモ（顧客の懸念・発言を自由に入力）</label>
+      <textarea id="memoInput" placeholder="例：費用がかかるのではないか心配している、手続きが難しそうで踏み出せない、自分が対象になるか分からない..."></textarea>
+      <div class="char-count"><span id="charCount">0</span> 文字</div>
+    </div>
+
+    <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+  </div>
+
+  <!-- Right: Output Panel -->
+  <div class="output-panel" id="outputPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">&#128172;</div>
+      <h3>トークスクリプトを生成</h3>
+      <p>左パネルで顧客の懸念事項を入力し、<br>「トークスクリプトを生成」ボタンを押してください。</p>
+      <p style="margin-top: 16px; font-size: .78rem; color: #aab;">
+        懸念タグのクリックやフリーメモへの入力で<br>最適なトークスクリプトがリアルタイムで表示されます。
+      </p>
+    </div>
+    <div id="scriptOutput" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script>
+const STRENGTHS = {
+  freeCounseling: { label: '相談無料', text: '当事務所では相談料は一切いただいておりません。' },
+  successFee: { label: '完全成功報酬', text: '着手金は0円、完全成功報酬制ですので、給付金を受け取るまで費用は一切かかりません。' },
+  freeResearch: { label: '資料収集無料代行', text: '面倒な資料の収集や調査は、すべて当事務所が無料で代行いたします。' },
+  noVisit: { label: '来所不要', text: '原則としてご来所は不要です。すべてお電話・WEB・郵送で完結いたします。' },
+};
+
+const CONCERN_SCRIPTS = {
+  cost: {
+    keywords: ['費用', 'お金', 'コスト', '料金', '高い', '払え', '心配', '経済的', '金銭', '値段', '価格'],
+    title: '費用面の懸念への対応',
+    icon: '&#128176;',
+    concern: 'お客様は費用面に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご費用面のご不安、大変よく分かります。ご安心ください。当事務所では<strong>相談料は完全無料</strong>でございます。さらに、<strong>着手金も0円の完全成功報酬制</strong>を採用しておりますので、<strong>給付金をお受け取りになるまで、一切費用はかかりません</strong>。つまり、お客様のお手元からお金が出ていくことは一切ございません。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '万が一、給付金が受け取れなかった場合も費用は発生いたしませんので、<strong>リスクは完全にゼロ</strong>です。まずは無料相談で、お客様が対象になるかどうか確認させていただければと思います。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '費用のことはまったくご心配いただかなくて大丈夫ですので、<strong>まずは無料相談で給付金の対象かどうかだけでも確認してみませんか？</strong>'
+      }
+    ],
+    tip: '費用面の不安は最も多い懸念です。「0円」「一切かからない」「リスクゼロ」というキーワードを繰り返し伝えることが効果的です。',
+    strengths: ['freeCounseling', 'successFee']
+  },
+
+  procedure: {
+    keywords: ['面倒', '手続き', '複雑', '難し', '書類', '大変', '手間', 'わからない', '分からない', 'やり方'],
+    title: '手続きの煩雑さへの懸念への対応',
+    icon: '&#128203;',
+    concern: 'お客様は手続きが面倒・複雑だと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お手続きが面倒なのではとご心配されるお気持ち、よく分かります。ですがご安心ください。<strong>面倒な資料の収集や調査は、すべて当事務所が無料で代行</strong>いたします。お客様にしていただくことは、最初にお話をお聞かせいただくことだけです。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'さらに、<strong>原則としてご来所は不要</strong>です。すべてお電話・WEB・郵送で完結いたしますので、お忙しい方でも、遠方の方でも、ご負担なくお手続きいただけます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '具体的にどのような流れになるか、<strong>無料相談で詳しくご説明</strong>させていただきます。お話を聞いていただくだけでも構いませんので、いかがでしょうか？'
+      }
+    ],
+    tip: '「お客様がやることはほとんどない」ことを具体的に伝えましょう。来所不要・郵送完結は大きな安心材料になります。',
+    strengths: ['freeResearch', 'noVisit']
+  },
+
+  eligibility: {
+    keywords: ['対象', '該当', '条件', '自分は', '資格', 'もらえる', '受けられる', '当てはまる', '適用'],
+    title: '給付金対象かどうかの不安への対応',
+    icon: '&#128269;',
+    concern: 'お客様は自分が給付金の対象になるか分からず不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご自身が対象になるかどうか、分からないのは当然のことです。実は、<strong>ご自身では対象外だと思っていた方が、調べてみたら対象だった</strong>というケースが非常に多くございます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'B型肝炎給付金は、昭和23年から昭和63年の間に集団予防接種を受けてB型肝炎ウイルスに感染された方が対象です。<strong>母子感染の方（二次感染）も対象</strong>になる場合があります。ただ、条件が細かいため、<strong>専門家が確認することで初めて分かる</strong>ことも多いです。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '対象かどうかは<strong>無料相談で簡単に確認</strong>できます。<strong>調査費用も無料</strong>ですので、まずは一度お話をお聞かせいただけませんか？対象外だった場合も費用は一切かかりません。'
+      }
+    ],
+    tip: '「対象外だと思っていたが実は対象だった」事例を伝えることで、相談へのハードルを下げましょう。「調べるだけならタダ」を強調。',
+    strengths: ['freeCounseling', 'freeResearch']
+  },
+
+  statute: {
+    keywords: ['時効', '期限', '間に合う', '遅い', '今さら', '期間', '過ぎ', '昔'],
+    title: '時効・期限への懸念への対応',
+    icon: '&#9200;',
+    concern: 'お客様は申請期限や時効を心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '時効についてご心配されているのですね。B型肝炎給付金の<strong>請求期限は令和9年（2027年）3月31日</strong>まで延長されています。ですが、<strong>この期限を過ぎると請求できなくなる可能性</strong>がございますので、お早めのご相談をおすすめいたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '資料の収集や調査にもお時間がかかりますので、<strong>余裕を持ったスケジュールで進めることが大切</strong>です。当事務所では資料収集を無料で代行しておりますので、お客様にお手間をおかけすることはございません。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '期限がございますので、<strong>まずは無料相談でお早めに確認されることをおすすめいたします。</strong>「もっと早く相談すればよかった」とおっしゃるお客様も多いですよ。'
+      }
+    ],
+    tip: '期限の具体的な日付を伝えることで緊急性を出しつつ、「まだ間に合う」安心感も同時に与えましょう。',
+    strengths: ['freeResearch', 'freeCounseling']
+  },
+
+  privacy: {
+    keywords: ['家族', '知られ', 'バレ', '秘密', '内緒', 'プライバシー', '周り', '会社'],
+    title: 'プライバシー（家族・周囲への秘密）への懸念への対応',
+    icon: '&#128274;',
+    concern: 'お客様は家族や周囲に知られることを心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご家族やお知り合いに知られたくないというお気持ち、しっかりと配慮させていただきます。当事務所では<strong>秘密厳守を徹底</strong>しております。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'お手続きは<strong>すべてお電話・WEB・郵送で完結</strong>しますので、事務所にお越しいただく必要はございません。郵送物についても、<strong>事務所名が分からないよう配慮した発送</strong>が可能です。ご希望に応じて連絡方法や時間帯も調整いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'プライバシーへの配慮は万全ですので、<strong>安心して無料相談をご利用ください。</strong>ご連絡方法やお時間のご希望があれば、柔軟に対応させていただきます。'
+      }
+    ],
+    tip: '具体的な配慮方法（郵送物の差出人名、連絡時間の調整等）を伝えると安心感が増します。',
+    strengths: ['noVisit']
+  },
+
+  evidence: {
+    keywords: ['証拠', '資料', '書類', 'カルテ', '記録', '母子手帳', '証明', 'ない', '捨て', '見つから'],
+    title: '証拠・資料がない場合の懸念への対応',
+    icon: '&#128196;',
+    concern: 'お客様は必要な証拠や資料が手元にないことを心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '資料がお手元にないとご不安ですよね。ご安心ください。<strong>資料の収集や調査は、すべて当事務所が無料で代行</strong>いたします。母子手帳やカルテがなくても、<strong>他の方法で証明できるケース</strong>もたくさんございます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '実際に、母子手帳を紛失されていた方でも<strong>市区町村の予防接種台帳</strong>などから接種記録を取得できた事例がございます。当事務所では、こうした<strong>資料収集のノウハウ</strong>を豊富に持っておりますので、お任せください。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '資料がなくても、<strong>まずは無料相談でお話をお聞かせください。</strong>どのような資料が必要で、どのように集められるか、具体的にご説明いたします。'
+      }
+    ],
+    tip: '「資料がなくても諦めないでください」というメッセージが重要。代替手段がある事実を伝えることで希望を持っていただきましょう。',
+    strengths: ['freeResearch', 'freeCounseling']
+  },
+
+  comparison: {
+    keywords: ['他', '事務所', '比較', '違い', 'どこ', '選', '迷', 'おすすめ'],
+    title: '他事務所との比較検討中のお客様への対応',
+    icon: '&#128200;',
+    concern: 'お客様は他の事務所と比較検討されています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '複数の事務所を比較されるのは、とても大切なことです。当事務所の特長を簡単にお伝えさせていただきますね。'
+      },
+      {
+        label: 'point',
+        labelText: '4つの強み',
+        text: '当事務所は、<strong>①相談料が無料</strong>、<strong>②着手金0円の完全成功報酬制</strong>、<strong>③資料収集・調査を無料で代行</strong>、<strong>④来所不要で電話・WEB・郵送で完結</strong>という4つの強みがございます。つまり、<strong>お客様のご負担を最小限に、給付金の受給をサポート</strong>いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '他の事務所様と比較していただいた上でも構いませんので、<strong>まずは無料相談で当事務所の対応を体感していただけませんか？</strong>お話しいただいて、合わないと感じられた場合はもちろん費用はかかりません。'
+      }
+    ],
+    tip: '他事務所を否定せず、自社の強みを淡々と伝えましょう。「比較して当然」と肯定することで信頼感が増します。',
+    strengths: ['freeCounseling', 'successFee', 'freeResearch', 'noVisit']
+  },
+
+  amount: {
+    keywords: ['金額', 'いくら', '給付金額', '額', '受給', '支給', '最大', '相場'],
+    title: '給付金額に関する質問への対応',
+    icon: '&#128178;',
+    concern: 'お客様は給付金額がどのくらいになるか知りたいと考えています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '給付金額は、お客様の<strong>病状や感染経路によって異なり</strong>ます。目安としては、無症候性キャリアの方で<strong>50万円</strong>、慢性肝炎の方で<strong>1,250万円</strong>、肝硬変（軽度）で<strong>2,500万円</strong>、肝がん・重度肝硬変で<strong>3,600万円</strong>が給付金の目安となります。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '上記はあくまで目安であり、<strong>実際の金額はお客様の具体的なご状況</strong>によって決まります。<strong>無料相談では、お客様のケースでの見込み金額</strong>もお伝えすることができます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>ご自身の場合、いくらくらいになるか、無料相談で確認してみませんか？</strong>費用は一切かかりませんし、金額の見込みを知った上でご判断いただけます。'
+      }
+    ],
+    tip: '具体的な金額を提示することで「行動する価値がある」と感じていただくことが重要です。ただし「目安」であることは必ず補足しましょう。',
+    strengths: ['freeCounseling', 'successFee']
+  },
+
+  time: {
+    keywords: ['忙し', '時間', 'ない', '仕事', '都合', 'スケジュール'],
+    title: '時間がない・忙しいお客様への対応',
+    icon: '&#128340;',
+    concern: 'お客様はお忙しく、手続きに時間を割けないと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お忙しい中、お時間をいただきありがとうございます。当事務所では、<strong>お忙しい方にも負担なくお手続きいただける体制</strong>を整えております。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>来所は原則不要</strong>で、すべてお電話・WEB・郵送で完結します。<strong>資料収集も無料で代行</strong>しますので、お客様にしていただくのはお電話でのヒアリングだけです。ご都合の良い時間帯にお電話させていただくことも可能です。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '無料相談はお電話で<strong>30分程度</strong>あれば十分です。<strong>ご都合の良いお日にちとお時間帯をお教えいただけませんか？</strong>'
+      }
+    ],
+    tip: '具体的な所要時間（30分程度）を伝えることで「それくらいなら…」と思っていただくことがポイントです。',
+    strengths: ['noVisit', 'freeResearch']
+  },
+
+  fear: {
+    keywords: ['裁判', '怖', '不安', '心配', '大丈夫', '大事', '訴訟', '法律', '弁護士'],
+    title: '裁判・法的手続きへの不安への対応',
+    icon: '&#9878;',
+    concern: 'お客様は裁判や法的手続きに対して恐怖・不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '裁判というと身構えてしまいますよね。ご安心ください。B型肝炎給付金の手続きは、<strong>国を相手にした訴訟ではありますが、争う裁判ではありません</strong>。国の制度に基づいて給付金を受け取るための、<strong>形式的な手続き</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>お客様が裁判所に出向く必要は原則ありません</strong>。すべて弁護士が代理で行います。また、<strong>相手方と対面で争うようなことも一切ございません</strong>。安心してお任せください。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '実際の手続きの流れは、<strong>無料相談で分かりやすくご説明</strong>いたします。「思っていたより簡単だった」とおっしゃる方がほとんどですよ。<strong>まずはお気軽にお話しだけでも聞いてみませんか？</strong>'
+      }
+    ],
+    tip: '「争う裁判ではない」「形式的な手続き」であることを強調し、心理的ハードルを下げましょう。',
+    strengths: ['noVisit', 'freeCounseling']
+  },
+
+  elderly: {
+    keywords: ['高齢', '年齢', '体調', '体', '病気', '入院', '通院', '足', '歩'],
+    title: '高齢・体調不安のお客様への対応',
+    icon: '&#128116;',
+    concern: 'お客様は高齢やご体調面で手続きが難しいと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご体調面のご不安、しっかりと配慮させていただきます。当事務所では、<strong>ご来所は原則不要</strong>です。すべてお電話・郵送・WEBで完結いたしますので、ご自宅から一歩も出ることなくお手続きが可能です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>ご家族の方が代わりにご連絡いただくことも可能</strong>です。必要な資料の収集もすべて無料で代行いたしますので、お客様にご負担をおかけすることはございません。お電話の時間帯もご体調に合わせて調整いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'まずは<strong>お電話でお話をお聞かせいただくだけ</strong>で大丈夫です。<strong>ご都合の良いお時間に、こちらからお電話させていただくことも可能</strong>ですので、いかがでしょうか？'
+      }
+    ],
+    tip: '高齢の方にはゆっくり丁寧に話すこと。ご家族経由のご連絡も歓迎であることを伝えましょう。',
+    strengths: ['noVisit', 'freeResearch', 'freeCounseling']
+  },
+
+  doubt: {
+    keywords: ['本当', '信用', '怪し', '詐欺', '嘘', '大丈夫', '信じ'],
+    title: '「本当にもらえるのか」という疑念への対応',
+    icon: '&#10067;',
+    concern: 'お客様は給付金制度自体に疑念を持っています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご不安に思われるのは当然です。B型肝炎給付金は、<strong>国が法律（特定B型肝炎ウイルス感染者給付金等の支給に関する特別措置法）に基づいて支給する、正式な制度</strong>です。厚生労働省のホームページにも掲載されている、<strong>公的な救済制度</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所では、これまで<strong>多くのお客様の給付金受給をサポート</strong>してまいりました。まずは制度の内容や対象条件を、無料相談でしっかりとご説明させていただきます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、制度の内容をお聞きいただくだけでも構いません。</strong>ご納得いただけなければ、それ以上のお手続きをお勧めすることは一切ございませんのでご安心ください。'
+      }
+    ],
+    tip: '「国の制度である」「法律に基づいている」ことを伝え、公的な救済措置であることを強調しましょう。',
+    strengths: ['freeCounseling', 'successFee']
+  }
+};
+
+const OPENING_SCRIPT = {
+  title: 'オープニングトーク',
+  icon: '&#128075;',
+  scripts: [
+    {
+      label: 'response',
+      labelText: '第一声',
+      text: 'お電話ありがとうございます。B型肝炎給付金のご相談ですね。当事務所ではB型肝炎給付金の無料相談を行っておりますので、まずはお話をお聞かせいただければと思います。'
+    }
+  ]
+};
+
+const CLOSING_SCRIPT = {
+  title: 'クロージング（予約獲得）',
+  icon: '&#127919;',
+  scripts: [
+    {
+      label: 'close',
+      labelText: '予約誘導トーク',
+      text: 'ここまでのお話を踏まえまして、<strong>無料相談で詳しくご状況をお伺いし、給付金の対象になるか、またどのくらいの金額が見込めるか確認させていただければ</strong>と思います。<strong>費用は一切かかりませんし、来所も不要</strong>ですので、お気軽にご利用ください。'
+    },
+    {
+      label: 'close',
+      labelText: '日程調整',
+      text: 'それでは、無料相談の日程を調整させていただきます。<strong>ご都合の良いお日にちとお時間帯</strong>をお教えいただけますか？お電話でもWEBでも、ご希望の方法で対応可能です。'
+    }
+  ]
+};
+
+// Tag button handling
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const textarea = document.getElementById('memoInput');
+    const tag = this.dataset.tag;
+
+    if (this.classList.contains('active')) {
+      textarea.value = textarea.value ? textarea.value + '、' + tag : tag;
+    } else {
+      textarea.value = textarea.value
+        .replace(new RegExp('[、,]?' + tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[、,]?'), '')
+        .replace(/^[、,]+|[、,]+$/g, '');
+    }
+
+    updateCharCount();
+  });
+});
+
+// Character count
+document.getElementById('memoInput').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('memoInput').value.length;
+}
+
+// Script generation
+function generateScript() {
+  const memo = document.getElementById('memoInput').value;
+  const condition = document.getElementById('condition').value;
+
+  if (!memo.trim()) {
+    alert('懸念事項を入力してください。タグのクリックまたはフリーメモへの入力をお願いします。');
+    return;
+  }
+
+  const matchedConcerns = [];
+  const memoLower = memo.toLowerCase();
+
+  for (const [key, concern] of Object.entries(CONCERN_SCRIPTS)) {
+    for (const keyword of concern.keywords) {
+      if (memoLower.includes(keyword)) {
+        matchedConcerns.push(concern);
+        break;
+      }
+    }
+  }
+
+  if (matchedConcerns.length === 0) {
+    matchedConcerns.push(CONCERN_SCRIPTS.cost);
+    matchedConcerns.push(CONCERN_SCRIPTS.procedure);
+    matchedConcerns.push(CONCERN_SCRIPTS.eligibility);
+  }
+
+  renderScripts(matchedConcerns, condition);
+}
+
+function renderScripts(concerns, condition) {
+  const output = document.getElementById('scriptOutput');
+  const emptyState = document.getElementById('emptyState');
+
+  emptyState.style.display = 'none';
+  output.style.display = 'block';
+
+  let html = '';
+
+  // Opening
+  html += renderSection(OPENING_SCRIPT, []);
+
+  // Matched concern scripts
+  concerns.forEach(concern => {
+    html += renderSection(concern, concern.strengths || []);
+  });
+
+  // Condition-specific supplement
+  if (condition) {
+    const conditionScript = getConditionSupplement(condition);
+    if (conditionScript) {
+      html += renderSection(conditionScript, []);
+    }
+  }
+
+  // Closing
+  html += renderSection(CLOSING_SCRIPT, ['freeCounseling', 'successFee', 'noVisit', 'freeResearch']);
+
+  output.innerHTML = html;
+}
+
+function renderSection(section, strengthKeys) {
+  let html = `
+    <div class="script-section">
+      <div class="script-section-title">
+        <span class="icon">${section.icon}</span>
+        ${section.title}
+        <button class="copy-btn" onclick="copySection(this)">コピー</button>
+      </div>
+      <div class="script-card">`;
+
+  if (section.concern) {
+    html += `<div><span class="script-label label-concern">顧客の懸念</span></div>
+             <div class="script-text">${section.concern}</div>
+             <hr class="script-divider">`;
+  }
+
+  section.scripts.forEach((script, i) => {
+    const labelClass = 'label-' + script.label;
+    html += `<div><span class="script-label ${labelClass}">${script.labelText}</span></div>
+             <div class="script-text">${script.text}</div>`;
+    if (i < section.scripts.length - 1) {
+      html += '<hr class="script-divider">';
+    }
+  });
+
+  if (strengthKeys && strengthKeys.length > 0) {
+    html += '<hr class="script-divider"><div>';
+    strengthKeys.forEach(key => {
+      const s = STRENGTHS[key];
+      if (s) {
+        html += `<span class="strength-badge">${s.label}</span>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  if (section.tip) {
+    html += `<div class="tip-box">
+               <div class="tip-box-title">対応のポイント</div>
+               ${section.tip}
+             </div>`;
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function getConditionSupplement(condition) {
+  const supplements = {
+    carrier: {
+      title: '無症候性キャリアの方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '病状別補足',
+        text: '無症候性キャリアの方の場合、給付金額は<strong>50万円</strong>が目安となります。金額としては他の病状より低くなりますが、<strong>費用は完全成功報酬制で持ち出しゼロ</strong>ですので、受け取れるものはしっかり受け取っておくことをおすすめいたします。また、今後万が一発症された場合には<strong>追加給付金の請求</strong>も可能です。'
+      }]
+    },
+    chronic: {
+      title: '慢性肝炎の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '病状別補足',
+        text: '慢性肝炎の方の場合、給付金額は<strong>1,250万円</strong>が目安となります。発症後20年を経過している場合でも<strong>300万円（＋定期検査費用等）</strong>の給付金を受給できる可能性がございます。まずは詳しいご状況をお聞かせください。'
+      }]
+    },
+    cirrhosis: {
+      title: '肝硬変の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '病状別補足',
+        text: '肝硬変の方の場合、軽度で<strong>2,500万円</strong>、重度で<strong>3,600万円</strong>が給付金の目安となります。<strong>治療にかかる費用面の負担を軽減するためにも</strong>、お早めの申請をおすすめいたします。'
+      }]
+    },
+    cancer: {
+      title: '肝がんの方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '病状別補足',
+        text: '肝がんの方の場合、給付金額は<strong>最大3,600万円</strong>となります。<strong>治療に専念していただくためにも</strong>、面倒なお手続きはすべて当事務所にお任せください。資料収集から申請まで、全力でサポートいたします。'
+      }]
+    },
+    unknown: {
+      title: '病状が不明・未診断の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '病状別補足',
+        text: 'まだ詳しい診断を受けていらっしゃらない場合でも、ご安心ください。<strong>まずは無料相談でお話をお聞かせいただき</strong>、必要に応じて検査のご案内もいたします。現在のご状況を把握することが、給付金請求の第一歩です。'
+      }]
+    }
+  };
+
+  return supplements[condition] || null;
+}
+
+function copySection(btn) {
+  const card = btn.closest('.script-section');
+  const textElements = card.querySelectorAll('.script-text');
+  let text = '';
+  textElements.forEach(el => {
+    text += el.textContent.trim() + '\n\n';
+  });
+
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = 'コピー完了';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
