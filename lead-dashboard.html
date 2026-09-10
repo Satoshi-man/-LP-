@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リード実績サマリーダッシュボード（ドラフト）</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:    #fcfcfb;
+    --surface-2:    #f9f9f7;
+    --surface-card: #ffffff;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+    --success:   #006300;
+
+    --s1: #2a78d6; /* blue */
+    --s2: #eb6834; /* orange */
+    --s3: #1baf7a; /* aqua */
+    --s4: #eda100; /* yellow */
+
+    --s1-track: #cde2fb;
+    --lane-bg: #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:    #1a1a19;
+      --surface-2:    #0d0d0d;
+      --surface-card: #232322;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --border:    rgba(255,255,255,0.10);
+      --success:   #0ca30c;
+
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+      --s4: #c98500;
+
+      --s1-track: #184f95;
+      --lane-bg: #2c2c2a;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    padding-bottom: 64px;
+  }
+
+  header.top {
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.top h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  header.top p {
+    margin: 0;
+    font-size: .82rem;
+    color: var(--text-muted);
+  }
+  .badge-demo {
+    display: inline-block;
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--s2);
+    border: 1px solid var(--s2);
+    border-radius: 20px;
+    padding: 1px 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  section.card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  section.card h2 {
+    font-size: .98rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  section.card .card-sub {
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+  }
+
+  /* ---- overview ---- */
+  .ov-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .ov-tile {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    background: var(--surface-1);
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+  }
+  .ov-tile:hover { border-color: var(--s1); }
+  .ov-tile .ov-name { font-size: .82rem; font-weight: 700; margin-bottom: 6px; }
+  .ov-tile .ov-figs { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+  .ov-tile .ov-pct { font-size: 1.5rem; font-weight: 700; }
+  .ov-tile .ov-pct-label { font-size: .72rem; color: var(--text-muted); }
+  .ov-tile .ov-detail { font-size: .74rem; color: var(--text-secondary); }
+
+  .meter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .meter-row:last-child { margin-bottom: 0; }
+  .meter-label { width: 90px; flex-shrink: 0; font-size: .82rem; font-weight: 600; }
+  .meter-track { flex: 1; height: 14px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .meter-fill { height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; }
+  .meter-val { width: 190px; flex-shrink: 0; text-align: right; font-size: .78rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .meter-val strong { color: var(--text-primary); font-weight: 700; }
+
+  /* ---- tabs ---- */
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tab-btn {
+    font-family: inherit;
+    font-size: .86rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .tab-btn[aria-selected="true"] {
+    background: var(--s1);
+    border-color: var(--s1);
+    color: #fff;
+  }
+
+  .domain-panel[hidden] { display: none; }
+
+  /* ---- KPI tiles ---- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi-tile { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .kpi-tile .kpi-label { font-size: .76rem; color: var(--text-muted); margin-bottom: 6px; }
+  .kpi-tile .kpi-value { font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+  .kpi-tile .kpi-unit { font-size: .82rem; font-weight: 400; color: var(--text-secondary); margin-left: 2px; }
+  .kpi-tile.hero .kpi-value { color: var(--s1); }
+  .kpi-tile .kpi-meter { margin-top: 10px; height: 8px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .kpi-tile .kpi-meter-fill { height: 100%; background: var(--s1); }
+
+  /* ---- agency toggle ---- */
+  .agency-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .agency-btn {
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .agency-btn .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .agency-btn .cnt { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .agency-btn[aria-pressed="true"] { border-color: currentColor; background: var(--surface-card); color: var(--text-primary); box-shadow: 0 0 0 1px currentColor inset; }
+
+  /* ---- composition bar ---- */
+  .comp-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; background: var(--lane-bg); }
+  .comp-seg { height: 100%; transition: opacity .15s; }
+  .comp-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; font-size: .78rem; color: var(--text-secondary); }
+  .comp-legend .item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .comp-legend .item .swatch { width: 10px; height: 10px; border-radius: 2px; }
+  .comp-legend .item.dim { opacity: .45; }
+
+  /* ---- breakdown bars ---- */
+  .grp { margin-bottom: 18px; }
+  .grp:last-child { margin-bottom: 0; }
+  .grp-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .82rem; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--grid); padding-bottom: 6px; margin-bottom: 10px; }
+  .grp-head .grp-sub { font-weight: 400; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-cat { width: 200px; flex-shrink: 0; font-size: .8rem; color: var(--text-primary); }
+  .bar-lane { flex: 1; height: 18px; background: var(--lane-bg); border-radius: 4px; position: relative; }
+  .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .bar-figs { width: 130px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .bar-figs strong { color: var(--text-primary); font-weight: 700; }
+
+  /* ---- table ---- */
+  .table-toggle { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--s1); background: none; border: none; cursor: pointer; padding: 0; margin-top: 18px; }
+  .cross-table-wrap { overflow-x: auto; margin-top: 12px; }
+  table.cross { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  table.cross th, table.cross td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.cross th:first-child, table.cross td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.cross thead th { color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--baseline); }
+  table.cross tbody tr.grp-row td { background: var(--surface-1); font-weight: 700; color: var(--text-secondary); }
+  table.cross tbody tr.total-row td { font-weight: 700; border-top: 1px solid var(--baseline); border-bottom: none; }
+
+  @media (max-width: 640px) {
+    .bar-cat { width: 120px; font-size: .74rem; }
+    .bar-figs { width: 96px; }
+    .meter-label { width: 68px; }
+    .meter-val { width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>リード実績サマリーダッシュボード<span class="badge-demo">仮想データ・草案</span></h1>
+  <p>商材 × 依頼方針 × リード代理店 で実績を分析。数値はすべて仮想データです（対象月：2026年8月度）。</p>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>事務所全体に対するリード占有率</h2>
+    <p class="card-sub">全体実績（全流入経路）に対するリード実績の割合。ドメインをクリックすると詳細タブに移動します。</p>
+    <div id="overview-tiles" class="ov-grid"></div>
+    <div id="overview-meters"></div>
+  </section>
+
+  <div class="tabs" id="domain-tabs" role="tablist"></div>
+
+  <div id="domain-panels"></div>
+
+</main>
+
+<script>
+const DOMAINS = [
+  {
+    key: 'saimu', name: '債務整理', overallTotal: 850,
+    groups: [
+      { name: '任意整理', items: [
+        { key: 'ninni', name: '①任意整理' },
+        { key: 'kankaba', name: '②完カバ（完済業者への過払い金請求）' },
+        { key: 'zankaba', name: '③残カバ（返済中業者への過払い金請求）' },
+        { key: 'jikou', name: '④時効援用' },
+      ]},
+      { name: '法的整理', items: [
+        { key: 'jikohasan', name: '①自己破産' },
+        { key: 'kojinsaisei', name: '②個人再生' },
+      ]},
+    ],
+    agencies: [
+      { key: 'onestar', name: 'ワンスター', data: { ninni: 68, kankaba: 22, zankaba: 15, jikou: 9, jikohasan: 31, kojinsaisei: 18 } },
+      { key: 'organic', name: 'オーガニック', data: { ninni: 41, kankaba: 13, zankaba: 10, jikou: 6, jikohasan: 19, kojinsaisei: 11 } },
+    ],
+  },
+  {
+    key: 'bkan', name: 'B型肝炎', overallTotal: 420,
+    groups: [
+      { name: '病態あり', items: [
+        { key: 'shibou', name: '①死亡' },
+        { key: 'shibou_j', name: '②死亡除斥' },
+        { key: 'kangan', name: '③肝がん' },
+        { key: 'kangan_j', name: '④肝がん除斥' },
+        { key: 'kankouhen', name: '⑤肝硬変' },
+        { key: 'kankouhen_j_ari', name: '⑥肝硬変除斥治療歴あり' },
+        { key: 'kankouhen_j_nashi', name: '⑦肝硬変除斥治療歴なし' },
+        { key: 'mansei', name: '⑧慢性肝炎' },
+        { key: 'mansei_j_ari', name: '⑨慢性肝炎除斥治療歴あり' },
+        { key: 'mansei_j_nashi', name: '⑩慢性肝炎除斥治療歴なし' },
+      ]},
+      { name: 'キャリア', items: [
+        { key: 'carrier', name: 'キャリア' },
+      ]},
+    ],
+    agencies: [
+      { key: 'ashiro', name: 'アシロ', data: { shibou: 2, shibou_j: 1, kangan: 5, kangan_j: 2, kankouhen: 9, kankouhen_j_ari: 4, kankouhen_j_nashi: 3, mansei: 21, mansei_j_ari: 8, mansei_j_nashi: 6, carrier: 14 } },
+      { key: 'self', name: 'セルフ', data: { shibou: 1, shibou_j: 0, kangan: 3, kangan_j: 1, kankouhen: 6, kankouhen_j_ari: 2, kankouhen_j_nashi: 2, mansei: 14, mansei_j_ari: 5, mansei_j_nashi: 4, carrier: 9 } },
+      { key: 'organic', name: 'オーガニック', data: { shibou: 1, shibou_j: 1, kangan: 4, kangan_j: 2, kankouhen: 7, kankouhen_j_ari: 3, kankouhen_j_nashi: 2, mansei: 16, mansei_j_ari: 6, mansei_j_nashi: 5, carrier: 11 } },
+    ],
+  },
+  {
+    key: 'koutsu', name: '交通事件', overallTotal: 610,
+    groups: [
+      { name: null, items: [
+        { key: 'bentoku_a', name: '弁特A' },
+        { key: 'bentoku_n', name: '弁特N' },
+      ]},
+    ],
+    agencies: [
+      { key: 'ashiro', name: 'アシロ', data: { bentoku_a: 58, bentoku_n: 34 } },
+      { key: 'self', name: 'セルフ', data: { bentoku_a: 33, bentoku_n: 19 } },
+      { key: 'lis', name: 'リス', data: { bentoku_a: 21, bentoku_n: 14 } },
+      { key: 'organic', name: 'オーガニック', data: { bentoku_a: 40, bentoku_n: 27 } },
+    ],
+  },
+  {
+    key: 'kaji', name: '家事事件', overallTotal: 380,
+    groups: [
+      { name: '請求', items: [
+        { key: 'seikyu_tandoku', name: '①請求単独' },
+        { key: 'w_seikyu', name: '②W請求' },
+        { key: 'teisouken', name: '③貞操権侵害' },
+        { key: 'challenge', name: '④チャレンジ' },
+        { key: 'shomen', name: '⑤書面作成' },
+      ]},
+      { name: '被請求', items: [
+        { key: 'hiseikyu', name: '①被請求' },
+        { key: 'support', name: '②サポート' },
+      ]},
+      { name: '離婚', items: [
+        { key: 'rikon', name: '①離婚' },
+        { key: 'backup', name: '②バックアップ' },
+        { key: 'youikuhi', name: '③養育費' },
+        { key: 'konhi', name: '④婚費' },
+      ]},
+    ],
+    agencies: [
+      { key: 'ashiro', name: 'アシロ', data: { seikyu_tandoku: 12, w_seikyu: 5, teisouken: 3, challenge: 4, shomen: 6, hiseikyu: 9, support: 4, rikon: 15, backup: 7, youikuhi: 5, konhi: 3 } },
+      { key: 'naisei', name: '内製', data: { seikyu_tandoku: 6, w_seikyu: 2, teisouken: 1, challenge: 2, shomen: 3, hiseikyu: 5, support: 2, rikon: 8, backup: 3, youikuhi: 3, konhi: 2 } },
+      { key: 'organic', name: 'オーガニック', data: { seikyu_tandoku: 9, w_seikyu: 3, teisouken: 2, challenge: 3, shomen: 4, hiseikyu: 6, support: 3, rikon: 10, backup: 4, youikuhi: 4, konhi: 2 } },
+    ],
+  },
+];
+
+const SERIES_COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)'];
+
+const sum = obj => Object.values(obj).reduce((a, b) => a + b, 0);
+const agencyTotal = agency => sum(agency.data);
+const domainLeadTotal = domain => domain.agencies.reduce((a, ag) => a + agencyTotal(ag), 0);
+const occupancy = domain => (domainLeadTotal(domain) / domain.overallTotal) * 100;
+const fmt = n => n.toLocaleString('ja-JP');
+const pct = n => n.toFixed(1) + '%';
+
+const activeAgencyByDomain = {};
+DOMAINS.forEach(d => { activeAgencyByDomain[d.key] = d.agencies[0].key; });
+
+function renderOverview() {
+  const tilesEl = document.getElementById('overview-tiles');
+  const metersEl = document.getElementById('overview-meters');
+  const officeTotal = DOMAINS.reduce((a, d) => a + d.overallTotal, 0);
+  const officeLead = DOMAINS.reduce((a, d) => a + domainLeadTotal(d), 0);
+
+  tilesEl.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const lead = domainLeadTotal(d);
+    const occ = occupancy(d);
+    const btn = document.createElement('button');
+    btn.className = 'ov-tile';
+    btn.innerHTML = `
+      <div class="ov-name">${d.name}</div>
+      <div class="ov-figs"><span class="ov-pct">${pct(occ)}</span><span class="ov-pct-label">占有率</span></div>
+      <div class="ov-detail">全体実績 <strong>${fmt(d.overallTotal)}</strong>件 ／ リード実績 <strong>${fmt(lead)}</strong>件</div>
+    `;
+    btn.addEventListener('click', () => selectDomain(d.key, true));
+    tilesEl.appendChild(btn);
+  });
+
+  const rows = [{ label: '全社合計', total: officeTotal, lead: officeLead }]
+    .concat(DOMAINS.map(d => ({ label: d.name, total: d.overallTotal, lead: domainLeadTotal(d) })));
+
+  metersEl.innerHTML = rows.map(r => {
+    const p = (r.lead / r.total) * 100;
+    return `
+      <div class="meter-row">
+        <div class="meter-label">${r.label}</div>
+        <div class="meter-track"><div class="meter-fill" style="width:${p}%"></div></div>
+        <div class="meter-val">リード <strong>${fmt(r.lead)}</strong>／全体 ${fmt(r.total)}件（<strong>${pct(p)}</strong>）</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTabs() {
+  const tabsEl = document.getElementById('domain-tabs');
+  tabsEl.innerHTML = '';
+  DOMAINS.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn';
+    btn.textContent = d.name;
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    btn.dataset.domain = d.key;
+    btn.addEventListener('click', () => selectDomain(d.key));
+    tabsEl.appendChild(btn);
+  });
+}
+
+function selectDomain(key, scroll) {
+  document.querySelectorAll('#domain-tabs .tab-btn').forEach(b => {
+    b.setAttribute('aria-selected', b.dataset.domain === key ? 'true' : 'false');
+  });
+  document.querySelectorAll('.domain-panel').forEach(p => {
+    p.hidden = p.dataset.domain !== key;
+  });
+  if (scroll) {
+    document.getElementById('domain-tabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function renderDomainPanels() {
+  const wrap = document.getElementById('domain-panels');
+  wrap.innerHTML = '';
+  DOMAINS.forEach((d, i) => {
+    const panel = document.createElement('section');
+    panel.className = 'card domain-panel';
+    panel.dataset.domain = d.key;
+    panel.hidden = i !== 0;
+    panel.innerHTML = `
+      <h2>${d.name}　ミクロ分析</h2>
+      <p class="card-sub">依頼方針別・リード代理店別の実績内訳。</p>
+      <div class="kpi-row" id="kpi-${d.key}"></div>
+      <div class="agency-toggle" id="agency-toggle-${d.key}"></div>
+      <div class="comp-bar" id="comp-bar-${d.key}"></div>
+      <div class="comp-legend" id="comp-legend-${d.key}"></div>
+      <div id="breakdown-${d.key}"></div>
+      <button class="table-toggle" id="table-toggle-${d.key}">＋ 代理店別クロス集計表を表示</button>
+      <div class="cross-table-wrap" id="cross-table-${d.key}" hidden></div>
+    `;
+    wrap.appendChild(panel);
+
+    renderKpis(d);
+    renderAgencyToggle(d);
+    renderComposition(d);
+    renderBreakdown(d);
+    renderCrossTable(d);
+
+    document.getElementById(`table-toggle-${d.key}`).addEventListener('click', function () {
+      const t = document.getElementById(`cross-table-${d.key}`);
+      t.hidden = !t.hidden;
+      this.textContent = (t.hidden ? '＋ ' : '－ ') + '代理店別クロス集計表を表示';
+    });
+  });
+}
+
+function renderKpis(d) {
+  const lead = domainLeadTotal(d);
+  const occ = occupancy(d);
+  document.getElementById(`kpi-${d.key}`).innerHTML = `
+    <div class="kpi-tile">
+      <div class="kpi-label">全体実績（全流入経路）</div>
+      <div class="kpi-value">${fmt(d.overallTotal)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計実績</div>
+      <div class="kpi-value">${fmt(lead)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile hero">
+      <div class="kpi-label">リード占有率</div>
+      <div class="kpi-value">${pct(occ)}</div>
+      <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${occ}%"></div></div>
+    </div>
+  `;
+}
+
+function renderAgencyToggle(d) {
+  const el = document.getElementById(`agency-toggle-${d.key}`);
+  el.innerHTML = '';
+  d.agencies.forEach((ag, i) => {
+    const total = agencyTotal(ag);
+    const btn = document.createElement('button');
+    btn.className = 'agency-btn';
+    btn.style.color = SERIES_COLORS[i];
+    btn.setAttribute('aria-pressed', ag.key === activeAgencyByDomain[d.key] ? 'true' : 'false');
+    btn.innerHTML = `<span class="swatch" style="background:${SERIES_COLORS[i]}"></span>${ag.name}<span class="cnt">${fmt(total)}件</span>`;
+    btn.addEventListener('click', () => setActiveAgency(d, ag.key));
+    el.appendChild(btn);
+  });
+}
+
+function renderComposition(d) {
+  const total = domainLeadTotal(d);
+  const barEl = document.getElementById(`comp-bar-${d.key}`);
+  const legendEl = document.getElementById(`comp-legend-${d.key}`);
+  barEl.innerHTML = '';
+  legendEl.innerHTML = '';
+  d.agencies.forEach((ag, i) => {
+    const t = agencyTotal(ag);
+    const p = (t / total) * 100;
+    const seg = document.createElement('div');
+    seg.className = 'comp-seg';
+    seg.style.width = p + '%';
+    seg.style.background = SERIES_COLORS[i];
+    seg.title = `${ag.name}：${fmt(t)}件（リード内 ${pct(p)}）`;
+    seg.dataset.agency = ag.key;
+    barEl.appendChild(seg);
+
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.dataset.agency = ag.key;
+    item.innerHTML = `<span class="swatch" style="background:${SERIES_COLORS[i]}"></span>${ag.name}（${pct(p)}）`;
+    item.addEventListener('click', () => setActiveAgency(d, ag.key));
+    legendEl.appendChild(item);
+  });
+  updateCompositionHighlight(d);
+}
+
+function updateCompositionHighlight(d) {
+  const active = activeAgencyByDomain[d.key];
+  document.querySelectorAll(`#comp-bar-${d.key} .comp-seg`).forEach(seg => {
+    seg.style.opacity = seg.dataset.agency === active ? '1' : '.4';
+  });
+  document.querySelectorAll(`#comp-legend-${d.key} .item`).forEach(item => {
+    item.classList.toggle('dim', item.dataset.agency !== active);
+  });
+}
+
+function renderBreakdown(d) {
+  const agency = d.agencies.find(a => a.key === activeAgencyByDomain[d.key]);
+  const agencyIndex = d.agencies.indexOf(agency);
+  const color = SERIES_COLORS[agencyIndex];
+  const agTotal = agencyTotal(agency);
+  const maxVal = Math.max(...d.groups.flatMap(g => g.items.map(it => agency.data[it.key] || 0)), 1);
+
+  const el = document.getElementById(`breakdown-${d.key}`);
+  el.innerHTML = d.groups.map(g => {
+    const groupTotal = g.items.reduce((a, it) => a + (agency.data[it.key] || 0), 0);
+    const headHtml = g.name
+      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件</span></div>`
+      : '';
+    const rows = g.items.map(it => {
+      const v = agency.data[it.key] || 0;
+      const w = (v / maxVal) * 100;
+      const share = agTotal ? (v / agTotal) * 100 : 0;
+      return `
+        <div class="bar-row">
+          <div class="bar-cat">${it.name}</div>
+          <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${color}"></div></div>
+          <div class="bar-figs"><strong>${fmt(v)}</strong>件（${pct(share)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="grp">${headHtml}${rows}</div>`;
+  }).join('');
+}
+
+function renderCrossTable(d) {
+  const el = document.getElementById(`cross-table-${d.key}`);
+  const headCols = d.agencies.map(a => `<th>${a.name}</th>`).join('');
+  const bodyRows = d.groups.map(g => {
+    const groupHead = g.name
+      ? `<tr class="grp-row"><td>${g.name}</td>${d.agencies.map(() => '<td></td>').join('')}<td></td></tr>`
+      : '';
+    const itemRows = g.items.map(it => {
+      const cells = d.agencies.map(a => `<td>${fmt(a.data[it.key] || 0)}</td>`).join('');
+      const rowTotal = d.agencies.reduce((s, a) => s + (a.data[it.key] || 0), 0);
+      return `<tr><td>${it.name}</td>${cells}<td><strong>${fmt(rowTotal)}</strong></td></tr>`;
+    }).join('');
+    return groupHead + itemRows;
+  }).join('');
+  const totalRow = `
+    <tr class="total-row">
+      <td>合計</td>
+      ${d.agencies.map(a => `<td>${fmt(agencyTotal(a))}</td>`).join('')}
+      <td>${fmt(domainLeadTotal(d))}</td>
+    </tr>
+  `;
+  el.innerHTML = `
+    <table class="cross">
+      <thead><tr><th>依頼方針</th>${headCols}<th>合計</th></tr></thead>
+      <tbody>${bodyRows}${totalRow}</tbody>
+    </table>
+  `;
+}
+
+function setActiveAgency(d, agencyKey) {
+  activeAgencyByDomain[d.key] = agencyKey;
+  document.querySelectorAll(`#agency-toggle-${d.key} .agency-btn`).forEach((btn, i) => {
+    btn.setAttribute('aria-pressed', d.agencies[i].key === agencyKey ? 'true' : 'false');
+  });
+  updateCompositionHighlight(d);
+  renderBreakdown(d);
+}
+
+renderOverview();
+renderTabs();
+renderDomainPanels();
+</script>
+
+</body>
+</html>
