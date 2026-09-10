@@ -211,6 +211,22 @@
 
   .sub-head { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin: 22px 0 10px; }
   .sub-head:first-of-type { margin-top: 0; }
+  .sub-note { font-size: .74rem; color: var(--text-muted); margin: -6px 0 12px; }
+
+  /* ---- rate section ---- */
+  .rate-group { margin-bottom: 16px; }
+  .rate-group:last-child { margin-bottom: 0; }
+  .rate-group-head { display: flex; align-items: baseline; gap: 8px; font-size: .84rem; font-weight: 700; margin-bottom: 8px; }
+  .rate-delta { font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 10px; }
+  .rate-delta.up { color: var(--good); background: rgba(12,163,12,.12); }
+  .rate-delta.down { color: var(--warning); background: rgba(250,178,25,.18); }
+  .rate-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rate-line:last-child { margin-bottom: 0; }
+  .rate-tag { width: 76px; flex-shrink: 0; font-size: .74rem; font-weight: 700; }
+  .rate-track { flex: 1; height: 10px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .rate-val { width: 250px; flex-shrink: 0; text-align: right; font-size: .74rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .rate-val strong { color: var(--text-primary); font-weight: 700; }
 
   /* ---- agency toggle ---- */
   .agency-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -282,6 +298,8 @@
     .bar-figs { width: 96px; }
     .meter-label { width: 68px; }
     .meter-val { width: 130px; }
+    .rate-tag { width: 60px; font-size: .68rem; }
+    .rate-val { width: 150px; font-size: .68rem; }
   }
 </style>
 </head>
@@ -339,6 +357,10 @@ const DOMAINS = [
     ],
     prices: { ninni: 88000, kankaba: 150000, zankaba: 120000, jikou: 55000, jikohasan: 250000, kojinsaisei: 350000 },
     nonLeadBase: { ninni: 241, kankaba: 75, zankaba: 55, jikou: 33, jikohasan: 110, kojinsaisei: 73 },
+    meetings: {
+      '任意整理': { overallBase: 1220, leadBase: 460 },
+      '法的整理': { overallBase: 750, leadBase: 280 },
+    },
     agencies: [
       { key: 'onestar', name: 'ワンスター', isPaid: true, adSpendBase: 8500000,
         dataBase: { ninni: 68, kankaba: 22, zankaba: 15, jikou: 9, jikohasan: 31, kojinsaisei: 18 } },
@@ -367,6 +389,10 @@ const DOMAINS = [
     ],
     prices: { shibou: 900000, shibou_j: 600000, kangan: 850000, kangan_j: 550000, kankouhen: 750000, kankouhen_j_ari: 500000, kankouhen_j_nashi: 400000, mansei: 350000, mansei_j_ari: 280000, mansei_j_nashi: 220000, carrier: 180000 },
     nonLeadBase: { shibou: 6, shibou_j: 3, kangan: 16, kangan_j: 7, kankouhen: 30, kankouhen_j_ari: 12, kankouhen_j_nashi: 9, mansei: 69, mansei_j_ari: 26, mansei_j_nashi: 20, carrier: 42 },
+    meetings: {
+      '病態あり': { overallBase: 1150, leadBase: 585 },
+      'キャリア': { overallBase: 138, leadBase: 71 },
+    },
     agencies: [
       { key: 'ashiro', name: 'アシロ', isPaid: true, adSpendBase: 8900000,
         dataBase: { shibou: 2, shibou_j: 1, kangan: 5, kangan_j: 2, kankouhen: 9, kankouhen_j_ari: 4, kankouhen_j_nashi: 3, mansei: 21, mansei_j_ari: 8, mansei_j_nashi: 6, carrier: 14 } },
@@ -386,6 +412,10 @@ const DOMAINS = [
     ],
     prices: { bentoku_a: 180000, bentoku_n: 140000 },
     nonLeadBase: { bentoku_a: 218, bentoku_n: 146 },
+    meetings: {
+      '弁特A': { overallBase: 617, leadBase: 245 },
+      '弁特N': { overallBase: 414, leadBase: 157 },
+    },
     agencies: [
       { key: 'ashiro', name: 'アシロ', isPaid: true, adSpendBase: 6100000, dataBase: { bentoku_a: 58, bentoku_n: 34 } },
       { key: 'self', name: 'セルフ', isPaid: true, adSpendBase: 3700000, dataBase: { bentoku_a: 33, bentoku_n: 19 } },
@@ -416,6 +446,11 @@ const DOMAINS = [
     ],
     prices: { seikyu_tandoku: 450000, w_seikyu: 600000, teisouken: 400000, challenge: 300000, shomen: 80000, hiseikyu: 400000, support: 150000, rikon: 350000, backup: 120000, youikuhi: 200000, konhi: 180000 },
     nonLeadBase: { seikyu_tandoku: 38, w_seikyu: 14, teisouken: 8, challenge: 12, shomen: 18, hiseikyu: 28, support: 12, rikon: 45, backup: 19, youikuhi: 17, konhi: 9 },
+    meetings: {
+      '請求': { overallBase: 369, leadBase: 186 },
+      '被請求': { overallBase: 138, leadBase: 66 },
+      '離婚': { overallBase: 347, leadBase: 174 },
+    },
     agencies: [
       { key: 'ashiro', name: 'アシロ', isPaid: true, adSpendBase: 7200000,
         dataBase: { seikyu_tandoku: 12, w_seikyu: 5, teisouken: 3, challenge: 4, shomen: 6, hiseikyu: 9, support: 4, rikon: 15, backup: 7, youikuhi: 5, konhi: 3 } },
@@ -564,6 +599,9 @@ function renderDomainPanels() {
       <h2>${d.name}　ミクロ分析</h2>
       <p class="card-sub">依頼方針別・リード代理店別の受任実績内訳（${MONTHS[selectedMonthIndex].label}度）。</p>
       <div class="kpi-row" id="kpi-${d.key}"></div>
+      <div class="sub-head">受任率（大カテ別・全体実績 vs リード実績）</div>
+      <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数（仮想データ）。全体実績とリード実績で受任率に差があるかを比較できます。</p>
+      <div id="rate-${d.key}"></div>
       <div class="sub-head">リード代理店（「全体実績」で全流入経路の内訳を確認できます）</div>
       <div class="agency-toggle" id="agency-toggle-${d.key}"></div>
       <div class="comp-bar" id="comp-bar-${d.key}"></div>
@@ -576,6 +614,7 @@ function renderDomainPanels() {
     wrap.appendChild(panel);
 
     renderKpis(d);
+    renderRateSection(d);
     renderAgencyToggle(d);
     renderComposition(d);
     renderRoasRow(d);
@@ -607,6 +646,50 @@ function renderKpis(d) {
       <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${md.occupancy}%"></div></div>
     </div>
   `;
+}
+
+function getMajorCategories(domain) {
+  return domain.groups.flatMap(g => g.name
+    ? [{ name: g.name, itemKeys: g.items.map(it => it.key) }]
+    : g.items.map(it => ({ name: it.name, itemKeys: [it.key] }))
+  );
+}
+
+function renderRateSection(d) {
+  const md = mdCache[d.key];
+  const mult = MONTHS[selectedMonthIndex].m;
+  const scale = v => Math.round(v * mult);
+  const el = document.getElementById(`rate-${d.key}`);
+  el.innerHTML = getMajorCategories(d).map(cat => {
+    const acceptedOverall = cat.itemKeys.reduce((s, k) => s + (md.overall[k] || 0), 0);
+    const acceptedLead = cat.itemKeys.reduce((s, k) => s + md.agencies.reduce((ss, a) => ss + (a.data[k] || 0), 0), 0);
+    const mBase = d.meetings[cat.name];
+    const meetingsOverall = scale(mBase.overallBase);
+    const meetingsLead = scale(mBase.leadBase);
+    const rateOverall = meetingsOverall ? (acceptedOverall / meetingsOverall) * 100 : 0;
+    const rateLead = meetingsLead ? (acceptedLead / meetingsLead) * 100 : 0;
+    const delta = rateLead - rateOverall;
+    const deltaCls = delta >= 0 ? 'up' : 'down';
+    const deltaSign = delta >= 0 ? '+' : '';
+    return `
+      <div class="rate-group">
+        <div class="rate-group-head">
+          <span>${cat.name}</span>
+          <span class="rate-delta ${deltaCls}">リード ${deltaSign}${delta.toFixed(1)}pt</span>
+        </div>
+        <div class="rate-line">
+          <span class="rate-tag" style="color:var(--s0)">全体実績</span>
+          <div class="rate-track"><div class="rate-fill" style="width:${rateOverall}%;background:var(--s0)"></div></div>
+          <div class="rate-val">受任率 <strong>${pct(rateOverall)}</strong>（受任${fmt(acceptedOverall)}／面談${fmt(meetingsOverall)}）</div>
+        </div>
+        <div class="rate-line">
+          <span class="rate-tag" style="color:var(--s1)">リード実績</span>
+          <div class="rate-track"><div class="rate-fill" style="width:${rateLead}%;background:var(--s1)"></div></div>
+          <div class="rate-val">受任率 <strong>${pct(rateLead)}</strong>（受任${fmt(acceptedLead)}／面談${fmt(meetingsLead)}）</div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderAgencyToggle(d) {
@@ -715,8 +798,9 @@ function renderBreakdown(d) {
   const el = document.getElementById(`breakdown-${d.key}`);
   el.innerHTML = d.groups.map(g => {
     const groupTotal = g.items.reduce((a, it) => a + (source[it.key] || 0), 0);
+    const groupShare = denom ? (groupTotal / denom) * 100 : 0;
     const headHtml = g.name
-      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件</span></div>`
+      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）</span></div>`
       : '';
     const rows = g.items.map(it => {
       const v = source[it.key] || 0;
