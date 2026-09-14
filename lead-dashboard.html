@@ -635,9 +635,6 @@ function renderDomainPanels() {
       <h2>${d.name}　ミクロ分析</h2>
       <p class="card-sub">依頼方針別・リード代理店別の受任実績内訳（${MONTHS[selectedMonthIndex].label}度）。</p>
       <div class="kpi-row" id="kpi-${d.key}"></div>
-      <div class="sub-head">受任率（大カテ別・全体実績／プロパー実績／代理店別）</div>
-      <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数（仮想データ）。全体実績・プロパー実績・各代理店ごとに受任率を比較できます。</p>
-      <div id="rate-${d.key}"></div>
       <div class="sub-head">表示切替（全体実績／プロパー実績／リード代理店）</div>
       <p class="sub-note">選択した対象の依頼方針別内訳が下に表示されます。プロパー実績は全体実績からリード実績（全代理店合計）を差し引いた直接反響・紹介等です。</p>
       <div class="agency-toggle" id="agency-toggle-${d.key}"></div>
@@ -647,16 +644,19 @@ function renderDomainPanels() {
       <div id="breakdown-${d.key}"></div>
       <button class="table-toggle" id="table-toggle-${d.key}">＋ 代理店別クロス集計・広告費対効果を表示</button>
       <div id="tables-${d.key}" hidden></div>
+      <div class="sub-head">受任率（大カテ別・全体実績／プロパー実績／代理店別）</div>
+      <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数（仮想データ）。全体実績・プロパー実績・各代理店ごとに受任率を比較できます。</p>
+      <div id="rate-${d.key}"></div>
     `;
     wrap.appendChild(panel);
 
     renderKpis(d);
-    renderRateSection(d);
     renderAgencyToggle(d);
     renderComposition(d);
     renderRoasRow(d);
     renderBreakdown(d);
     renderTables(d);
+    renderRateSection(d);
 
     document.getElementById(`table-toggle-${d.key}`).addEventListener('click', function () {
       const t = document.getElementById(`tables-${d.key}`);
