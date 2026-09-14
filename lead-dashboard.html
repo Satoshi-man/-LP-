@@ -431,7 +431,8 @@ const DOMAINS = [
   },
   {
     key: 'kaji', name: '家事事件',
-    occupancyNote: '家事事件はリード施策を「請求」商材に限定して実施しているため、本占有率は全体請求実績に対するリード請求実績の占有率を示します。',
+    occupancyNote: '家事事件はリード施策を「請求」商材に限定して実施しているため、本数値・占有率は全体請求実績に対するリード請求実績の占有率を示します。',
+    occupancyScopeGroup: '請求',
     groups: [
       { name: '請求', items: [
         { key: 'seikyu_tandoku', name: '①請求単独' },
@@ -516,6 +517,17 @@ function getDomainMonthData(domain, monthIdx) {
   };
 }
 
+function getOccupancyFigures(domain, md) {
+  if (!domain.occupancyScopeGroup) {
+    return { total: md.overallTotal, lead: md.leadTotal, occupancy: md.occupancy };
+  }
+  const group = domain.groups.find(g => g.name === domain.occupancyScopeGroup);
+  const keys = group.items.map(it => it.key);
+  const total = keys.reduce((s, k) => s + (md.overall[k] || 0), 0);
+  const lead = keys.reduce((s, k) => s + md.agencies.reduce((ss, a) => ss + (a.data[k] || 0), 0), 0);
+  return { total, lead, occupancy: total ? (lead / total) * 100 : 0 };
+}
+
 function renderMonthButtons() {
   const el = document.getElementById('month-buttons');
   el.innerHTML = '';
@@ -546,12 +558,13 @@ function renderOverview() {
 
   tilesEl.innerHTML = '';
   rows.forEach(({ d, md }) => {
+    const fig = getOccupancyFigures(d, md);
     const btn = document.createElement('button');
     btn.className = 'ov-tile';
     btn.innerHTML = `
       <div class="ov-name">${d.name}</div>
-      <div class="ov-figs"><span class="ov-pct">${pct(md.occupancy)}</span><span class="ov-pct-label">占有率</span></div>
-      <div class="ov-detail">全体実績 <strong>${fmt(md.overallTotal)}</strong>件 ／ リード実績 <strong>${fmt(md.leadTotal)}</strong>件</div>
+      <div class="ov-figs"><span class="ov-pct">${pct(fig.occupancy)}</span><span class="ov-pct-label">占有率</span></div>
+      <div class="ov-detail">全体実績 <strong>${fmt(fig.total)}</strong>件 ／ リード実績 <strong>${fmt(fig.lead)}</strong>件</div>
       ${d.occupancyNote ? `<div class="ov-note">※${d.occupancyNote}</div>` : ''}
     `;
     btn.addEventListener('click', () => selectDomain(d.key, true));
@@ -559,7 +572,10 @@ function renderOverview() {
   });
 
   const meterRows = [{ label: '全社合計', total: officeTotal, lead: officeLead, note: null }]
-    .concat(rows.map(({ d, md }) => ({ label: d.name, total: md.overallTotal, lead: md.leadTotal, note: d.occupancyNote })));
+    .concat(rows.map(({ d, md }) => {
+      const fig = getOccupancyFigures(d, md);
+      return { label: d.name, total: fig.total, lead: fig.lead, note: d.occupancyNote };
+    }));
 
   metersEl.innerHTML = meterRows.map(r => {
     const p = r.total ? (r.lead / r.total) * 100 : 0;
@@ -651,19 +667,20 @@ function renderDomainPanels() {
 
 function renderKpis(d) {
   const md = mdCache[d.key];
+  const fig = getOccupancyFigures(d, md);
   document.getElementById(`kpi-${d.key}`).innerHTML = `
     <div class="kpi-tile">
       <div class="kpi-label">全体実績（全流入経路・受任数）</div>
-      <div class="kpi-value">${fmt(md.overallTotal)}<span class="kpi-unit">件</span></div>
+      <div class="kpi-value">${fmt(fig.total)}<span class="kpi-unit">件</span></div>
     </div>
     <div class="kpi-tile">
       <div class="kpi-label">リード合計実績（受任数）</div>
-      <div class="kpi-value">${fmt(md.leadTotal)}<span class="kpi-unit">件</span></div>
+      <div class="kpi-value">${fmt(fig.lead)}<span class="kpi-unit">件</span></div>
     </div>
     <div class="kpi-tile hero">
       <div class="kpi-label">リード占有率</div>
-      <div class="kpi-value">${pct(md.occupancy)}</div>
-      <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${md.occupancy}%"></div></div>
+      <div class="kpi-value">${pct(fig.occupancy)}</div>
+      <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${fig.occupancy}%"></div></div>
       ${d.occupancyNote ? `<div class="kpi-note">※${d.occupancyNote}</div>` : ''}
     </div>
   `;
