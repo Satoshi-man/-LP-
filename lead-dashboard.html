@@ -302,6 +302,7 @@
   table.data-table td.roas-good { color: var(--good); font-weight: 700; }
   table.data-table td.roas-bad { color: var(--critical); font-weight: 700; }
   table.data-table td.na { color: var(--text-muted); }
+  table.data-table .cell-sub { display: block; font-size: .68rem; font-weight: 400; color: var(--text-muted); }
 
   @media (max-width: 640px) {
     .bar-cat { width: 120px; font-size: .74rem; }
@@ -941,16 +942,36 @@ function renderBreakdown(d) {
 function renderTables(d) {
   const md = mdCache[d.key];
   const el = document.getElementById(`tables-${d.key}`);
+  const creditorKeys = d.creditorKeys || [];
+
+  const cell = (caseVal, creditorVal) => {
+    const sub = creditorVal === null ? '' : `<span class="cell-sub">介入${fmt(creditorVal)}社</span>`;
+    return `${fmt(caseVal)}${sub}`;
+  };
 
   const headCols = md.agencies.map(a => `<th>${a.name}</th>`).join('');
   const bodyRows = d.groups.map(g => {
-    const groupHead = g.name
-      ? `<tr class="grp-row"><td>${g.name}</td>${md.agencies.map(() => '<td></td>').join('')}<td></td><td></td><td></td></tr>`
-      : '';
+    const groupCreditorItems = g.items.filter(it => creditorKeys.includes(it.key));
+    const hasGroupCreditor = groupCreditorItems.length > 0;
+    const groupHead = !g.name
+      ? ''
+      : !hasGroupCreditor
+        ? `<tr class="grp-row"><td>${g.name}</td>${md.agencies.map(() => '<td></td>').join('')}<td></td><td></td><td></td></tr>`
+        : (() => {
+            const gCase = keySrc => g.items.reduce((s, it) => s + (keySrc[it.key] || 0), 0);
+            const gCredit = creditSrc => groupCreditorItems.reduce((s, it) => s + (creditSrc[it.key] || 0), 0);
+            const agencyCells = md.agencies.map(a => `<td>${cell(gCase(a.data), gCredit(a.creditors))}</td>`).join('');
+            const leadCell = `<td><strong>${cell(gCase(md.lead.data), gCredit(md.lead.creditors))}</strong></td>`;
+            const properCell = `<td>${cell(gCase(md.proper.data), gCredit(md.proper.creditors))}</td>`;
+            const overallCell = `<td>${cell(gCase(md.overall), gCredit(md.overallCreditors))}</td>`;
+            return `<tr class="grp-row"><td>${g.name}</td>${agencyCells}${leadCell}${properCell}${overallCell}</tr>`;
+          })();
     const itemRows = g.items.map(it => {
-      const cells = md.agencies.map(a => `<td>${fmt(a.data[it.key] || 0)}</td>`).join('');
+      const hasCreditor = creditorKeys.includes(it.key);
+      const cells = md.agencies.map(a => `<td>${cell(a.data[it.key] || 0, hasCreditor ? (a.creditors[it.key] || 0) : null)}</td>`).join('');
       const rowTotal = md.agencies.reduce((s, a) => s + (a.data[it.key] || 0), 0);
-      return `<tr><td>${it.name}</td>${cells}<td><strong>${fmt(rowTotal)}</strong></td><td>${fmt(md.proper.data[it.key] || 0)}</td><td>${fmt(md.overall[it.key] || 0)}</td></tr>`;
+      const rowTotalCreditor = hasCreditor ? md.agencies.reduce((s, a) => s + (a.creditors[it.key] || 0), 0) : null;
+      return `<tr><td>${it.name}</td>${cells}<td><strong>${cell(rowTotal, rowTotalCreditor)}</strong></td><td>${cell(md.proper.data[it.key] || 0, hasCreditor ? (md.proper.creditors[it.key] || 0) : null)}</td><td>${cell(md.overall[it.key] || 0, hasCreditor ? (md.overallCreditors[it.key] || 0) : null)}</td></tr>`;
     }).join('');
     return groupHead + itemRows;
   }).join('');
