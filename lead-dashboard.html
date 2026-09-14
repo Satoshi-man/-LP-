@@ -911,8 +911,12 @@ function renderBreakdown(d) {
   el.innerHTML = note + d.groups.map(g => {
     const groupTotal = g.items.reduce((a, it) => a + (source[it.key] || 0), 0);
     const groupShare = denom ? (groupTotal / denom) * 100 : 0;
+    const groupCreditorItems = g.items.filter(it => creditorKeys.includes(it.key));
+    const groupCreditorFig = groupCreditorItems.length
+      ? `／介入<strong>${fmt(groupCreditorItems.reduce((a, it) => a + (creditorSource[it.key] || 0), 0))}</strong>社`
+      : '';
     const headHtml = g.name
-      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）</span></div>`
+      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）${groupCreditorFig}</span></div>`
       : '';
     const rows = g.items.map(it => {
       const v = source[it.key] || 0;
