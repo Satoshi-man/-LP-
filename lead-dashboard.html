@@ -223,6 +223,7 @@
   .sub-head { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin: 22px 0 10px; }
   .sub-head:first-of-type { margin-top: 0; }
   .sub-note { font-size: .74rem; color: var(--text-muted); margin: -6px 0 12px; }
+  .breakdown-note { font-size: .74rem; color: var(--text-muted); margin: 0 0 14px; }
 
   /* ---- rate section ---- */
   .rate-group { margin-bottom: 16px; }
@@ -285,6 +286,7 @@
   .bar-lane { flex: 1; height: 18px; background: var(--lane-bg); border-radius: 4px; position: relative; }
   .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
   .bar-figs { width: 130px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .bar-figs.wide { width: 230px; }
   .bar-figs strong { color: var(--text-primary); font-weight: 700; }
 
   /* ---- tables ---- */
@@ -304,6 +306,7 @@
   @media (max-width: 640px) {
     .bar-cat { width: 120px; font-size: .74rem; }
     .bar-figs { width: 96px; }
+    .bar-figs.wide { width: 150px; }
     .meter-label { width: 68px; }
     .meter-val { width: 130px; }
     .meter-note { margin-left: 80px; }
@@ -364,17 +367,21 @@ const DOMAINS = [
         { key: 'kojinsaisei', name: '②個人再生' },
       ]},
     ],
-    prices: { ninni: 88000, kankaba: 150000, zankaba: 120000, jikou: 55000, jikohasan: 250000, kojinsaisei: 350000 },
+    prices: { ninni: 28000, kankaba: 140000, zankaba: 115000, jikou: 52000, jikohasan: 250000, kojinsaisei: 350000 },
     nonLeadBase: { ninni: 241, kankaba: 75, zankaba: 55, jikou: 33, jikohasan: 110, kojinsaisei: 73 },
+    creditorKeys: ['ninni', 'kankaba', 'zankaba', 'jikou'],
+    nonLeadCreditorsBase: { ninni: 770, kankaba: 86, zankaba: 61, jikou: 35 },
     meetingRates: {
       '任意整理': { ALL: 48.2, PROPER: 58, onestar: 38, organic: 44 },
       '法的整理': { ALL: 34.9, PROPER: 42, onestar: 26, organic: 31 },
     },
     agencies: [
       { key: 'onestar', name: 'ワンスター', isPaid: true, adSpendBase: 8500000,
-        dataBase: { ninni: 68, kankaba: 22, zankaba: 15, jikou: 9, jikohasan: 31, kojinsaisei: 18 } },
+        dataBase: { ninni: 68, kankaba: 22, zankaba: 15, jikou: 9, jikohasan: 31, kojinsaisei: 18 },
+        creditorsBase: { ninni: 180, kankaba: 24, zankaba: 16, jikou: 9 } },
       { key: 'organic', name: 'オーガニック', isPaid: false,
-        dataBase: { ninni: 41, kankaba: 13, zankaba: 10, jikou: 6, jikohasan: 19, kojinsaisei: 11 } },
+        dataBase: { ninni: 41, kankaba: 13, zankaba: 10, jikou: 6, jikohasan: 19, kojinsaisei: 11 },
+        creditorsBase: { ninni: 160, kankaba: 16, zankaba: 12, jikou: 7 } },
     ],
   },
   {
@@ -488,21 +495,30 @@ const mdCache = {};
 function getDomainMonthData(domain, monthIdx) {
   const mult = MONTHS[monthIdx].m;
   const scale = v => Math.round(v * mult);
+  const creditorKeys = domain.creditorKeys || [];
   const agencies = domain.agencies.map(ag => {
     const data = {};
+    const creditors = {};
     let total = 0, revenue = 0;
     Object.entries(ag.dataBase).forEach(([k, v]) => {
       const val = scale(v);
       data[k] = val;
       total += val;
-      revenue += val * (domain.prices[k] || 0);
+      let units = val;
+      if (creditorKeys.includes(k)) {
+        units = scale((ag.creditorsBase && ag.creditorsBase[k]) || 0);
+        creditors[k] = units;
+      }
+      revenue += units * (domain.prices[k] || 0);
     });
     const adSpend = ag.isPaid ? scale(ag.adSpendBase) : 0;
     const roas = (ag.isPaid && adSpend > 0) ? (revenue / adSpend) * 100 : null;
-    return { key: ag.key, name: ag.name, isPaid: ag.isPaid, data, total, revenue, adSpend, roas };
+    return { key: ag.key, name: ag.name, isPaid: ag.isPaid, data, creditors, total, revenue, adSpend, roas };
   });
   const overall = {};
+  const overallCreditors = {};
   const proper = {};
+  const properCreditors = {};
   let overallTotal = 0, properTotal = 0, properRevenue = 0;
   Object.keys(domain.nonLeadBase).forEach(k => {
     const agencySum = agencies.reduce((s, a) => s + (a.data[k] || 0), 0);
@@ -511,20 +527,32 @@ function getDomainMonthData(domain, monthIdx) {
     proper[k] = nonLead;
     overallTotal += overall[k];
     properTotal += nonLead;
-    properRevenue += nonLead * (domain.prices[k] || 0);
+    let properUnits = nonLead;
+    if (creditorKeys.includes(k)) {
+      const agencyCreditorSum = agencies.reduce((s, a) => s + (a.creditors[k] || 0), 0);
+      const nonLeadCreditors = scale((domain.nonLeadCreditorsBase && domain.nonLeadCreditorsBase[k]) || 0);
+      overallCreditors[k] = agencyCreditorSum + nonLeadCreditors;
+      properCreditors[k] = nonLeadCreditors;
+      properUnits = nonLeadCreditors;
+    }
+    properRevenue += properUnits * (domain.prices[k] || 0);
   });
   const leadTotal = agencies.reduce((s, a) => s + a.total, 0);
   const leadData = {};
+  const leadCreditors = {};
   Object.keys(domain.nonLeadBase).forEach(k => {
     leadData[k] = agencies.reduce((s, a) => s + (a.data[k] || 0), 0);
+    if (creditorKeys.includes(k)) {
+      leadCreditors[k] = agencies.reduce((s, a) => s + (a.creditors[k] || 0), 0);
+    }
   });
   const leadRevenue = agencies.reduce((s, a) => s + a.revenue, 0);
   const leadAdSpend = agencies.reduce((s, a) => s + a.adSpend, 0);
   const leadRoas = leadAdSpend > 0 ? (leadRevenue / leadAdSpend) * 100 : null;
   return {
-    agencies, overall, overallTotal, leadTotal,
-    proper: { data: proper, total: properTotal, revenue: properRevenue },
-    lead: { data: leadData, total: leadTotal, revenue: leadRevenue, adSpend: leadAdSpend, roas: leadRoas },
+    agencies, overall, overallTotal, overallCreditors, leadTotal,
+    proper: { data: proper, creditors: properCreditors, total: properTotal, revenue: properRevenue },
+    lead: { data: leadData, creditors: leadCreditors, total: leadTotal, revenue: leadRevenue, adSpend: leadAdSpend, roas: leadRoas },
     occupancy: overallTotal ? (leadTotal / overallTotal) * 100 : 0,
   };
 }
@@ -818,25 +846,28 @@ function renderRoasRow(d) {
   const active = activeAgencyByDomain[d.key];
   if (active === 'ALL') { el.innerHTML = ''; return; }
   const md = mdCache[d.key];
+  const revenueLabel = (d.creditorKeys && d.creditorKeys.length)
+    ? '期待収益（任意整理は介入債権者数ベース・仮想単価）'
+    : '期待収益（受任ベース・仮想単価）';
 
   if (active === 'PROPER') {
-    el.innerHTML = `<p class="roas-note-box">プロパー実績（全体実績からリード実績を差し引いた直接反響・紹介等）は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益（受任ベース）：<strong>${fmtMan(md.proper.revenue)}</strong>）。</p>`;
+    el.innerHTML = `<p class="roas-note-box">プロパー実績（全体実績からリード実績を差し引いた直接反響・紹介等）は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（${revenueLabel}：<strong>${fmtMan(md.proper.revenue)}</strong>）。</p>`;
     return;
   }
   if (active === 'LEAD') {
     renderRoasTiles(el, md.lead.adSpend, md.lead.revenue, md.lead.roas,
-      '全代理店（オーガニックを含む）合計の広告費・期待収益から算出。オーガニックの広告費は0円として合算しています。');
+      '全代理店（オーガニックを含む）合計の広告費・期待収益から算出。オーガニックの広告費は0円として合算しています。', revenueLabel);
     return;
   }
   const ag = md.agencies.find(a => a.key === active);
   if (!ag.isPaid) {
-    el.innerHTML = `<p class="roas-note-box">${ag.name}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益（受任ベース）：<strong>${fmtMan(ag.revenue)}</strong>）。</p>`;
+    el.innerHTML = `<p class="roas-note-box">${ag.name}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（${revenueLabel}：<strong>${fmtMan(ag.revenue)}</strong>）。</p>`;
     return;
   }
-  renderRoasTiles(el, ag.adSpend, ag.revenue, ag.roas, '目安：250%以上=良好／150%未満=要注意');
+  renderRoasTiles(el, ag.adSpend, ag.revenue, ag.roas, '目安：250%以上=良好／150%未満=要注意', revenueLabel);
 }
 
-function renderRoasTiles(el, adSpend, revenue, roas, note) {
+function renderRoasTiles(el, adSpend, revenue, roas, note, revenueLabel) {
   const roasClass = roas >= 250 ? 'style="color:var(--good)"' : (roas < 150 ? 'style="color:var(--critical)"' : '');
   el.innerHTML = `
     <div class="roas-row">
@@ -845,7 +876,7 @@ function renderRoasTiles(el, adSpend, revenue, roas, note) {
         <div class="roas-value">${fmtMan(adSpend)}</div>
       </div>
       <div class="roas-tile">
-        <div class="roas-label">期待収益（受任ベース・仮想単価）</div>
+        <div class="roas-label">${revenueLabel || '期待収益（受任ベース・仮想単価）'}</div>
         <div class="roas-value">${fmtMan(revenue)}</div>
       </div>
       <div class="roas-tile">
@@ -868,10 +899,16 @@ function renderBreakdown(d) {
   const color = isAll ? 'var(--s0)' : isProper ? 'var(--sp)' : isLead ? 'var(--sl)' : SERIES_COLORS[agencyIndex];
   const source = isAll ? md.overall : isProper ? md.proper.data : isLead ? md.lead.data : ag.data;
   const denom = isAll ? md.overallTotal : isProper ? md.proper.total : isLead ? md.lead.total : ag.total;
+  const creditorSource = isAll ? md.overallCreditors : isProper ? md.proper.creditors : isLead ? md.lead.creditors : ag.creditors;
+  const creditorKeys = d.creditorKeys || [];
   const maxVal = Math.max(...d.groups.flatMap(g => g.items.map(it => source[it.key] || 0)), 1);
 
+  const note = creditorKeys.length
+    ? `<p class="breakdown-note">任意整理の各商材は、受任件数に加えて仮想の介入債権者数を表示しています。期待収益は介入債権者数×単価で算出しています。</p>`
+    : '';
+
   const el = document.getElementById(`breakdown-${d.key}`);
-  el.innerHTML = d.groups.map(g => {
+  el.innerHTML = note + d.groups.map(g => {
     const groupTotal = g.items.reduce((a, it) => a + (source[it.key] || 0), 0);
     const groupShare = denom ? (groupTotal / denom) * 100 : 0;
     const headHtml = g.name
@@ -881,11 +918,15 @@ function renderBreakdown(d) {
       const v = source[it.key] || 0;
       const w = (v / maxVal) * 100;
       const share = denom ? (v / denom) * 100 : 0;
+      const hasCreditor = creditorKeys.includes(it.key);
+      const creditorFig = hasCreditor
+        ? `／介入<strong>${fmt(creditorSource[it.key] || 0)}</strong>社`
+        : '';
       return `
         <div class="bar-row">
           <div class="bar-cat">${it.name}</div>
           <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${color}"></div></div>
-          <div class="bar-figs"><strong>${fmt(v)}</strong>件（${pct(share)}）</div>
+          <div class="bar-figs${hasCreditor ? ' wide' : ''}"><strong>${fmt(v)}</strong>件（${pct(share)}）${creditorFig}</div>
         </div>
       `;
     }).join('');
