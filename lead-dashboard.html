@@ -286,7 +286,7 @@
   .bar-lane { flex: 1; height: 18px; background: var(--lane-bg); border-radius: 4px; position: relative; }
   .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
   .bar-figs { width: 130px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
-  .bar-figs.wide { width: 230px; }
+  .bar-figs.wide { width: 260px; }
   .bar-figs strong { color: var(--text-primary); font-weight: 700; }
 
   /* ---- tables ---- */
@@ -487,6 +487,7 @@ const SERIES_COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)'];
 const fmt = n => Math.round(n).toLocaleString('ja-JP');
 const pct = n => n.toFixed(1) + '%';
 const fmtMan = n => fmt(n / 10000) + '万円';
+const avgPerCase = (caseVal, creditorVal) => (caseVal ? (creditorVal / caseVal).toFixed(1) : '-');
 
 const activeAgencyByDomain = {};
 DOMAINS.forEach(d => { activeAgencyByDomain[d.key] = 'ALL'; });
@@ -905,7 +906,7 @@ function renderBreakdown(d) {
   const maxVal = Math.max(...d.groups.flatMap(g => g.items.map(it => source[it.key] || 0)), 1);
 
   const note = creditorKeys.length
-    ? `<p class="breakdown-note">任意整理の各商材は、受任件数に加えて仮想の介入債権者数を表示しています。期待収益は介入債権者数×単価で算出しています。</p>`
+    ? `<p class="breakdown-note">任意整理の各商材は、受任件数に加えて仮想の介入債権者数と、受任1件あたりの平均介入債権者数を表示しています。期待収益は介入債権者数×単価で算出しています。</p>`
     : '';
 
   const el = document.getElementById(`breakdown-${d.key}`);
@@ -913,9 +914,11 @@ function renderBreakdown(d) {
     const groupTotal = g.items.reduce((a, it) => a + (source[it.key] || 0), 0);
     const groupShare = denom ? (groupTotal / denom) * 100 : 0;
     const groupCreditorItems = g.items.filter(it => creditorKeys.includes(it.key));
-    const groupCreditorFig = groupCreditorItems.length
-      ? `／介入<strong>${fmt(groupCreditorItems.reduce((a, it) => a + (creditorSource[it.key] || 0), 0))}</strong>社`
-      : '';
+    const groupCreditorFig = (() => {
+      if (!groupCreditorItems.length) return '';
+      const gCredit = groupCreditorItems.reduce((a, it) => a + (creditorSource[it.key] || 0), 0);
+      return `／介入<strong>${fmt(gCredit)}</strong>社（平均${avgPerCase(groupTotal, gCredit)}社/件）`;
+    })();
     const headHtml = g.name
       ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）${groupCreditorFig}</span></div>`
       : '';
@@ -925,7 +928,7 @@ function renderBreakdown(d) {
       const share = denom ? (v / denom) * 100 : 0;
       const hasCreditor = creditorKeys.includes(it.key);
       const creditorFig = hasCreditor
-        ? `／介入<strong>${fmt(creditorSource[it.key] || 0)}</strong>社`
+        ? `／介入<strong>${fmt(creditorSource[it.key] || 0)}</strong>社（平均${avgPerCase(v, creditorSource[it.key] || 0)}社/件）`
         : '';
       return `
         <div class="bar-row">
@@ -945,7 +948,7 @@ function renderTables(d) {
   const creditorKeys = d.creditorKeys || [];
 
   const cell = (caseVal, creditorVal) => {
-    const sub = creditorVal === null ? '' : `<span class="cell-sub">介入${fmt(creditorVal)}社</span>`;
+    const sub = creditorVal === null ? '' : `<span class="cell-sub">介入${fmt(creditorVal)}社・平均${avgPerCase(caseVal, creditorVal)}社/件</span>`;
     return `${fmt(caseVal)}${sub}`;
   };
 
