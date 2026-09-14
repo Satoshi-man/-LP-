@@ -23,6 +23,7 @@
     --s4: #eda100; /* yellow */
     --s0: #898781; /* neutral (全体実績) */
     --sp: #4a3aa7; /* violet (プロパー実績) */
+    --sl: #e87ba4; /* magenta (リード合計実績) */
 
     --good:     #0ca30c;
     --warning:  #fab219;
@@ -49,6 +50,7 @@
       --s4: #c98500;
       --s0: #898781;
       --sp: #9085e9;
+      --sl: #d55181;
 
       --lane-bg: #2c2c2a;
     }
@@ -71,6 +73,7 @@
     --s4: #c98500;
     --s0: #898781;
     --sp: #9085e9;
+    --sl: #d55181;
 
     --lane-bg: #2c2c2a;
   }
@@ -511,9 +514,17 @@ function getDomainMonthData(domain, monthIdx) {
     properRevenue += nonLead * (domain.prices[k] || 0);
   });
   const leadTotal = agencies.reduce((s, a) => s + a.total, 0);
+  const leadData = {};
+  Object.keys(domain.nonLeadBase).forEach(k => {
+    leadData[k] = agencies.reduce((s, a) => s + (a.data[k] || 0), 0);
+  });
+  const leadRevenue = agencies.reduce((s, a) => s + a.revenue, 0);
+  const leadAdSpend = agencies.reduce((s, a) => s + a.adSpend, 0);
+  const leadRoas = leadAdSpend > 0 ? (leadRevenue / leadAdSpend) * 100 : null;
   return {
     agencies, overall, overallTotal, leadTotal,
     proper: { data: proper, total: properTotal, revenue: properRevenue },
+    lead: { data: leadData, total: leadTotal, revenue: leadRevenue, adSpend: leadAdSpend, roas: leadRoas },
     occupancy: overallTotal ? (leadTotal / overallTotal) * 100 : 0,
   };
 }
@@ -635,7 +646,7 @@ function renderDomainPanels() {
       <h2>${d.name}　ミクロ分析</h2>
       <p class="card-sub">依頼方針別・リード代理店別の受任実績内訳（${MONTHS[selectedMonthIndex].label}度）。</p>
       <div class="kpi-row" id="kpi-${d.key}"></div>
-      <div class="sub-head">表示切替（全体実績／プロパー実績／リード代理店）</div>
+      <div class="sub-head">表示切替（全体実績／プロパー実績／リード合計実績／リード代理店）</div>
       <p class="sub-note">選択した対象の依頼方針別内訳が下に表示されます。プロパー実績は全体実績からリード実績（全代理店合計）を差し引いた直接反響・紹介等です。</p>
       <div class="agency-toggle" id="agency-toggle-${d.key}"></div>
       <div class="comp-bar" id="comp-bar-${d.key}"></div>
@@ -745,6 +756,14 @@ function renderAgencyToggle(d) {
   properBtn.addEventListener('click', () => setActiveAgency(d, 'PROPER'));
   el.appendChild(properBtn);
 
+  const leadBtn = document.createElement('button');
+  leadBtn.className = 'agency-btn all-btn';
+  leadBtn.style.color = 'var(--sl)';
+  leadBtn.setAttribute('aria-pressed', activeAgencyByDomain[d.key] === 'LEAD' ? 'true' : 'false');
+  leadBtn.innerHTML = `<span class="swatch" style="background:var(--sl)"></span>リード合計実績<span class="cnt">${fmt(md.lead.total)}件</span>`;
+  leadBtn.addEventListener('click', () => setActiveAgency(d, 'LEAD'));
+  el.appendChild(leadBtn);
+
   md.agencies.forEach((ag, i) => {
     const btn = document.createElement('button');
     btn.className = 'agency-btn';
@@ -785,11 +804,12 @@ function renderComposition(d) {
 
 function updateCompositionHighlight(d) {
   const active = activeAgencyByDomain[d.key];
+  const showAll = active === 'ALL' || active === 'LEAD';
   document.querySelectorAll(`#comp-bar-${d.key} .comp-seg`).forEach(seg => {
-    seg.style.opacity = (active === 'ALL' || seg.dataset.agency === active) ? '1' : '.4';
+    seg.style.opacity = (showAll || seg.dataset.agency === active) ? '1' : '.4';
   });
   document.querySelectorAll(`#comp-legend-${d.key} .item`).forEach(item => {
-    item.classList.toggle('dim', active !== 'ALL' && item.dataset.agency !== active);
+    item.classList.toggle('dim', !showAll && item.dataset.agency !== active);
   });
 }
 
@@ -798,31 +818,40 @@ function renderRoasRow(d) {
   const active = activeAgencyByDomain[d.key];
   if (active === 'ALL') { el.innerHTML = ''; return; }
   const md = mdCache[d.key];
+
   if (active === 'PROPER') {
     el.innerHTML = `<p class="roas-note-box">プロパー実績（全体実績からリード実績を差し引いた直接反響・紹介等）は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益（受任ベース）：<strong>${fmtMan(md.proper.revenue)}</strong>）。</p>`;
     return;
   }
+  if (active === 'LEAD') {
+    renderRoasTiles(el, md.lead.adSpend, md.lead.revenue, md.lead.roas,
+      '全代理店（オーガニックを含む）合計の広告費・期待収益から算出。オーガニックの広告費は0円として合算しています。');
+    return;
+  }
   const ag = md.agencies.find(a => a.key === active);
-
   if (!ag.isPaid) {
     el.innerHTML = `<p class="roas-note-box">${ag.name}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益（受任ベース）：<strong>${fmtMan(ag.revenue)}</strong>）。</p>`;
     return;
   }
-  const roasClass = ag.roas >= 250 ? 'style="color:var(--good)"' : (ag.roas < 150 ? 'style="color:var(--critical)"' : '');
+  renderRoasTiles(el, ag.adSpend, ag.revenue, ag.roas, '目安：250%以上=良好／150%未満=要注意');
+}
+
+function renderRoasTiles(el, adSpend, revenue, roas, note) {
+  const roasClass = roas >= 250 ? 'style="color:var(--good)"' : (roas < 150 ? 'style="color:var(--critical)"' : '');
   el.innerHTML = `
     <div class="roas-row">
       <div class="roas-tile">
         <div class="roas-label">広告費</div>
-        <div class="roas-value">${fmtMan(ag.adSpend)}</div>
+        <div class="roas-value">${fmtMan(adSpend)}</div>
       </div>
       <div class="roas-tile">
         <div class="roas-label">期待収益（受任ベース・仮想単価）</div>
-        <div class="roas-value">${fmtMan(ag.revenue)}</div>
+        <div class="roas-value">${fmtMan(revenue)}</div>
       </div>
       <div class="roas-tile">
         <div class="roas-label">ROAS（期待収益 ÷ 広告費）</div>
-        <div class="roas-value" ${roasClass}>${pct(ag.roas)}</div>
-        <div class="roas-note">目安：250%以上=良好／150%未満=要注意</div>
+        <div class="roas-value" ${roasClass}>${pct(roas)}</div>
+        <div class="roas-note">${note}</div>
       </div>
     </div>
   `;
@@ -833,11 +862,12 @@ function renderBreakdown(d) {
   const active = activeAgencyByDomain[d.key];
   const isAll = active === 'ALL';
   const isProper = active === 'PROPER';
-  const ag = (isAll || isProper) ? null : md.agencies.find(a => a.key === active);
+  const isLead = active === 'LEAD';
+  const ag = (isAll || isProper || isLead) ? null : md.agencies.find(a => a.key === active);
   const agencyIndex = ag ? md.agencies.indexOf(ag) : -1;
-  const color = isAll ? 'var(--s0)' : isProper ? 'var(--sp)' : SERIES_COLORS[agencyIndex];
-  const source = isAll ? md.overall : isProper ? md.proper.data : ag.data;
-  const denom = isAll ? md.overallTotal : isProper ? md.proper.total : ag.total;
+  const color = isAll ? 'var(--s0)' : isProper ? 'var(--sp)' : isLead ? 'var(--sl)' : SERIES_COLORS[agencyIndex];
+  const source = isAll ? md.overall : isProper ? md.proper.data : isLead ? md.lead.data : ag.data;
+  const denom = isAll ? md.overallTotal : isProper ? md.proper.total : isLead ? md.lead.total : ag.total;
   const maxVal = Math.max(...d.groups.flatMap(g => g.items.map(it => source[it.key] || 0)), 1);
 
   const el = document.getElementById(`breakdown-${d.key}`);
