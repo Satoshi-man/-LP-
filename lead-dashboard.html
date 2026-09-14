@@ -433,6 +433,7 @@ const DOMAINS = [
     key: 'kaji', name: '家事事件',
     occupancyNote: '家事事件はリード施策を「請求」商材に限定して実施しているため、本数値・占有率は全体請求実績に対するリード請求実績の占有率を示します。',
     occupancyScopeGroup: '請求',
+    occupancyLabels: { overall: '全体請求実績', lead: 'リード請求実績' },
     groups: [
       { name: '請求', items: [
         { key: 'seikyu_tandoku', name: '①請求単独' },
@@ -668,13 +669,14 @@ function renderDomainPanels() {
 function renderKpis(d) {
   const md = mdCache[d.key];
   const fig = getOccupancyFigures(d, md);
+  const labels = d.occupancyLabels || { overall: '全体実績', lead: 'リード合計実績' };
   document.getElementById(`kpi-${d.key}`).innerHTML = `
     <div class="kpi-tile">
-      <div class="kpi-label">全体実績（全流入経路・受任数）</div>
+      <div class="kpi-label">${labels.overall}（全流入経路・受任数）</div>
       <div class="kpi-value">${fmt(fig.total)}<span class="kpi-unit">件</span></div>
     </div>
     <div class="kpi-tile">
-      <div class="kpi-label">リード合計実績（受任数）</div>
+      <div class="kpi-label">${labels.lead}（受任数）</div>
       <div class="kpi-value">${fmt(fig.lead)}<span class="kpi-unit">件</span></div>
     </div>
     <div class="kpi-tile hero">
