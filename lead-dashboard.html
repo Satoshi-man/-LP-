@@ -172,14 +172,19 @@
   .ov-tile .ov-pct { font-size: 1.5rem; font-weight: 700; }
   .ov-tile .ov-pct-label { font-size: .72rem; color: var(--text-muted); }
   .ov-tile .ov-detail { font-size: .74rem; color: var(--text-secondary); }
+  .ov-tile .ov-note { font-size: .68rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
 
-  .meter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .meter-row:last-child { margin-bottom: 0; }
+  .meter-group { margin-bottom: 10px; }
+  .meter-group:last-child { margin-bottom: 0; }
+  .meter-row { display: flex; align-items: center; gap: 12px; }
   .meter-label { width: 90px; flex-shrink: 0; font-size: .82rem; font-weight: 600; }
   .meter-track { flex: 1; height: 14px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
   .meter-fill { height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; }
   .meter-val { width: 190px; flex-shrink: 0; text-align: right; font-size: .78rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
   .meter-val strong { color: var(--text-primary); font-weight: 700; }
+  .meter-note { font-size: .7rem; color: var(--text-muted); margin: 4px 0 0 102px; line-height: 1.4; }
+
+  .kpi-tile .kpi-note { font-size: .7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
 
   /* ---- tabs ---- */
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -298,6 +303,7 @@
     .bar-figs { width: 96px; }
     .meter-label { width: 68px; }
     .meter-val { width: 130px; }
+    .meter-note { margin-left: 80px; }
     .rate-tag { width: 60px; font-size: .68rem; }
     .rate-val { width: 150px; font-size: .68rem; }
   }
@@ -425,6 +431,7 @@ const DOMAINS = [
   },
   {
     key: 'kaji', name: '家事事件',
+    occupancyNote: '家事事件はリード施策を「請求」商材に限定して実施しているため、本占有率は全体請求実績に対するリード請求実績の占有率を示します。',
     groups: [
       { name: '請求', items: [
         { key: 'seikyu_tandoku', name: '①請求単独' },
@@ -545,21 +552,25 @@ function renderOverview() {
       <div class="ov-name">${d.name}</div>
       <div class="ov-figs"><span class="ov-pct">${pct(md.occupancy)}</span><span class="ov-pct-label">占有率</span></div>
       <div class="ov-detail">全体実績 <strong>${fmt(md.overallTotal)}</strong>件 ／ リード実績 <strong>${fmt(md.leadTotal)}</strong>件</div>
+      ${d.occupancyNote ? `<div class="ov-note">※${d.occupancyNote}</div>` : ''}
     `;
     btn.addEventListener('click', () => selectDomain(d.key, true));
     tilesEl.appendChild(btn);
   });
 
-  const meterRows = [{ label: '全社合計', total: officeTotal, lead: officeLead }]
-    .concat(rows.map(({ d, md }) => ({ label: d.name, total: md.overallTotal, lead: md.leadTotal })));
+  const meterRows = [{ label: '全社合計', total: officeTotal, lead: officeLead, note: null }]
+    .concat(rows.map(({ d, md }) => ({ label: d.name, total: md.overallTotal, lead: md.leadTotal, note: d.occupancyNote })));
 
   metersEl.innerHTML = meterRows.map(r => {
     const p = r.total ? (r.lead / r.total) * 100 : 0;
     return `
-      <div class="meter-row">
-        <div class="meter-label">${r.label}</div>
-        <div class="meter-track"><div class="meter-fill" style="width:${p}%"></div></div>
-        <div class="meter-val">リード <strong>${fmt(r.lead)}</strong>／全体 ${fmt(r.total)}件（<strong>${pct(p)}</strong>）</div>
+      <div class="meter-group">
+        <div class="meter-row">
+          <div class="meter-label">${r.label}</div>
+          <div class="meter-track"><div class="meter-fill" style="width:${p}%"></div></div>
+          <div class="meter-val">リード <strong>${fmt(r.lead)}</strong>／全体 ${fmt(r.total)}件（<strong>${pct(p)}</strong>）</div>
+        </div>
+        ${r.note ? `<div class="meter-note">※${r.note}</div>` : ''}
       </div>
     `;
   }).join('');
@@ -653,6 +664,7 @@ function renderKpis(d) {
       <div class="kpi-label">リード占有率</div>
       <div class="kpi-value">${pct(md.occupancy)}</div>
       <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${md.occupancy}%"></div></div>
+      ${d.occupancyNote ? `<div class="kpi-note">※${d.occupancyNote}</div>` : ''}
     </div>
   `;
 }
