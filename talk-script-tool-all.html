@@ -476,6 +476,262 @@
     .script-section:nth-child(3) { animation-delay: .1s; }
     .script-section:nth-child(4) { animation-delay: .15s; }
     .script-section:nth-child(5) { animation-delay: .2s; }
+
+    /* Result recording panel */
+    .result-panel {
+      margin-top: 32px;
+      padding: 24px;
+      background: var(--white);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .result-panel h3 {
+      font-size: .95rem;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    .result-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .result-btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+      min-width: 160px;
+    }
+
+    .result-btn:hover { opacity: .85; transform: scale(1.02); }
+    .result-btn:active { transform: scale(.98); }
+
+    .result-btn.reserved {
+      background: var(--green);
+      color: var(--white);
+    }
+
+    .result-btn.not-reserved {
+      background: #e74c3c;
+      color: var(--white);
+    }
+
+    .result-recorded {
+      padding: 16px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: .9rem;
+      animation: fadeInUp .3s ease-out;
+    }
+
+    .result-recorded.success {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .result-recorded.fail {
+      background: #fdecea;
+      color: #c0392b;
+    }
+
+    /* Dashboard button */
+    .dashboard-btn {
+      background: none;
+      border: 1px solid rgba(200,169,81,.5);
+      color: var(--gold-light);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    .dashboard-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+    }
+
+    /* Dashboard overlay */
+    .dashboard-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,30,53,.6);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInUp .2s ease-out;
+    }
+
+    .dashboard-modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    .dashboard-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 20px 28px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dashboard-header h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .dashboard-close {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 4px;
+      font-family: inherit;
+    }
+
+    .dashboard-close:hover { color: var(--white); }
+
+    .dashboard-body { padding: 28px; }
+
+    .dashboard-domain-section {
+      margin-bottom: 32px;
+    }
+
+    .dashboard-domain-title {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--navy);
+      padding: 8px 16px;
+      background: var(--gray-bg);
+      border-left: 4px solid var(--gold);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dashboard-summary {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary-card.total {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .summary-card.success-card {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .summary-card.fail-card {
+      background: #fdecea;
+      color: #c0392b;
+    }
+
+    .summary-card .num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: block;
+    }
+
+    .summary-card .lbl {
+      font-size: .72rem;
+      font-weight: 600;
+    }
+
+    .dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+
+    .dashboard-table th {
+      background: var(--navy);
+      color: var(--white);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: .75rem;
+    }
+
+    .dashboard-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dashboard-table tr:hover td {
+      background: #f8f9fb;
+    }
+
+    .rate-bar {
+      display: inline-block;
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .rate-bar.green { background: var(--green); }
+    .rate-bar.red { background: #e74c3c; }
+    .rate-bar.blue { background: var(--blue); }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-light);
+      padding: 32px;
+      font-size: .85rem;
+    }
+
+    .dashboard-reset-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-light);
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: .72rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    .dashboard-reset-btn:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+    }
   </style>
 </head>
 <body>
@@ -485,7 +741,10 @@
     トークスクリプト支援ツール
     <span class="badge">社内用</span>
   </h1>
-  <span class="internal">対応者向け支援システム（全ドメイン統合版）</span>
+  <span style="display:flex;align-items:center;gap:12px;">
+    <span class="internal">対応者向け支援システム（全ドメイン統合版）</span>
+    <button class="dashboard-btn" onclick="showDashboard()">&#128202; ダッシュボード</button>
+  </span>
 </div>
 
 <div class="domain-tabs" id="domainTabs">
@@ -529,8 +788,10 @@
       </p>
     </div>
     <div id="scriptOutput" style="display:none;"></div>
+    <div id="resultPanel" style="display:none;"></div>
   </div>
 </div>
+<div id="dashboardOverlay" style="display:none;"></div>
 
 <script>
 // ============================================================
@@ -838,7 +1099,10 @@ function switchDomain(domainKey) {
   updateCharCount();
   document.getElementById('scriptOutput').style.display = 'none';
   document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('resultPanel').style.display = 'none';
+  document.getElementById('resultPanel').innerHTML = '';
   document.getElementById('emptyState').style.display = '';
+  lastMatchedConcernKeys = [];
 }
 
 document.querySelectorAll('.domain-tab').forEach(tab => {
@@ -870,12 +1134,14 @@ function generateScript() {
   }
 
   const matchedConcerns = [];
+  lastMatchedConcernKeys = [];
   const memoLower = memo.toLowerCase();
 
   for (const [key, concern] of Object.entries(domain.concerns)) {
     for (const keyword of concern.keywords) {
       if (memoLower.includes(keyword)) {
         matchedConcerns.push(concern);
+        lastMatchedConcernKeys.push(key);
         break;
       }
     }
@@ -883,11 +1149,16 @@ function generateScript() {
 
   if (matchedConcerns.length === 0) {
     domain.defaultConcerns.forEach(k => {
-      if (domain.concerns[k]) matchedConcerns.push(domain.concerns[k]);
+      if (domain.concerns[k]) {
+        matchedConcerns.push(domain.concerns[k]);
+        lastMatchedConcernKeys.push(k);
+      }
     });
   }
 
+  recordConcerns(currentDomain, lastMatchedConcernKeys);
   renderScripts(matchedConcerns);
+  showResultPanel();
 }
 
 function renderScripts(concerns) {
@@ -959,7 +1230,10 @@ function clearAll() {
   updateCharCount();
   document.getElementById('scriptOutput').style.display = 'none';
   document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('resultPanel').style.display = 'none';
+  document.getElementById('resultPanel').innerHTML = '';
   document.getElementById('emptyState').style.display = '';
+  lastMatchedConcernKeys = [];
 }
 
 function copySection(btn) {
@@ -972,6 +1246,187 @@ function copySection(btn) {
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 2000);
   });
+}
+
+// ============================================================
+// KNOWLEDGE & RESULT TRACKING
+// ============================================================
+
+const STORAGE_KEY = 'talkScriptKnowledge';
+let lastMatchedConcernKeys = [];
+let resultRecorded = false;
+
+function loadKnowledge() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch(e) {
+    return {};
+  }
+}
+
+function saveKnowledge(knowledge) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(knowledge));
+  } catch(e) {}
+}
+
+function recordConcerns(domainKey, concernKeys) {
+  const knowledge = loadKnowledge();
+  if (!knowledge[domainKey]) {
+    knowledge[domainKey] = { totalSessions: 0, reserved: 0, notReserved: 0, concerns: {} };
+  }
+  knowledge[domainKey].totalSessions++;
+  concernKeys.forEach(key => {
+    if (!knowledge[domainKey].concerns[key]) {
+      knowledge[domainKey].concerns[key] = { count: 0, reserved: 0, notReserved: 0 };
+    }
+    knowledge[domainKey].concerns[key].count++;
+  });
+  saveKnowledge(knowledge);
+}
+
+function recordResult(reserved) {
+  if (resultRecorded) return;
+  resultRecorded = true;
+
+  const knowledge = loadKnowledge();
+  const dk = currentDomain;
+  if (!knowledge[dk]) return;
+
+  if (reserved) {
+    knowledge[dk].reserved++;
+  } else {
+    knowledge[dk].notReserved++;
+  }
+
+  lastMatchedConcernKeys.forEach(key => {
+    if (knowledge[dk].concerns[key]) {
+      if (reserved) {
+        knowledge[dk].concerns[key].reserved++;
+      } else {
+        knowledge[dk].concerns[key].notReserved++;
+      }
+    }
+  });
+
+  saveKnowledge(knowledge);
+
+  const panel = document.getElementById('resultPanel');
+  panel.innerHTML = reserved
+    ? '<div class="result-recorded success">&#10004; 予約獲得として記録しました</div>'
+    : '<div class="result-recorded fail">&#10006; 未予約として記録しました</div>';
+}
+
+function showResultPanel() {
+  resultRecorded = false;
+  const panel = document.getElementById('resultPanel');
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="result-panel">
+      <h3>&#128203; 対応結果を記録してください</h3>
+      <div class="result-btns">
+        <button class="result-btn reserved" onclick="recordResult(true)">&#10004; 予約獲得</button>
+        <button class="result-btn not-reserved" onclick="recordResult(false)">&#10006; 未予約</button>
+      </div>
+    </div>`;
+}
+
+function showDashboard() {
+  const knowledge = loadKnowledge();
+  const overlay = document.getElementById('dashboardOverlay');
+  overlay.style.display = 'flex';
+  overlay.className = 'dashboard-overlay';
+
+  let html = `
+    <div class="dashboard-modal">
+      <div class="dashboard-header">
+        <h2>&#128202; ナレッジダッシュボード</h2>
+        <button class="dashboard-close" onclick="closeDashboard()">&times;</button>
+      </div>
+      <div class="dashboard-body">`;
+
+  const domainOrder = ['bkan','saimu','kaji','jiko'];
+  let hasAnyData = false;
+
+  domainOrder.forEach(dk => {
+    const domain = DOMAINS[dk];
+    const data = knowledge[dk];
+    if (!data || data.totalSessions === 0) return;
+    hasAnyData = true;
+
+    const rate = data.totalSessions > 0
+      ? Math.round((data.reserved / data.totalSessions) * 100) : 0;
+
+    html += `
+      <div class="dashboard-domain-section">
+        <div class="dashboard-domain-title">
+          <span>${domain.label}</span>
+          <button class="dashboard-reset-btn" onclick="resetDomain('${dk}')">データリセット</button>
+        </div>
+        <div class="dashboard-summary">
+          <div class="summary-card total"><span class="num">${data.totalSessions}</span><span class="lbl">総対応数</span></div>
+          <div class="summary-card success-card"><span class="num">${data.reserved}</span><span class="lbl">予約獲得</span></div>
+          <div class="summary-card fail-card"><span class="num">${data.notReserved}</span><span class="lbl">未予約</span></div>
+          <div class="summary-card" style="background:#fffbf0;color:var(--navy);">
+            <span class="num">${rate}%</span><span class="lbl">予約獲得率</span>
+          </div>
+        </div>
+        <table class="dashboard-table">
+          <thead><tr>
+            <th>懸念事項</th>
+            <th>出現回数</th>
+            <th>出現率</th>
+            <th>予約獲得</th>
+            <th>未予約</th>
+            <th>払拭成功率</th>
+          </tr></thead>
+          <tbody>`;
+
+    const concerns = Object.entries(data.concerns)
+      .filter(([,v]) => v.count > 0)
+      .sort((a,b) => b[1].count - a[1].count);
+
+    concerns.forEach(([key, c]) => {
+      const freq = Math.round((c.count / data.totalSessions) * 100);
+      const total = c.reserved + c.notReserved;
+      const successRate = total > 0 ? Math.round((c.reserved / total) * 100) : '-';
+      const title = domain.concerns[key] ? domain.concerns[key].title.replace(/への対応$/, '') : key;
+      const barW = typeof successRate === 'number' ? successRate : 0;
+
+      html += `<tr>
+        <td>${title}</td>
+        <td>${c.count}回</td>
+        <td><span class="rate-bar blue" style="width:${freq}px"></span>${freq}%</td>
+        <td>${c.reserved}</td>
+        <td>${c.notReserved}</td>
+        <td><span class="rate-bar ${typeof successRate === 'number' && successRate >= 50 ? 'green' : 'red'}" style="width:${barW}px"></span>${typeof successRate === 'number' ? successRate + '%' : '-'}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+  });
+
+  if (!hasAnyData) {
+    html += '<div class="no-data">&#128203; まだデータがありません。<br>トークスクリプトを生成し、対応結果を記録すると、<br>ここにナレッジが蓄積されていきます。</div>';
+  }
+
+  html += '</div></div>';
+  overlay.innerHTML = html;
+}
+
+function closeDashboard() {
+  const overlay = document.getElementById('dashboardOverlay');
+  overlay.style.display = 'none';
+  overlay.innerHTML = '';
+}
+
+function resetDomain(dk) {
+  if (!confirm(DOMAINS[dk].label + ' のデータをリセットしますか？\nこの操作は元に戻せません。')) return;
+  const knowledge = loadKnowledge();
+  delete knowledge[dk];
+  saveKnowledge(knowledge);
+  showDashboard();
 }
 
 // Initialize
