@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>債務整理 トークスクリプト支援ツール</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2b4a;
+      --navy-dark: #0f1e35;
+      --gold: #c8a951;
+      --gold-light: #e8d080;
+      --gray-bg: #f5f6f8;
+      --text: #2d2d2d;
+      --text-light: #666;
+      --white: #fff;
+      --green: #27ae60;
+      --green-light: #eafaf1;
+      --blue: #2980b9;
+      --blue-light: #ebf5fb;
+      --orange: #e67e22;
+      --orange-light: #fef5e7;
+      --red: #c0392b;
+      --border: #dde1e8;
+    }
+
+    body {
+      font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+      background: var(--gray-bg);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-header .badge {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: .05em;
+    }
+
+    .app-header .internal {
+      font-size: .7rem;
+      color: var(--gold-light);
+      font-weight: 400;
+    }
+
+    /* Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Left Panel */
+    .input-panel {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* Quick tags */
+    .quick-tags {
+      margin-bottom: 20px;
+    }
+
+    .quick-tags-label {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-btn {
+      background: var(--gray-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    .tag-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .tag-btn.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    /* Memo area */
+    .memo-area {
+      margin-bottom: 20px;
+    }
+
+    .memo-area label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .memo-area textarea {
+      width: 100%;
+      height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: .88rem;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color .2s;
+    }
+
+    .memo-area textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,169,81,.15);
+    }
+
+    .memo-area textarea::placeholder {
+      color: #aab;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: .7rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Customer info */
+    .customer-info {
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .info-field {
+      flex: 1;
+    }
+
+    .info-field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .info-field select,
+    .info-field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: .82rem;
+      font-family: inherit;
+      background: var(--white);
+    }
+
+    .info-field select:focus,
+    .info-field input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    /* Generate button */
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s;
+      font-family: inherit;
+      letter-spacing: .03em;
+    }
+
+    .generate-btn:hover {
+      opacity: .85;
+    }
+
+    .generate-btn:active {
+      transform: scale(.98);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-row .generate-btn {
+      flex: 1;
+    }
+
+    .clear-btn {
+      padding: 14px 20px;
+      background: var(--white);
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+    }
+
+    .clear-btn:active {
+      transform: scale(.98);
+    }
+
+    /* Right Panel */
+    .output-panel {
+      padding: 24px 32px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+    }
+
+    /* Script cards */
+    .script-section {
+      margin-bottom: 28px;
+    }
+
+    .script-section-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--navy);
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .script-section-title .icon {
+      font-size: 1rem;
+    }
+
+    .script-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    }
+
+    .script-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .label-concern {
+      background: #fdecea;
+      color: var(--red);
+    }
+
+    .label-response {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .label-point {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .label-close {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .script-text {
+      font-size: .9rem;
+      line-height: 2;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .script-text strong {
+      color: var(--navy);
+      background: linear-gradient(transparent 60%, rgba(200,169,81,.25) 60%);
+    }
+
+    .script-text .emphasis {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .script-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 16px 0;
+    }
+
+    /* Strength badge */
+    .strength-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* Tip box */
+    .tip-box {
+      background: #fffbf0;
+      border: 1px solid var(--gold);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .tip-box-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+      font-size: .78rem;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: .72rem;
+      cursor: pointer;
+      color: var(--text-light);
+      font-family: inherit;
+      transition: all .15s;
+      float: right;
+    }
+
+    .copy-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .copy-btn.copied {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--text-light);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: .4;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: .85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        position: relative;
+        top: 0;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .output-panel {
+        max-height: none;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .script-section {
+      animation: fadeInUp .3s ease-out;
+    }
+
+    .script-section:nth-child(2) { animation-delay: .05s; }
+    .script-section:nth-child(3) { animation-delay: .1s; }
+    .script-section:nth-child(4) { animation-delay: .15s; }
+    .script-section:nth-child(5) { animation-delay: .2s; }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>
+    債務整理 トークスクリプト支援ツール
+    <span class="badge">社内用</span>
+  </h1>
+  <span class="internal">対応者向け支援システム</span>
+</div>
+
+<div class="app-container">
+
+  <!-- Left: Input Panel -->
+  <div class="input-panel">
+    <div class="panel-title">顧客情報・懸念事項入力</div>
+
+    <div class="customer-info">
+      <div class="info-row">
+        <div class="info-field">
+          <label>顧客の年代</label>
+          <select id="ageGroup">
+            <option value="">選択してください</option>
+            <option value="10s">10代</option>
+            <option value="20s">20代</option>
+            <option value="30s">30代</option>
+            <option value="40s">40代</option>
+            <option value="50s">50代</option>
+            <option value="60s">60代</option>
+            <option value="70s">70代以上</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>債務総額</label>
+          <select id="debtAmount">
+            <option value="">選択してください</option>
+            <option value="under50">50万円未満</option>
+            <option value="50to100">50万〜100万円</option>
+            <option value="100to300">100万〜300万円</option>
+            <option value="300to500">300万〜500万円</option>
+            <option value="500to1000">500万〜1000万円</option>
+            <option value="over1000">1000万円以上</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-field">
+          <label>主な債権者</label>
+          <select id="creditor">
+            <option value="">選択してください</option>
+            <option value="acom">アコム</option>
+            <option value="promise">プロミス（SMBCコンシューマーファイナンス）</option>
+            <option value="aiful">アイフル</option>
+            <option value="lake">レイク（新生フィナンシャル）</option>
+            <option value="mobit">SMBCモビット</option>
+            <option value="mitsui">三井住友カード</option>
+            <option value="rakuten">楽天カード</option>
+            <option value="epos">エポスカード</option>
+            <option value="orico">オリコ</option>
+            <option value="cedyna">セディナ</option>
+            <option value="jaccs">ジャックス</option>
+            <option value="saison">クレディセゾン</option>
+            <option value="aeon">イオンカード</option>
+            <option value="jcb">JCB</option>
+            <option value="bank">銀行系ローン</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>相談経緯</label>
+          <select id="channel">
+            <option value="">選択してください</option>
+            <option value="web">Web検索</option>
+            <option value="webad">Web広告</option>
+            <option value="cm">TV・CM</option>
+            <option value="referral">知人紹介</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-tags">
+      <div class="quick-tags-label">よくある懸念事項（クリックで追加）</div>
+      <div class="tag-group">
+        <button class="tag-btn" data-tag="費用が心配">費用が心配</button>
+        <button class="tag-btn" data-tag="家族にバレたくない">家族にバレたくない</button>
+        <button class="tag-btn" data-tag="手続きが面倒">手続きが面倒</button>
+        <button class="tag-btn" data-tag="ブラックリストが心配">ブラックリストが心配</button>
+        <button class="tag-btn" data-tag="仕事に影響しないか">仕事に影響しないか</button>
+        <button class="tag-btn" data-tag="借金がなくなるか不安">借金がなくなるか不安</button>
+        <button class="tag-btn" data-tag="取り立てが怖い">取り立てが怖い</button>
+        <button class="tag-btn" data-tag="自己破産したくない">自己破産したくない</button>
+        <button class="tag-btn" data-tag="時間がない">時間がない</button>
+        <button class="tag-btn" data-tag="他事務所と比較中">他事務所と比較中</button>
+        <button class="tag-btn" data-tag="本当に解決できるか">本当に解決できるか</button>
+        <button class="tag-btn" data-tag="周囲の目が気になる">周囲の目が気になる</button>
+      </div>
+    </div>
+
+    <div class="memo-area">
+      <label for="memoInput">フリーメモ（顧客の懸念・発言を自由に入力）</label>
+      <textarea id="memoInput" placeholder="例：家族にバレたくない、費用が心配、ブラックリストに載るのが不安..."></textarea>
+      <div class="char-count"><span id="charCount">0</span> 文字</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+      <button class="clear-btn" onclick="clearAll()">クリア</button>
+    </div>
+  </div>
+
+  <!-- Right: Output Panel -->
+  <div class="output-panel" id="outputPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">&#128172;</div>
+      <h3>トークスクリプトを生成</h3>
+      <p>左パネルで顧客の懸念事項を入力し、<br>「トークスクリプトを生成」ボタンを押してください。</p>
+      <p style="margin-top: 16px; font-size: .78rem; color: #aab;">
+        懸念タグのクリックやフリーメモへの入力で<br>最適なトークスクリプトがリアルタイムで表示されます。
+      </p>
+    </div>
+    <div id="scriptOutput" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script>
+const STRENGTHS = {
+  freeCounseling: { label: '相談無料', text: '当事務所では相談料は原則無料です。' },
+  noLossGuarantee: { label: '損をさせない保証', text: '債権者への支払いと弁護士費用を併せて、経済的に不利益とならないよう進めます。' },
+  nationwide: { label: '全国支店対応', text: '全国に支店がございますので、コンビニ感覚でお近くの支店にお越しいただけます。すぐに債権者への支払いを止められます。' },
+};
+
+const CONCERN_SCRIPTS = {
+  cost: {
+    keywords: ['費用', 'お金', 'コスト', '料金', '高い', '払え', '経済的', '金銭'],
+    title: '費用面の懸念への対応',
+    icon: '&#128176;',
+    concern: 'お客様は費用面に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご費用面のご不安、大変よく分かります。ご安心ください。当事務所では<strong>相談料は原則無料</strong>でございます。さらに、<strong>損をさせない保証</strong>がございますので、債権者への支払いと弁護士費用を併せて、<strong>経済的に不利益とならないよう</strong>お手続きを進めてまいります。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士費用についても分割でのお支払いが可能です。現在の借金の返済をストップした上で、<strong>無理のない範囲でお支払い</strong>いただけますので、費用面でのご負担を最小限に抑えることができます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '費用のことはまったくご心配いただかなくて大丈夫ですので、<strong>まずは無料相談でご状況をお聞かせいただけませんか？</strong>'
+      }
+    ],
+    tip: '費用面の不安は最も多い懸念です。「相談無料」「損をさせない保証」というキーワードを繰り返し伝えることが効果的です。',
+    strengths: ['freeCounseling', 'noLossGuarantee']
+  },
+
+  familySecret: {
+    keywords: ['家族', 'バレ', '知られ', '秘密', '内緒', '配偶者', '妻', '夫', '親'],
+    title: '家族に知られたくないという懸念への対応',
+    icon: '&#128274;',
+    concern: 'お客様はご家族に知られることを強く心配しています。（最重要懸念）',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご家族に知られたくないというお気持ち、しっかりと配慮させていただきます。当事務所では<strong>秘密厳守を徹底</strong>しております。多くのお客様がご家族に知られずにお手続きを完了されていますので、ご安心ください。'
+      },
+      {
+        label: 'point',
+        labelText: '具体的な配慮',
+        text: '具体的には、<strong>郵送物は事務所名が分からないよう配慮した発送</strong>が可能です。また、<strong>ご連絡の時間帯も調整</strong>いたしますので、ご家族がいらっしゃらない時間にお電話させていただくこともできます。さらに、<strong>お電話やメールのみでの対応も可能</strong>ですので、ご希望に応じて柔軟に対応させていただきます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'プライバシーへの配慮は万全ですので、<strong>安心して無料相談をご利用ください。</strong>ご連絡方法やお時間のご希望があれば、柔軟に対応させていただきます。'
+      }
+    ],
+    tip: '家族バレへの不安は債務整理において最も重要な懸念事項です。具体的な配慮方法（郵送物の差出人名、連絡時間の調整、メール対応）を丁寧に伝えましょう。',
+    strengths: ['freeCounseling']
+  },
+
+  procedure: {
+    keywords: ['面倒', '手続き', '複雑', '難し', '書類', '大変', '手間'],
+    title: '手続きの煩雑さへの懸念への対応',
+    icon: '&#128203;',
+    concern: 'お客様は手続きが面倒・複雑だと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お手続きが面倒なのではとご心配されるお気持ち、よく分かります。ですがご安心ください。<strong>全国に支店がございますので、コンビニ感覚でお近くの支店にお越しいただけます</strong>。お手続きに必要な作業は<strong>ほぼすべて事務所が代行</strong>いたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'ご依頼いただきましたら、<strong>すぐに債権者への支払いを止められます</strong>。その後の債権者との交渉もすべて弁護士が行いますので、お客様が直接債権者とやりとりする必要はございません。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '具体的にどのような流れになるか、<strong>無料相談で詳しくご説明</strong>させていただきます。お話を聞いていただくだけでも構いませんので、いかがでしょうか？'
+      }
+    ],
+    tip: '「お客様がやることはほとんどない」ことを具体的に伝えましょう。全国支店でのアクセスの良さは大きな安心材料になります。',
+    strengths: ['nationwide']
+  },
+
+  blacklist: {
+    keywords: ['ブラック', '信用', 'ローン', 'クレジット', '審査', 'カード'],
+    title: 'ブラックリスト（信用情報）への懸念への対応',
+    icon: '&#128179;',
+    concern: 'お客様はブラックリストへの登録を心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ブラックリストについてご心配されているのですね。正直に申し上げますと、債務整理を行った場合、<strong>信用情報機関に登録される（いわゆるブラックリスト）のは事実</strong>です。しかし、これは<strong>完済から5〜7年で削除</strong>されます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '一方で、<strong>借金を放置し続ける方がリスクは大きい</strong>です。延滞が続けばいずれ信用情報は傷つきますし、最悪の場合、給与の差し押さえなどに発展する可能性もございます。早めに対処することで、<strong>より早く信用情報を回復</strong>させることができます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、お客様にとって最善の方法を一緒に確認してみませんか？</strong>信用情報への影響も含めて、詳しくご説明いたします。'
+      }
+    ],
+    tip: 'ブラックリストへの登録は事実として正直に伝えた上で、「放置する方がリスクが大きい」「5〜7年で削除される」ことを伝え、行動を促しましょう。',
+    strengths: ['freeCounseling']
+  },
+
+  work: {
+    keywords: ['仕事', '会社', '職場', 'クビ', '解雇', '影響', '勤務先'],
+    title: '仕事への影響に関する懸念への対応',
+    icon: '&#128188;',
+    concern: 'お客様は仕事や職場への影響を心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お仕事への影響についてのご不安、よく分かります。ご安心ください。<strong>任意整理の場合、勤務先に知られることは原則ありません</strong>。任意整理は裁判所を通さない手続きですので、<strong>会社に通知が行くことはございません</strong>。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士には<strong>守秘義務</strong>がございますので、お客様の情報が外部に漏れることはありません。ご連絡も<strong>ご希望の方法・時間帯</strong>で対応いたしますので、職場にいる時間帯を避けてのご連絡も可能です。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'お仕事に影響なくお手続きできますので、<strong>まずは無料相談でご状況をお聞かせください。</strong>'
+      }
+    ],
+    tip: '任意整理は裁判所を通さないため会社に知られるリスクが低いことを明確に伝えましょう。',
+    strengths: ['freeCounseling']
+  },
+
+  resolution: {
+    keywords: ['解決', 'なくなる', '減る', '返済', '完済', '終わる'],
+    title: '本当に借金が解決できるかという不安への対応',
+    icon: '&#128161;',
+    concern: 'お客様は借金が本当に解決できるか不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '本当に解決できるのかというご不安、よく分かります。当事務所では<strong>損をさせない保証</strong>がございます。債権者との交渉で<strong>将来利息のカットや分割回数の見直し</strong>を行い、<strong>無理のない返済計画</strong>を立てさせていただきます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '任意整理では、<strong>将来発生する利息をカット</strong>できるケースがほとんどです。つまり、返済した分がそのまま元本の返済に充てられるため、<strong>確実にゴールに近づいていく</strong>ことを実感していただけます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、具体的にどのくらい返済が楽になるか確認してみませんか？</strong>損をさせない保証がございますので、安心してご相談ください。'
+      }
+    ],
+    tip: '「損をさせない保証」があることを強調し、具体的な仕組み（将来利息カット、分割回数見直し）を伝えましょう。',
+    strengths: ['noLossGuarantee', 'freeCounseling']
+  },
+
+  collection: {
+    keywords: ['取り立て', '督促', '電話', '催促', '請求', '滞納'],
+    title: '取り立て・督促への不安への対応',
+    icon: '&#128222;',
+    concern: 'お客様は債権者からの取り立てや督促に恐怖を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '取り立てや督促でお辛い思いをされているのですね。<strong>弁護士にご依頼いただければ、受任通知を送付し、債権者からの直接連絡・取り立てはすぐに止まります</strong>。法律上、弁護士が介入した後は債権者がお客様に直接連絡することはできません。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>全国に支店がございますので、すぐに対応可能</strong>です。お近くの支店にお越しいただければ、<strong>最短でその日のうちに受任通知を発送</strong>し、取り立てを止めることができます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '一日も早く取り立てを止めるために、<strong>まずは無料相談にお越しください。</strong>全国の支店でお待ちしております。'
+      }
+    ],
+    tip: '取り立てに悩んでいる方は精神的に追い詰められているケースが多いです。「すぐに止められる」ことを強調し、安心感を与えましょう。',
+    strengths: ['nationwide']
+  },
+
+  bankruptcy: {
+    keywords: ['自己破産', '破産', '競売', '差し押さえ'],
+    title: '自己破産への抵抗感への対応',
+    icon: '&#9888;',
+    concern: 'お客様は自己破産を避けたいと考えています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '自己破産はしたくないというお気持ち、よく分かります。<strong>債務整理＝自己破産ではございません</strong>。債務整理にはいくつかの方法があり、<strong>任意整理であれば裁判所を通さず、財産を手放す必要もありません</strong>。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '任意整理は、弁護士が債権者と直接交渉し、<strong>将来利息のカットや返済期間の見直し</strong>を行う手続きです。ご自宅や車などの<strong>財産を残したまま</strong>、無理のない返済計画を立てることができます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'お客様のご状況に合った<strong>最適な方法を一緒に検討</strong>しましょう。<strong>まずは無料相談で、自己破産以外の選択肢を確認してみませんか？</strong>'
+      }
+    ],
+    tip: '「債務整理＝自己破産ではない」ことを明確に伝え、任意整理という選択肢があることを丁寧に説明しましょう。',
+    strengths: ['freeCounseling']
+  },
+
+  time: {
+    keywords: ['忙し', '時間', 'ない', '仕事', '都合'],
+    title: '時間がない・忙しいお客様への対応',
+    icon: '&#128340;',
+    concern: 'お客様はお忙しく、相談に時間を割けないと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お忙しい中、お時間をいただきありがとうございます。当事務所では、<strong>全国に支店がございますので、コンビニ感覚でお近くの支店にお越しいただけます</strong>。お仕事帰りやお買い物のついでにお立ち寄りいただくことも可能です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '無料相談は<strong>30分程度</strong>あれば十分です。また、<strong>お電話やWEBでのご相談</strong>も対応しておりますので、ご来所が難しい場合もお気軽にご利用ください。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>ご都合の良いお日にちとお時間帯をお教えいただけませんか？</strong>お近くの支店で、短時間でご相談いただけます。'
+      }
+    ],
+    tip: '具体的な所要時間（30分程度）と全国支店のアクセスの良さを伝えることで「それくらいなら…」と思っていただくことがポイントです。',
+    strengths: ['nationwide']
+  },
+
+  comparison: {
+    keywords: ['他', '事務所', '比較', '違い', 'どこ', '選', '迷'],
+    title: '他事務所との比較検討中のお客様への対応',
+    icon: '&#128200;',
+    concern: 'お客様は他の事務所と比較検討されています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '複数の事務所を比較されるのは、とても大切なことです。当事務所の特長を簡単にお伝えさせていただきますね。'
+      },
+      {
+        label: 'point',
+        labelText: '3つの強み',
+        text: '当事務所は、<strong>①相談料が原則無料</strong>、<strong>②損をさせない保証（経済的に不利益とならないようお手続きを進めます）</strong>、<strong>③全国に支店があり、コンビニ感覚でお近くの支店にすぐお越しいただけます</strong>。つまり、<strong>お客様のご負担を最小限に、最適な債務整理をサポート</strong>いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '他の事務所様と比較していただいた上でも構いませんので、<strong>まずは無料相談で当事務所の対応を体感していただけませんか？</strong>お話しいただいて、合わないと感じられた場合はもちろん費用はかかりません。'
+      }
+    ],
+    tip: '他事務所を否定せず、自社の強みを淡々と伝えましょう。「比較して当然」と肯定することで信頼感が増します。',
+    strengths: ['freeCounseling', 'noLossGuarantee', 'nationwide']
+  },
+
+  doubt: {
+    keywords: ['本当', '信用', '怪し', '大丈夫'],
+    title: '「本当に解決できるのか」という疑念への対応',
+    icon: '&#10067;',
+    concern: 'お客様は債務整理で本当に解決できるのか疑念を持っています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご不安に思われるのは当然です。債務整理は<strong>法律で認められた正当な手続き</strong>であり、多くの方がこの手続きを通じて借金問題を解決されています。当事務所でも<strong>豊富な解決実績</strong>がございます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所では<strong>損をさせない保証</strong>がございます。債権者への支払いと弁護士費用を併せて、<strong>経済的に不利益とならないよう</strong>進めますので、ご安心ください。まずは無料相談で、お客様のご状況に合った最善の方法をご提案いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、具体的な解決の見通しをお伝えいたします。</strong>ご納得いただけなければ、それ以上のお手続きをお勧めすることは一切ございませんのでご安心ください。'
+      }
+    ],
+    tip: '「法律で認められた手続き」であることと「損をさせない保証」を伝え、信頼感を醸成しましょう。',
+    strengths: ['noLossGuarantee', 'freeCounseling']
+  },
+
+  stigma: {
+    keywords: ['周り', '恥ずかし', '世間体', '目', '噂'],
+    title: '周囲の目・世間体への懸念への対応',
+    icon: '&#128065;',
+    concern: 'お客様は周囲の目や世間体を気にされています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '周囲の目が気になるというお気持ち、よく分かります。しかし、<strong>債務整理は法律で認められた正当な権利</strong>です。借金問題は誰にでも起こり得ることであり、それを解決するための手段として法律が用意している制度です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所では<strong>秘密厳守を徹底</strong>しておりますので、<strong>周囲に知られることはございません</strong>。郵送物の配慮やご連絡方法の調整など、プライバシーへの配慮も万全です。実際に、多くのお客様が周囲に知られることなくお手続きを完了されています。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '一人で悩み続けるよりも、<strong>専門家に相談して一歩踏み出すことが大切</strong>です。<strong>まずは無料相談で、安心してお話をお聞かせください。</strong>'
+      }
+    ],
+    tip: '「法律で認められた正当な権利」であることを伝え、借金問題を解決することへの心理的ハードルを下げましょう。',
+    strengths: ['freeCounseling']
+  }
+};
+
+const OPENING_SCRIPT = {
+  title: 'オープニングトーク',
+  icon: '&#128075;',
+  scripts: [
+    {
+      label: 'response',
+      labelText: '第一声',
+      text: 'お電話ありがとうございます。債務整理のご相談ですね。当事務所では債務整理の無料相談を行っておりますので、まずはお話をお聞かせいただければと思います。'
+    }
+  ]
+};
+
+const CLOSING_SCRIPT = {
+  title: 'クロージング（予約獲得）',
+  icon: '&#127919;',
+  scripts: [
+    {
+      label: 'close',
+      labelText: '予約誘導トーク',
+      text: 'ここまでのお話を踏まえまして、<strong>無料相談で詳しくご状況をお伺いし、最適な債務整理の方法をご提案させていただければ</strong>と思います。<strong>費用面でも損をさせない保証がございます</strong>ので、お気軽にご利用ください。'
+    },
+    {
+      label: 'close',
+      labelText: '日程調整',
+      text: 'それでは、無料相談の日程を調整させていただきます。<strong>全国に支店がございます</strong>ので、お近くの支店にお越しいただくか、お電話での相談も可能です。<strong>ご都合の良いお日にちとお時間帯</strong>をお教えいただけますか？'
+    }
+  ]
+};
+
+// Tag button handling
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const textarea = document.getElementById('memoInput');
+    const tag = this.dataset.tag;
+
+    if (this.classList.contains('active')) {
+      textarea.value = textarea.value ? textarea.value + '、' + tag : tag;
+    } else {
+      textarea.value = textarea.value
+        .replace(new RegExp('[、,]?' + tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[、,]?'), '')
+        .replace(/^[、,]+|[、,]+$/g, '');
+    }
+
+    updateCharCount();
+  });
+});
+
+// Character count
+document.getElementById('memoInput').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('memoInput').value.length;
+}
+
+// Script generation
+function generateScript() {
+  const memo = document.getElementById('memoInput').value;
+  const creditor = document.getElementById('creditor').value;
+
+  if (!memo.trim()) {
+    alert('懸念事項を入力してください。タグのクリックまたはフリーメモへの入力をお願いします。');
+    return;
+  }
+
+  const matchedConcerns = [];
+  const memoLower = memo.toLowerCase();
+
+  for (const [key, concern] of Object.entries(CONCERN_SCRIPTS)) {
+    for (const keyword of concern.keywords) {
+      if (memoLower.includes(keyword)) {
+        matchedConcerns.push(concern);
+        break;
+      }
+    }
+  }
+
+  if (matchedConcerns.length === 0) {
+    matchedConcerns.push(CONCERN_SCRIPTS.cost);
+    matchedConcerns.push(CONCERN_SCRIPTS.familySecret);
+    matchedConcerns.push(CONCERN_SCRIPTS.resolution);
+  }
+
+  renderScripts(matchedConcerns, creditor);
+}
+
+function renderScripts(concerns, creditor) {
+  const output = document.getElementById('scriptOutput');
+  const emptyState = document.getElementById('emptyState');
+
+  emptyState.style.display = 'none';
+  output.style.display = 'block';
+
+  let html = '';
+
+  // Opening
+  html += renderSection(OPENING_SCRIPT, []);
+
+  // Matched concern scripts
+  concerns.forEach(concern => {
+    html += renderSection(concern, concern.strengths || []);
+  });
+
+  // Creditor-specific supplement
+  if (creditor) {
+    const creditorScript = getConditionSupplement(creditor);
+    if (creditorScript) {
+      html += renderSection(creditorScript, []);
+    }
+  }
+
+  // Closing
+  html += renderSection(CLOSING_SCRIPT, ['freeCounseling', 'noLossGuarantee', 'nationwide']);
+
+  output.innerHTML = html;
+}
+
+function renderSection(section, strengthKeys) {
+  let html = `
+    <div class="script-section">
+      <div class="script-section-title">
+        <span class="icon">${section.icon}</span>
+        ${section.title}
+        <button class="copy-btn" onclick="copySection(this)">コピー</button>
+      </div>
+      <div class="script-card">`;
+
+  if (section.concern) {
+    html += `<div><span class="script-label label-concern">顧客の懸念</span></div>
+             <div class="script-text">${section.concern}</div>
+             <hr class="script-divider">`;
+  }
+
+  section.scripts.forEach((script, i) => {
+    const labelClass = 'label-' + script.label;
+    html += `<div><span class="script-label ${labelClass}">${script.labelText}</span></div>
+             <div class="script-text">${script.text}</div>`;
+    if (i < section.scripts.length - 1) {
+      html += '<hr class="script-divider">';
+    }
+  });
+
+  if (strengthKeys && strengthKeys.length > 0) {
+    html += '<hr class="script-divider"><div>';
+    strengthKeys.forEach(key => {
+      const s = STRENGTHS[key];
+      if (s) {
+        html += `<span class="strength-badge">${s.label}</span>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  if (section.tip) {
+    html += `<div class="tip-box">
+               <div class="tip-box-title">対応のポイント</div>
+               ${section.tip}
+             </div>`;
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function getConditionSupplement(creditor) {
+  const supplements = {
+    acom: {
+      title: 'アコムに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'アコムは、<strong>将来利息カットに応じてもらえるケースが多く、最大60回の分割払いが可能</strong>な場合がございます。比較的柔軟に和解に応じてくれる債権者です。'
+      }]
+    },
+    promise: {
+      title: 'プロミスに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'プロミス（SMBCコンシューマーファイナンス）は、<strong>将来利息のカットに応じてもらえる傾向</strong>にあり、<strong>60回程度の分割も可能</strong>な場合があります。早期に交渉を開始するほど有利な条件を引き出しやすい債権者です。'
+      }]
+    },
+    aiful: {
+      title: 'アイフルに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'アイフルは、和解条件は時期によって変動しますが、<strong>将来利息カットの上、分割回数についても柔軟に対応</strong>してもらえるケースがございます。'
+      }]
+    },
+    lake: {
+      title: 'レイクに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'レイク（新生フィナンシャル）は、<strong>将来利息カットには応じてもらえるケースが多い</strong>ですが、分割回数は<strong>36回〜60回程度</strong>となる場合がございます。<strong>早めのご相談をおすすめ</strong>いたします。'
+      }]
+    },
+    mobit: {
+      title: 'SMBCモビットに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'SMBCモビットは、<strong>将来利息カットには比較的応じてもらえます</strong>が、分割回数は<strong>60回程度が上限</strong>となるケースが多いです。'
+      }]
+    },
+    mitsui: {
+      title: '三井住友カードに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: '三井住友カードは、<strong>将来利息のカットに応じてもらえるケースが多い</strong>債権者です。分割回数についても、<strong>お客様の返済能力を考慮した交渉</strong>を行い、無理のない和解条件を引き出してまいります。'
+      }]
+    },
+    rakuten: {
+      title: '楽天カードに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: '楽天カードは、<strong>利息カットの条件が厳しく、分割回数も36回程度まで</strong>となる場合がございます。<strong>債務総額と返済能力を考慮した交渉</strong>が重要です。'
+      }]
+    },
+    epos: {
+      title: 'エポスカードに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'エポスカードは、<strong>将来利息カットに応じてもらえ、分割回数も比較的柔軟</strong>な債権者です。'
+      }]
+    },
+    orico: {
+      title: 'オリコに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'オリコは、<strong>将来利息のカットに応じてもらえるケースが多く、60回程度の分割も可能</strong>です。'
+      }]
+    },
+    cedyna: {
+      title: 'セディナに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'セディナは、<strong>将来利息のカットに応じてもらえるケースが多い</strong>債権者です。当事務所の<strong>豊富な交渉実績</strong>を活かし、お客様にとって最適な和解条件を引き出してまいります。'
+      }]
+    },
+    jaccs: {
+      title: 'ジャックスに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'ジャックスは、<strong>交渉次第で将来利息のカットや分割回数の調整が可能</strong>な債権者です。当事務所では<strong>豊富な交渉実績</strong>がございますので、お任せください。'
+      }]
+    },
+    saison: {
+      title: 'クレディセゾンに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'クレディセゾンは、<strong>将来利息のカットや分割払いについて交渉可能</strong>な債権者です。当事務所の<strong>交渉ノウハウ</strong>を活かし、お客様に有利な条件での和解を目指します。'
+      }]
+    },
+    aeon: {
+      title: 'イオンカードに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'イオンカードは、<strong>将来利息のカットに応じてもらえるケースが多い</strong>債権者です。当事務所の<strong>豊富な実績</strong>を活かし、お客様のご状況に合った和解条件を交渉いたします。'
+      }]
+    },
+    jcb: {
+      title: 'JCBに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: 'JCBは、<strong>交渉によって将来利息のカットや返済計画の見直し</strong>が可能な債権者です。当事務所では<strong>豊富な交渉実績</strong>がございますので、最適な条件での和解を目指します。'
+      }]
+    },
+    bank: {
+      title: '銀行系ローンに関する補足トーク',
+      icon: '&#127970;',
+      scripts: [{
+        label: 'point',
+        labelText: '債権者別補足',
+        text: '銀行系ローンは<strong>条件が個別に異なります</strong>が、<strong>任意整理の対象にできる場合</strong>がございます。詳しくは<strong>無料相談でご状況をお聞かせください</strong>。'
+      }]
+    }
+  };
+
+  if (supplements[creditor]) {
+    return supplements[creditor];
+  }
+
+  // Default for 'other' or unlisted
+  return {
+    title: '債権者に関する補足トーク',
+    icon: '&#127970;',
+    scripts: [{
+      label: 'point',
+      labelText: '債権者別補足',
+      text: '債権者ごとに和解基準が異なりますが、当事務所では<strong>豊富な交渉実績</strong>がございます。まずは<strong>無料相談で詳しくご状況をお聞かせください</strong>。'
+    }]
+  };
+}
+
+function clearAll() {
+  document.getElementById('memoInput').value = '';
+  document.getElementById('ageGroup').value = '';
+  document.getElementById('debtAmount').value = '';
+  document.getElementById('creditor').value = '';
+  document.getElementById('channel').value = '';
+
+  document.querySelectorAll('.tag-btn.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  updateCharCount();
+
+  document.getElementById('scriptOutput').style.display = 'none';
+  document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('emptyState').style.display = '';
+}
+
+function copySection(btn) {
+  const card = btn.closest('.script-section');
+  const textElements = card.querySelectorAll('.script-text');
+  let text = '';
+  textElements.forEach(el => {
+    text += el.textContent.trim() + '\n\n';
+  });
+
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = 'コピー完了';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
