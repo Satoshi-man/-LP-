@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交通事故 トークスクリプト支援ツール</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2b4a;
+      --navy-dark: #0f1e35;
+      --gold: #c8a951;
+      --gold-light: #e8d080;
+      --gray-bg: #f5f6f8;
+      --text: #2d2d2d;
+      --text-light: #666;
+      --white: #fff;
+      --green: #27ae60;
+      --green-light: #eafaf1;
+      --blue: #2980b9;
+      --blue-light: #ebf5fb;
+      --orange: #e67e22;
+      --orange-light: #fef5e7;
+      --red: #c0392b;
+      --border: #dde1e8;
+    }
+
+    body {
+      font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+      background: var(--gray-bg);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-header .badge {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: .05em;
+    }
+
+    .app-header .internal {
+      font-size: .7rem;
+      color: var(--gold-light);
+      font-weight: 400;
+    }
+
+    /* Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Left Panel */
+    .input-panel {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* Quick tags */
+    .quick-tags {
+      margin-bottom: 20px;
+    }
+
+    .quick-tags-label {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-btn {
+      background: var(--gray-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    .tag-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .tag-btn.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    /* Memo area */
+    .memo-area {
+      margin-bottom: 20px;
+    }
+
+    .memo-area label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .memo-area textarea {
+      width: 100%;
+      height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: .88rem;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color .2s;
+    }
+
+    .memo-area textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,169,81,.15);
+    }
+
+    .memo-area textarea::placeholder {
+      color: #aab;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: .7rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Customer info */
+    .customer-info {
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .info-field {
+      flex: 1;
+    }
+
+    .info-field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .info-field select,
+    .info-field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: .82rem;
+      font-family: inherit;
+      background: var(--white);
+    }
+
+    .info-field select:focus,
+    .info-field input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    /* Generate button */
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s;
+      font-family: inherit;
+      letter-spacing: .03em;
+    }
+
+    .generate-btn:hover {
+      opacity: .85;
+    }
+
+    .generate-btn:active {
+      transform: scale(.98);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-row .generate-btn {
+      flex: 1;
+    }
+
+    .clear-btn {
+      padding: 14px 20px;
+      background: var(--white);
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+    }
+
+    .clear-btn:active {
+      transform: scale(.98);
+    }
+
+    /* Right Panel */
+    .output-panel {
+      padding: 24px 32px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+    }
+
+    /* Script cards */
+    .script-section {
+      margin-bottom: 28px;
+    }
+
+    .script-section-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--navy);
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .script-section-title .icon {
+      font-size: 1rem;
+    }
+
+    .script-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    }
+
+    .script-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .label-concern {
+      background: #fdecea;
+      color: var(--red);
+    }
+
+    .label-response {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .label-point {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .label-close {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .script-text {
+      font-size: .9rem;
+      line-height: 2;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .script-text strong {
+      color: var(--navy);
+      background: linear-gradient(transparent 60%, rgba(200,169,81,.25) 60%);
+    }
+
+    .script-text .emphasis {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .script-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 16px 0;
+    }
+
+    /* Strength badge */
+    .strength-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* Tip box */
+    .tip-box {
+      background: #fffbf0;
+      border: 1px solid var(--gold);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .tip-box-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+      font-size: .78rem;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: .72rem;
+      cursor: pointer;
+      color: var(--text-light);
+      font-family: inherit;
+      transition: all .15s;
+      float: right;
+    }
+
+    .copy-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .copy-btn.copied {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--text-light);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: .4;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: .85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        position: relative;
+        top: 0;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .output-panel {
+        max-height: none;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .script-section {
+      animation: fadeInUp .3s ease-out;
+    }
+
+    .script-section:nth-child(2) { animation-delay: .05s; }
+    .script-section:nth-child(3) { animation-delay: .1s; }
+    .script-section:nth-child(4) { animation-delay: .15s; }
+    .script-section:nth-child(5) { animation-delay: .2s; }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>
+    交通事故 トークスクリプト支援ツール
+    <span class="badge">社内用</span>
+  </h1>
+  <span class="internal">対応者向け支援システム</span>
+</div>
+
+<div class="app-container">
+
+  <!-- Left: Input Panel -->
+  <div class="input-panel">
+    <div class="panel-title">顧客情報・懸念事項入力</div>
+
+    <div class="customer-info">
+      <div class="info-row">
+        <div class="info-field">
+          <label>顧客の年代</label>
+          <select id="ageGroup">
+            <option value="">選択してください</option>
+            <option value="10s">10代</option>
+            <option value="20s">20代</option>
+            <option value="30s">30代</option>
+            <option value="40s">40代</option>
+            <option value="50s">50代</option>
+            <option value="60s">60代以上</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>当事者区分</label>
+          <select id="partyType">
+            <option value="">選択してください</option>
+            <option value="victim">被害者</option>
+            <option value="perpetrator">加害者</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-field">
+          <label>損害の種類</label>
+          <select id="damageType">
+            <option value="">選択してください</option>
+            <option value="personal">人損（怪我あり）</option>
+            <option value="property">物損（怪我なし）</option>
+            <option value="both">人損＋物損</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>弁護士費用特約</label>
+          <select id="lawyerInsurance">
+            <option value="">選択してください</option>
+            <option value="yes">あり</option>
+            <option value="no">なし</option>
+            <option value="unknown">不明</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-field">
+          <label>相談経緯</label>
+          <select id="channel">
+            <option value="">選択してください</option>
+            <option value="web">Web検索</option>
+            <option value="webad">Web広告</option>
+            <option value="cm">TV・CM</option>
+            <option value="referral">知人紹介</option>
+            <option value="insurance">保険会社から聞いた</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-tags">
+      <div class="quick-tags-label">よくある懸念事項（クリックで追加）</div>
+      <div class="tag-group">
+        <button class="tag-btn" data-tag="費用が心配">費用が心配</button>
+        <button class="tag-btn" data-tag="保険会社の対応に不満">保険会社の対応に不満</button>
+        <button class="tag-btn" data-tag="手続きが面倒">手続きが面倒</button>
+        <button class="tag-btn" data-tag="相手と直接やり取りしたくない">相手と直接やり取りしたくない</button>
+        <button class="tag-btn" data-tag="示談金が妥当か分からない">示談金が妥当か分からない</button>
+        <button class="tag-btn" data-tag="後遺障害の認定が不安">後遺障害の認定が不安</button>
+        <button class="tag-btn" data-tag="治療を続けたいのに打ち切られそう">治療を続けたいのに打ち切られそう</button>
+        <button class="tag-btn" data-tag="過失割合に納得できない">過失割合に納得できない</button>
+        <button class="tag-btn" data-tag="仕事を休んでいて収入が心配">仕事を休んでいて収入が心配</button>
+        <button class="tag-btn" data-tag="他事務所と比較中">他事務所と比較中</button>
+        <button class="tag-btn" data-tag="時間がない">時間がない</button>
+        <button class="tag-btn" data-tag="本当に増額できるか不安">本当に増額できるか不安</button>
+      </div>
+    </div>
+
+    <div class="memo-area">
+      <label for="memoInput">フリーメモ（顧客の懸念・発言を自由に入力）</label>
+      <textarea id="memoInput" placeholder="例：保険会社の提示額が低すぎる、治療を打ち切られそう、過失割合に納得できない..."></textarea>
+      <div class="char-count"><span id="charCount">0</span> 文字</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+      <button class="clear-btn" onclick="clearAll()">クリア</button>
+    </div>
+  </div>
+
+  <!-- Right: Output Panel -->
+  <div class="output-panel" id="outputPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">&#128172;</div>
+      <h3>トークスクリプトを生成</h3>
+      <p>左パネルで顧客の懸念事項を入力し、<br>「トークスクリプトを生成」ボタンを押してください。</p>
+      <p style="margin-top: 16px; font-size: .78rem; color: #aab;">
+        懸念タグのクリックやフリーメモへの入力で<br>最適なトークスクリプトがリアルタイムで表示されます。
+      </p>
+    </div>
+    <div id="scriptOutput" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script>
+const STRENGTHS = {
+  freeCounseling: { label: '相談無料', text: '当事務所では相談料は無料です。' },
+  noVisit: { label: '来所不要', text: '原則としてご来所は不要です。すべてお電話・WEB・郵送で完結いたします。' },
+  expertTeam: { label: '交通事故専門チーム', text: '交通事故の専門チームが在籍しており、お客様の希望に可能な限り寄り添った交渉が可能です。自分で進めるよりも経済的メリットが大きくなります。' },
+  lifeRestart: { label: '事故後の再スタート支援', text: 'お金を回収して終わりではなく、事故治療後の生活の再スタートが切れるかどうかまで見守り、最後まで一緒に事件を進めてまいります。' },
+};
+
+const CONCERN_SCRIPTS = {
+  cost: {
+    keywords: ['費用', 'お金', 'コスト', '料金', '高い', '払え', '経済的', '弁護士費用'],
+    title: '費用面の懸念への対応',
+    icon: '&#128176;',
+    concern: 'お客様は費用面に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご費用面のご不安、大変よく分かります。ご安心ください。当事務所では<strong>相談料は完全無料</strong>でございます。<strong>弁護士費用特約</strong>をお持ちであれば、<strong>実質自己負担ゼロ</strong>で弁護士に依頼できます。特約がない場合でも、弁護士に依頼することで<strong>示談金が増額されるケースが多く、経済的メリットが大きい</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士基準（裁判基準）での交渉により、保険会社の提示額から大幅に増額できる可能性がございます。<strong>増額分が弁護士費用を上回ることがほとんど</strong>ですので、まずは無料相談でお見積りをご確認ください。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '費用のことはまったくご心配いただかなくて大丈夫ですので、<strong>まずは無料相談で増額の見通しだけでも確認してみませんか？</strong>'
+      }
+    ],
+    tip: '弁護士費用特約の有無を早めに確認しましょう。特約がある場合は「実質ゼロ」、ない場合は「増額メリット」を強調することが効果的です。',
+    strengths: ['freeCounseling']
+  },
+
+  insuranceCompany: {
+    keywords: ['保険会社', '保険', '対応', '不満', '納得', '低い', '提示', '担当者'],
+    title: '保険会社の対応への不満への対応',
+    icon: '&#128228;',
+    concern: 'お客様は保険会社の対応に不満を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '保険会社の対応にご不満を感じていらっしゃるのですね。実は、保険会社の提示額は<strong>弁護士基準（裁判基準）よりも大幅に低い</strong>ことがほとんどです。弁護士が交渉することで<strong>2〜3倍に増額できるケース</strong>も珍しくありません。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士に依頼すれば、<strong>保険会社とのやり取りもすべて代行</strong>いたします。お客様が直接保険会社と交渉する必要はございません。専門チームが適正な賠償額を獲得いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、現在の提示額が妥当かどうか確認してみませんか？</strong>増額の見通しを具体的にお伝えいたします。'
+      }
+    ],
+    tip: '「保険会社の提示額は低いのが当たり前」という事実を伝え、弁護士介入による増額実績を具体的に示すことが効果的です。',
+    strengths: ['expertTeam', 'noVisit']
+  },
+
+  procedure: {
+    keywords: ['面倒', '手続き', '複雑', '難し', '書類', '大変', '手間', 'やり取り'],
+    title: '手続きの煩雑さへの懸念への対応',
+    icon: '&#128203;',
+    concern: 'お客様は手続きが面倒・複雑だと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お手続きが面倒なのではとご心配されるお気持ち、よく分かります。交通事故は<strong>警察・保険会社・相手方など連絡先が多く</strong>面倒ですよね。弁護士に依頼すれば、<strong>これらのやり取りをすべて代行</strong>いたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'さらに、<strong>原則としてご来所は不要</strong>です。すべてお電話・WEB・郵送で完結いたしますので、お忙しい方でも、遠方の方でも、ご負担なくお手続きいただけます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '具体的にどのような流れになるか、<strong>無料相談で詳しくご説明</strong>させていただきます。お話を聞いていただくだけでも構いませんので、いかがでしょうか？'
+      }
+    ],
+    tip: '「お客様がやることはほとんどない」ことを具体的に伝えましょう。来所不要・電話WEB完結は大きな安心材料になります。',
+    strengths: ['noVisit', 'expertTeam']
+  },
+
+  noContact: {
+    keywords: ['相手', '直接', 'やり取り', '連絡', '接触', '話したくない'],
+    title: '相手との直接やり取り回避への対応',
+    icon: '&#128694;',
+    concern: 'お客様は相手方と直接やり取りすることを避けたいと考えています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '相手方と直接やり取りしたくないというお気持ち、よく分かります。ご安心ください。<strong>弁護士が代理人としてすべての交渉・連絡を代行</strong>いたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>保険会社や相手方とのやり取りもすべてお任せ</strong>いただけます。お客様が直接対応する必要は一切ございません。精神的なご負担を軽減し、治療に専念していただけます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、今後の流れをご説明させていただきます。</strong>すべて弁護士にお任せいただけますので、ご安心ください。'
+      }
+    ],
+    tip: '精神的な負担の軽減を強調しましょう。「治療に専念できる」というメリットも合わせて伝えると効果的です。',
+    strengths: ['noVisit', 'expertTeam']
+  },
+
+  settlementAmount: {
+    keywords: ['示談', '妥当', '相場', '金額', '低い', '適正', 'いくら'],
+    title: '示談金の妥当性への不安への対応',
+    icon: '&#128178;',
+    concern: 'お客様は示談金が妥当かどうか分からず不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '示談金が妥当かどうか、気になりますよね。保険会社の提示額は<strong>「自賠責基準」や「任意保険基準」</strong>で計算されており、<strong>「弁護士基準（裁判基準）」より大幅に低い</strong>のが一般的です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士が交渉することで<strong>適正な金額を獲得</strong>できます。<strong>無料相談で見通しをお伝え</strong>いたしますので、現在の提示額と比較していただけます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、適正な示談金額の見通しを確認してみませんか？</strong>費用は一切かかりません。'
+      }
+    ],
+    tip: '3つの基準（自賠責・任意保険・弁護士基準）の差を説明し、弁護士基準での交渉メリットを具体的に伝えましょう。',
+    strengths: ['expertTeam', 'freeCounseling']
+  },
+
+  disability: {
+    keywords: ['後遺障害', '後遺症', '等級', '認定', '痛み', 'しびれ', '症状固定'],
+    title: '後遺障害認定への不安への対応',
+    icon: '&#127973;',
+    concern: 'お客様は後遺障害の等級認定に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '後遺障害の等級認定について不安に思われるのは当然です。後遺障害の等級認定は、<strong>今後の賠償額を大きく左右する重要なポイント</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所の<strong>専門チームが適正な等級認定をサポート</strong>いたします。認定結果に不服がある場合は<strong>異議申立てもサポート</strong>いたします。適正な等級を獲得することで、賠償額が大きく変わります。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、現在の症状や治療状況をお聞かせください。</strong>適正な等級認定に向けた最善の方法をご提案いたします。'
+      }
+    ],
+    tip: '後遺障害の等級は賠償額に直結する重要ポイント。専門チームによるサポートの具体性を伝えましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  treatmentCutoff: {
+    keywords: ['打ち切り', '治療', '終了', '通院', 'やめ', '病院', 'まだ痛い'],
+    title: '治療打ち切りへの不安への対応',
+    icon: '&#127975;',
+    concern: 'お客様は保険会社から治療費の打ち切りを打診されて不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '保険会社から治療費の打ち切りを打診されたのですね。ご不安ですよね。しかし、<strong>医師が治療の必要性を認めている限り、治療を継続できるケース</strong>がございます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>弁護士が保険会社と交渉し、治療継続をサポート</strong>いたします。治療を早期に打ち切ってしまうと、後遺障害の認定にも影響が出る可能性がありますので、<strong>適切な治療期間の確保</strong>が重要です。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、現在の治療状況をお聞かせください。</strong>治療継続に向けた最善の対応をご提案いたします。'
+      }
+    ],
+    tip: '治療の打ち切りは後遺障害認定にも影響します。早期相談の重要性を伝え、専門チームのサポートを強調しましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  faultRatio: {
+    keywords: ['過失', '割合', '納得', '悪くない', '相手が悪い', '比率'],
+    title: '過失割合への不満への対応',
+    icon: '&#9878;',
+    concern: 'お客様は保険会社が提示する過失割合に納得できていません。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '過失割合に納得できないとのこと、お気持ちよく分かります。過失割合は<strong>最終的な賠償額に直結する重要なポイント</strong>です。保険会社の提示する過失割合が<strong>必ずしも正しいとは限りません</strong>。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所の<strong>専門チームが事故状況を精査</strong>し、<strong>適正な過失割合を主張</strong>いたします。ドライブレコーダーや事故現場の状況等を踏まえて、有利な証拠を積み上げてまいります。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、事故の状況を詳しくお聞かせください。</strong>過失割合の見直しの可能性を具体的にお伝えいたします。'
+      }
+    ],
+    tip: '過失割合は賠償額に直結するため、具体的な事故状況を丁寧にヒアリングすることが重要です。',
+    strengths: ['expertTeam']
+  },
+
+  income: {
+    keywords: ['収入', '給与', '仕事', '休業', '休職', '生活', '補償'],
+    title: '収入面の不安への対応',
+    icon: '&#128188;',
+    concern: 'お客様は事故による収入減少に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お仕事を休まれて収入面がご不安ですよね。事故による収入減少分は、<strong>休業損害・逸失利益として相手方に請求可能</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>主婦（夫）の方も家事労働として休業損害を請求できます</strong>。当事務所の専門チームが<strong>適正な補償を獲得</strong>いたします。保険会社の提示額が適正かどうかもしっかり確認いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、請求可能な補償の見通しをお伝えいたします。</strong>生活の立て直しに向けて、全力でサポートいたします。'
+      }
+    ],
+    tip: '主婦（夫）の休業損害請求は意外と知られていません。該当する場合は積極的にお伝えしましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  comparison: {
+    keywords: ['他', '事務所', '比較', '違い', 'どこ', '選', '迷'],
+    title: '他事務所との比較検討中のお客様への対応',
+    icon: '&#128200;',
+    concern: 'お客様は他の事務所と比較検討されています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '複数の事務所を比較されるのは、とても大切なことです。当事務所の特長を簡単にお伝えさせていただきますね。'
+      },
+      {
+        label: 'point',
+        labelText: '4つの強み',
+        text: '当事務所は、<strong>①相談料が無料</strong>、<strong>②原則来所不要で電話・WEB・郵送で完結</strong>、<strong>③交通事故専門チームによる交渉</strong>、<strong>④事故後の生活再スタートまでサポート</strong>という4つの強みがございます。お客様の希望に可能な限り寄り添った対応をいたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '他の事務所様と比較していただいた上でも構いませんので、<strong>まずは無料相談で当事務所の対応を体感していただけませんか？</strong>お話しいただいて、合わないと感じられた場合はもちろん費用はかかりません。'
+      }
+    ],
+    tip: '他事務所を否定せず、自社の強みを淡々と伝えましょう。「比較して当然」と肯定することで信頼感が増します。',
+    strengths: ['freeCounseling', 'noVisit', 'expertTeam', 'lifeRestart']
+  },
+
+  time: {
+    keywords: ['忙し', '時間', 'ない', '都合', 'スケジュール'],
+    title: '時間がない・忙しいお客様への対応',
+    icon: '&#128340;',
+    concern: 'お客様はお忙しく、手続きに時間を割けないと感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お忙しい中、お時間をいただきありがとうございます。当事務所では、<strong>お忙しい方にも負担なくお手続きいただける体制</strong>を整えております。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>来所は原則不要</strong>で、すべてお電話・WEB・郵送で完結します。<strong>保険会社や相手方とのやり取りもすべて代行</strong>しますので、お客様の時間的負担を大幅に軽減いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '無料相談はお電話で<strong>30分程度</strong>あれば十分です。<strong>ご都合の良いお日にちとお時間帯をお教えいただけませんか？</strong>'
+      }
+    ],
+    tip: '具体的な所要時間（30分程度）を伝えることで「それくらいなら…」と思っていただくことがポイントです。',
+    strengths: ['noVisit', 'expertTeam']
+  },
+
+  canIncrease: {
+    keywords: ['増額', '本当', '上がる', '変わる', '意味ある'],
+    title: '増額効果への疑問への対応',
+    icon: '&#10067;',
+    concern: 'お客様は弁護士に依頼して本当に増額できるか不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '本当に増額できるのか、気になりますよね。<strong>弁護士基準（裁判基準）での交渉により、保険会社提示額から大幅に増額できるケースが多い</strong>です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '特に<strong>通院が長期の場合や後遺障害がある場合は差額が大きくなる傾向</strong>にあります。保険会社は「自賠責基準」や「任意保険基準」で低めに算出していますが、弁護士が介入することで「裁判基準」での交渉が可能になります。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、お客様のケースでの増額見通しを具体的にお伝えいたします。</strong>相談だけでも費用は一切かかりません。'
+      }
+    ],
+    tip: '「増額の可能性」を具体的な数字や傾向で説明し、無料相談で見通しを伝えることをクロージングにつなげましょう。',
+    strengths: ['expertTeam', 'freeCounseling']
+  }
+};
+
+const OPENING_SCRIPT = {
+  title: 'オープニングトーク',
+  icon: '&#128075;',
+  scripts: [
+    {
+      label: 'response',
+      labelText: '第一声',
+      text: 'お電話ありがとうございます。交通事故のご相談ですね。当事務所では交通事故に関する無料相談を行っておりますので、まずはお話をお聞かせいただければと思います。'
+    }
+  ]
+};
+
+const CLOSING_SCRIPT = {
+  title: 'クロージング（予約獲得）',
+  icon: '&#127919;',
+  scripts: [
+    {
+      label: 'close',
+      labelText: '予約誘導トーク',
+      text: 'ここまでのお話を踏まえまして、<strong>無料相談で詳しくご状況をお伺いし、最善の解決方法をご提案させていただければ</strong>と思います。<strong>専門チームがお客様の希望に寄り添って対応</strong>いたします。<strong>費用は一切かかりませんし、来所も不要</strong>ですので、お気軽にご利用ください。'
+    },
+    {
+      label: 'close',
+      labelText: '日程調整',
+      text: 'それでは、無料相談の日程を調整させていただきます。<strong>お電話でもWEBでも、ご希望の方法で対応可能</strong>です。<strong>ご都合の良いお日にちとお時間帯</strong>をお教えいただけますか？'
+    }
+  ]
+};
+
+// Tag button handling
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const textarea = document.getElementById('memoInput');
+    const tag = this.dataset.tag;
+
+    if (this.classList.contains('active')) {
+      textarea.value = textarea.value ? textarea.value + '、' + tag : tag;
+    } else {
+      textarea.value = textarea.value
+        .replace(new RegExp('[、,]?' + tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[、,]?'), '')
+        .replace(/^[、,]+|[、,]+$/g, '');
+    }
+
+    updateCharCount();
+  });
+});
+
+// Character count
+document.getElementById('memoInput').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('memoInput').value.length;
+}
+
+// Script generation
+function generateScript() {
+  const memo = document.getElementById('memoInput').value;
+  const partyType = document.getElementById('partyType').value;
+  const lawyerInsurance = document.getElementById('lawyerInsurance').value;
+
+  if (!memo.trim()) {
+    alert('懸念事項を入力してください。タグのクリックまたはフリーメモへの入力をお願いします。');
+    return;
+  }
+
+  const matchedConcerns = [];
+  const memoLower = memo.toLowerCase();
+
+  for (const [key, concern] of Object.entries(CONCERN_SCRIPTS)) {
+    for (const keyword of concern.keywords) {
+      if (memoLower.includes(keyword)) {
+        matchedConcerns.push(concern);
+        break;
+      }
+    }
+  }
+
+  if (matchedConcerns.length === 0) {
+    matchedConcerns.push(CONCERN_SCRIPTS.cost);
+    matchedConcerns.push(CONCERN_SCRIPTS.insuranceCompany);
+    matchedConcerns.push(CONCERN_SCRIPTS.settlementAmount);
+  }
+
+  renderScripts(matchedConcerns, partyType, lawyerInsurance);
+}
+
+function renderScripts(concerns, partyType, lawyerInsurance) {
+  const output = document.getElementById('scriptOutput');
+  const emptyState = document.getElementById('emptyState');
+
+  emptyState.style.display = 'none';
+  output.style.display = 'block';
+
+  let html = '';
+
+  // Opening
+  html += renderSection(OPENING_SCRIPT, []);
+
+  // Matched concern scripts
+  concerns.forEach(concern => {
+    html += renderSection(concern, concern.strengths || []);
+  });
+
+  // Party type supplement
+  if (partyType) {
+    const partyScript = getConditionSupplement(partyType);
+    if (partyScript) {
+      html += renderSection(partyScript, []);
+    }
+  }
+
+  // Lawyer insurance supplement
+  if (lawyerInsurance) {
+    const insuranceScript = getLawyerInsuranceSupplement(lawyerInsurance);
+    if (insuranceScript) {
+      html += renderSection(insuranceScript, []);
+    }
+  }
+
+  // Closing
+  html += renderSection(CLOSING_SCRIPT, ['freeCounseling', 'noVisit', 'expertTeam', 'lifeRestart']);
+
+  output.innerHTML = html;
+}
+
+function renderSection(section, strengthKeys) {
+  let html = `
+    <div class="script-section">
+      <div class="script-section-title">
+        <span class="icon">${section.icon}</span>
+        ${section.title}
+        <button class="copy-btn" onclick="copySection(this)">コピー</button>
+      </div>
+      <div class="script-card">`;
+
+  if (section.concern) {
+    html += `<div><span class="script-label label-concern">顧客の懸念</span></div>
+             <div class="script-text">${section.concern}</div>
+             <hr class="script-divider">`;
+  }
+
+  section.scripts.forEach((script, i) => {
+    const labelClass = 'label-' + script.label;
+    html += `<div><span class="script-label ${labelClass}">${script.labelText}</span></div>
+             <div class="script-text">${script.text}</div>`;
+    if (i < section.scripts.length - 1) {
+      html += '<hr class="script-divider">';
+    }
+  });
+
+  if (strengthKeys && strengthKeys.length > 0) {
+    html += '<hr class="script-divider"><div>';
+    strengthKeys.forEach(key => {
+      const s = STRENGTHS[key];
+      if (s) {
+        html += `<span class="strength-badge">${s.label}</span>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  if (section.tip) {
+    html += `<div class="tip-box">
+               <div class="tip-box-title">対応のポイント</div>
+               ${section.tip}
+             </div>`;
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function getConditionSupplement(partyType) {
+  const supplements = {
+    victim: {
+      title: '被害者の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '当事者区分別補足',
+        text: '被害者の方の場合、弁護士に依頼することで<strong>保険会社の提示額から大幅に増額できる可能性</strong>がございます。<strong>弁護士費用特約がある場合は実質自己負担ゼロ</strong>で弁護士に依頼できます。まずは保険証券をご確認ください。'
+      }]
+    },
+    perpetrator: {
+      title: '加害者側のご相談への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '当事者区分別補足',
+        text: '加害者側のご相談ですね。<strong>過失割合の見直し</strong>や、相手方からの<strong>過大な請求に対する減額交渉</strong>を行います。適正な解決のために<strong>専門チームがサポート</strong>いたします。'
+      }]
+    }
+  };
+
+  return supplements[partyType] || null;
+}
+
+function getLawyerInsuranceSupplement(lawyerInsurance) {
+  const supplements = {
+    yes: {
+      title: '弁護士費用特約ありの方への補足トーク',
+      icon: '&#128179;',
+      scripts: [{
+        label: 'point',
+        labelText: '弁護士費用特約補足',
+        text: '<strong>弁護士費用特約をお持ち</strong>ですので、<strong>弁護士費用は保険会社が負担</strong>いたします。<strong>実質自己負担ゼロ</strong>で弁護士に依頼できますので、ぜひご活用ください。'
+      }]
+    },
+    no: {
+      title: '弁護士費用特約なしの方への補足トーク',
+      icon: '&#128179;',
+      scripts: [{
+        label: 'point',
+        labelText: '弁護士費用特約補足',
+        text: '弁護士費用特約がない場合でも、弁護士に依頼することで<strong>示談金が増額されるケースがほとんど</strong>です。<strong>増額分が弁護士費用を上回ることが多い</strong>ため、経済的メリットは十分にございます。'
+      }]
+    },
+    unknown: {
+      title: '弁護士費用特約の確認について',
+      icon: '&#128179;',
+      scripts: [{
+        label: 'point',
+        labelText: '弁護士費用特約補足',
+        text: '弁護士費用特約の有無が分からない場合は、<strong>ご加入の自動車保険の証券をご確認ください</strong>。<strong>火災保険やクレジットカードに付帯している場合</strong>もございます。<strong>ご家族の保険でも利用できるケース</strong>がありますので、合わせてご確認いただければと思います。'
+      }]
+    }
+  };
+
+  return supplements[lawyerInsurance] || null;
+}
+
+function clearAll() {
+  document.getElementById('memoInput').value = '';
+  document.getElementById('ageGroup').value = '';
+  document.getElementById('partyType').value = '';
+  document.getElementById('damageType').value = '';
+  document.getElementById('lawyerInsurance').value = '';
+  document.getElementById('channel').value = '';
+
+  document.querySelectorAll('.tag-btn.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  updateCharCount();
+
+  document.getElementById('scriptOutput').style.display = 'none';
+  document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('emptyState').style.display = '';
+}
+
+function copySection(btn) {
+  const card = btn.closest('.script-section');
+  const textElements = card.querySelectorAll('.script-text');
+  let text = '';
+  textElements.forEach(el => {
+    text += el.textContent.trim() + '\n\n';
+  });
+
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = 'コピー完了';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>

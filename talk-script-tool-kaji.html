@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家事事件 トークスクリプト支援ツール</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2b4a;
+      --navy-dark: #0f1e35;
+      --gold: #c8a951;
+      --gold-light: #e8d080;
+      --gray-bg: #f5f6f8;
+      --text: #2d2d2d;
+      --text-light: #666;
+      --white: #fff;
+      --green: #27ae60;
+      --green-light: #eafaf1;
+      --blue: #2980b9;
+      --blue-light: #ebf5fb;
+      --orange: #e67e22;
+      --orange-light: #fef5e7;
+      --red: #c0392b;
+      --border: #dde1e8;
+    }
+
+    body {
+      font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 15px;
+      background: var(--gray-bg);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-header .badge {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .65rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: .05em;
+    }
+
+    .app-header .internal {
+      font-size: .7rem;
+      color: var(--gold-light);
+      font-weight: 400;
+    }
+
+    /* Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Left Panel */
+    .input-panel {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* Quick tags */
+    .quick-tags {
+      margin-bottom: 20px;
+    }
+
+    .quick-tags-label {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+    }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-btn {
+      background: var(--gray-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    .tag-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .tag-btn.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    /* Memo area */
+    .memo-area {
+      margin-bottom: 20px;
+    }
+
+    .memo-area label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .memo-area textarea {
+      width: 100%;
+      height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: .88rem;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color .2s;
+    }
+
+    .memo-area textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,169,81,.15);
+    }
+
+    .memo-area textarea::placeholder {
+      color: #aab;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: .7rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Customer info */
+    .customer-info {
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .info-field {
+      flex: 1;
+    }
+
+    .info-field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .info-field select,
+    .info-field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: .82rem;
+      font-family: inherit;
+      background: var(--white);
+    }
+
+    .info-field select:focus,
+    .info-field input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    /* Generate button */
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s;
+      font-family: inherit;
+      letter-spacing: .03em;
+    }
+
+    .generate-btn:hover {
+      opacity: .85;
+    }
+
+    .generate-btn:active {
+      transform: scale(.98);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-row .generate-btn {
+      flex: 1;
+    }
+
+    .clear-btn {
+      padding: 14px 20px;
+      background: var(--white);
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+    }
+
+    .clear-btn:active {
+      transform: scale(.98);
+    }
+
+    /* Right Panel */
+    .output-panel {
+      padding: 24px 32px;
+      overflow-y: auto;
+      max-height: calc(100vh - 56px);
+    }
+
+    /* Script cards */
+    .script-section {
+      margin-bottom: 28px;
+    }
+
+    .script-section-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--navy);
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .script-section-title .icon {
+      font-size: 1rem;
+    }
+
+    .script-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    }
+
+    .script-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .label-concern {
+      background: #fdecea;
+      color: var(--red);
+    }
+
+    .label-response {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .label-point {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .label-close {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .script-text {
+      font-size: .9rem;
+      line-height: 2;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .script-text strong {
+      color: var(--navy);
+      background: linear-gradient(transparent 60%, rgba(200,169,81,.25) 60%);
+    }
+
+    .script-text .emphasis {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .script-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 16px 0;
+    }
+
+    /* Strength badge */
+    .strength-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin: 2px 4px 2px 0;
+    }
+
+    /* Tip box */
+    .tip-box {
+      background: #fffbf0;
+      border: 1px solid var(--gold);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .tip-box-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+      font-size: .78rem;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: .72rem;
+      cursor: pointer;
+      color: var(--text-light);
+      font-family: inherit;
+      transition: all .15s;
+      float: right;
+    }
+
+    .copy-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .copy-btn.copied {
+      background: var(--green);
+      color: var(--white);
+      border-color: var(--green);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--text-light);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: .4;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: .85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        position: relative;
+        top: 0;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .output-panel {
+        max-height: none;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .script-section {
+      animation: fadeInUp .3s ease-out;
+    }
+
+    .script-section:nth-child(2) { animation-delay: .05s; }
+    .script-section:nth-child(3) { animation-delay: .1s; }
+    .script-section:nth-child(4) { animation-delay: .15s; }
+    .script-section:nth-child(5) { animation-delay: .2s; }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>
+    家事事件 トークスクリプト支援ツール
+    <span class="badge">社内用</span>
+  </h1>
+  <span class="internal">対応者向け支援システム</span>
+</div>
+
+<div class="app-container">
+
+  <!-- Left: Input Panel -->
+  <div class="input-panel">
+    <div class="panel-title">顧客情報・懸念事項入力</div>
+
+    <div class="customer-info">
+      <div class="info-row">
+        <div class="info-field">
+          <label>顧客の年代</label>
+          <select id="ageGroup">
+            <option value="">選択してください</option>
+            <option value="10s">10代</option>
+            <option value="20s">20代</option>
+            <option value="30s">30代</option>
+            <option value="40s">40代</option>
+            <option value="50s">50代</option>
+            <option value="60s">60代</option>
+            <option value="70s">70代以上</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>性別</label>
+          <select id="gender">
+            <option value="">選択してください</option>
+            <option value="male">男性</option>
+            <option value="female">女性</option>
+            <option value="other">その他・回答しない</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-field">
+          <label>相談内容</label>
+          <select id="caseType">
+            <option value="">選択してください</option>
+            <option value="claim">請求（単独請求）</option>
+            <option value="double_claim">Ｗ請求（不配＆不貞相手への請求）</option>
+            <option value="chastity">貞操権侵害</option>
+            <option value="defendant">被請求</option>
+            <option value="divorce">離婚</option>
+            <option value="childSupport">養育費</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>相談経緯</label>
+          <select id="channel">
+            <option value="">選択してください</option>
+            <option value="web">Web検索</option>
+            <option value="webad">Web広告</option>
+            <option value="cm">TV・CM</option>
+            <option value="referral">知人紹介</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-tags">
+      <div class="quick-tags-label">よくある懸念事項（クリックで追加）</div>
+      <div class="tag-group">
+        <button class="tag-btn" data-tag="費用が心配">費用が心配</button>
+        <button class="tag-btn" data-tag="相手が払うか不安">相手が払うか不安</button>
+        <button class="tag-btn" data-tag="証拠がない">証拠がない</button>
+        <button class="tag-btn" data-tag="子どもへの影響">子どもへの影響</button>
+        <button class="tag-btn" data-tag="相手と直接話したくない">相手と直接話したくない</button>
+        <button class="tag-btn" data-tag="周囲にバレたくない">周囲にバレたくない</button>
+        <button class="tag-btn" data-tag="慰謝料の相場が分からない">慰謝料の相場が分からない</button>
+        <button class="tag-btn" data-tag="本当に取れるか不安">本当に取れるか不安</button>
+        <button class="tag-btn" data-tag="減額したい（被請求）">減額したい（被請求）</button>
+        <button class="tag-btn" data-tag="離婚すべきか迷っている">離婚すべきか迷っている</button>
+        <button class="tag-btn" data-tag="再構築したい">再構築したい</button>
+        <button class="tag-btn" data-tag="精神的に辛い">精神的に辛い</button>
+      </div>
+    </div>
+
+    <div class="memo-area">
+      <label for="memoInput">フリーメモ（顧客の懸念・発言を自由に入力）</label>
+      <textarea id="memoInput" placeholder="例：相手が払ってくれるか不安、子どもへの影響が心配、離婚すべきか迷っている..."></textarea>
+      <div class="char-count"><span id="charCount">0</span> 文字</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="generate-btn" onclick="generateScript()">トークスクリプトを生成</button>
+      <button class="clear-btn" onclick="clearAll()">クリア</button>
+    </div>
+  </div>
+
+  <!-- Right: Output Panel -->
+  <div class="output-panel" id="outputPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">&#128172;</div>
+      <h3>トークスクリプトを生成</h3>
+      <p>左パネルで顧客の懸念事項を入力し、<br>「トークスクリプトを生成」ボタンを押してください。</p>
+      <p style="margin-top: 16px; font-size: .78rem; color: #aab;">
+        懸念タグのクリックやフリーメモへの入力で<br>最適なトークスクリプトがリアルタイムで表示されます。
+      </p>
+    </div>
+    <div id="scriptOutput" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script>
+const STRENGTHS = {
+  freeCounseling: { label: '相談無料', text: '当事務所では相談料は無料です。' },
+  noVisit: { label: '来所不要', text: '原則としてご来所は不要です。すべてお電話・WEB・郵送で完結いたします。' },
+  expertTeam: { label: '不倫・離婚専門チーム', text: '不倫や離婚の専門チームが在籍しており、お客様の希望に可能な限り寄り添った交渉が可能です。' },
+  lifeRestart: { label: '生活再スタート支援', text: 'お金を回収して終わりではなく、その後の生活の再スタートが切れるかどうかまで見守り、最後まで一緒に事件を進めてまいります。' },
+};
+
+const CONCERN_SCRIPTS = {
+  cost: {
+    keywords: ['費用', 'お金', 'コスト', '料金', '高い', '払え', '経済的'],
+    title: '費用面の懸念への対応',
+    icon: '&#128176;',
+    concern: 'お客様は費用面に不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'ご費用面のご不安、大変よく分かります。ご安心ください。当事務所では<strong>相談料は完全無料</strong>でございます。弁護士にご依頼いただくことで、ご自身で交渉されるよりも<strong>経済的なメリットが大きくなる</strong>ケースがほとんどです。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '不倫・離婚の<strong>専門チームがお客様のご希望額に寄り添った交渉</strong>を行いますので、費用対効果の面でもご納得いただける結果を目指します。まずは無料相談で、お客様のケースでの見通しをお伝えいたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '費用のことはご心配いただかなくて大丈夫です。<strong>まずは無料相談で、どのような方法が最善か一緒に考えてみませんか？</strong>'
+      }
+    ],
+    tip: '費用面の不安は最も多い懸念です。「相談無料」を繰り返し伝え、弁護士に依頼するメリットを具体的に説明しましょう。',
+    strengths: ['freeCounseling', 'expertTeam']
+  },
+
+  payment: {
+    keywords: ['払う', '支払い', '回収', '逃げ', '応じ'],
+    title: '相手が払うか不安への対応',
+    icon: '&#128179;',
+    concern: 'お客様は相手方が支払いに応じるか不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '相手方が支払いに応じてくれるかご不安ですよね。当事務所の<strong>専門チームは交渉のプロ</strong>として、多くのケースで回収に成功しております。お客様に代わって粘り強く交渉いたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '相手方が任意の交渉に応じない場合でも、<strong>法的手段（調停・訴訟）を検討</strong>することが可能です。また、回収して終わりではなく、<strong>その後の生活の再スタートが切れるかどうかまで寄り添い</strong>、最後まで一緒に事件を進めてまいります。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、相手方への請求の見通しを具体的にお伝えいたします。</strong>一人で悩まず、専門家にお任せください。'
+      }
+    ],
+    tip: '「専門チームが交渉のプロとして対応する」ことを伝え、一人で戦う必要がないことを強調しましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  evidence: {
+    keywords: ['証拠', '写真', 'LINE', 'メール', '録音', '記録', '証明'],
+    title: '証拠がない場合の懸念への対応',
+    icon: '&#128196;',
+    concern: 'お客様は証拠がないことを心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '証拠がないとご不安ですよね。ご安心ください。<strong>証拠がない状態でもまずはご相談いただけます</strong>。どのような証拠が有効か、今からどのように集めるか、具体的にアドバイスいたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>LINEやメールのスクリーンショット</strong>も証拠になりうるケースがございます。完璧な証拠が揃っていなくても、<strong>専門チームが状況を総合的に判断</strong>し、最善の方法をご提案いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '証拠のことは後からでも対策できます。<strong>まずは無料相談で、今あるものを一緒に整理してみませんか？</strong>'
+      }
+    ],
+    tip: '「証拠がなくても相談できる」ことを伝え、具体的にどのようなものが証拠になるか例示すると安心感が増します。',
+    strengths: ['freeCounseling', 'expertTeam']
+  },
+
+  children: {
+    keywords: ['子ども', '子供', '息子', '娘', '親権', '面会', '養育'],
+    title: '子どもへの影響への懸念への対応',
+    icon: '&#128118;',
+    concern: 'お客様はお子様への影響を心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: 'お子様のことを一番に考えていらっしゃるお気持ち、<strong>とても大切なこと</strong>です。当事務所でも、<strong>お子様への影響を最小限にする方法</strong>を一緒に考えさせていただきます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '<strong>養育費の確保</strong>も含め、お子様の将来を守るための最善の方法をご提案いたします。専門チームがお客様のご希望に寄り添い、<strong>お子様にとっても最良の解決</strong>を目指します。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'お子様のためにも、<strong>まずは無料相談で選択肢を知ることから始めてみませんか？</strong>専門チームが最後まで寄り添います。'
+      }
+    ],
+    tip: 'お子様のことを心配される気持ちに共感を示すことが最も重要です。「お子様のために」という視点で提案しましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  noContact: {
+    keywords: ['直接', '会いたくない', '話したくない', '連絡', '接触', '怖い', '顔'],
+    title: '相手と直接話したくない懸念への対応',
+    icon: '&#128274;',
+    concern: 'お客様は相手方との直接のやり取りを避けたいと考えています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '相手方と直接お話しされたくないお気持ち、よく分かります。ご安心ください。<strong>弁護士が代理人として、すべての交渉・連絡を代行</strong>いたします。お客様が相手方と直接やり取りする必要は<strong>一切ございません</strong>。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'さらに、当事務所では<strong>来所も不要</strong>です。すべてお電話・WEB・郵送で完結いたしますので、お客様のご負担を最小限に抑えられます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '相手方との連絡はすべて弁護士にお任せください。<strong>まずは無料相談で、今後の流れをご説明いたします。</strong>'
+      }
+    ],
+    tip: '「一切連絡を取る必要がない」ことを明確に伝えましょう。来所不要も安心材料になります。',
+    strengths: ['noVisit', 'expertTeam']
+  },
+
+  privacy: {
+    keywords: ['バレ', '知られ', '秘密', '内緒', '会社', '職場', '親', '友人'],
+    title: '周囲にバレたくない懸念への対応',
+    icon: '&#128272;',
+    concern: 'お客様は周囲に知られることを心配しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '周囲の方に知られたくないというお気持ち、しっかりと配慮させていただきます。当事務所では<strong>秘密厳守を徹底</strong>しております。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'お手続きは<strong>すべてお電話・WEB・郵送で完結</strong>しますので、事務所にお越しいただく必要はございません。郵送物についても<strong>配慮した発送</strong>が可能です。ご連絡方法や時間帯もご希望に応じて調整いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'プライバシーへの配慮は万全ですので、<strong>安心して無料相談をご利用ください。</strong>'
+      }
+    ],
+    tip: '具体的な配慮方法（郵送物の差出人名、連絡時間の調整等）を伝えると安心感が増します。',
+    strengths: ['noVisit']
+  },
+
+  marketRate: {
+    keywords: ['相場', 'いくら', '金額', '慰謝料', '額', '目安', '平均'],
+    title: '慰謝料の相場に関する質問への対応',
+    icon: '&#128178;',
+    concern: 'お客様は慰謝料の相場が分からず不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '慰謝料の金額が気になりますよね。不倫の慰謝料は一般的に<strong>100万〜300万円が相場</strong>と言われておりますが、婚姻期間や不倫の態様など、<strong>個別のご事情によって大きく変動</strong>いたします。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所の専門チームは、お客様の<strong>ご希望額に寄り添った交渉</strong>を行いますので、<strong>相場以上の結果を目指せる場合</strong>もございます。まずは無料相談で、お客様のケースでの見通しをお伝えいたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>ご自身の場合、いくらくらいになるか、無料相談で確認してみませんか？</strong>相談料は一切かかりません。'
+      }
+    ],
+    tip: '具体的な金額相場を提示することで「行動する価値がある」と感じていただくことが重要です。ただし個別事情で変動する旨は必ず補足しましょう。',
+    strengths: ['freeCounseling', 'expertTeam']
+  },
+
+  canGet: {
+    keywords: ['取れる', 'もらえる', '請求', '成功', '勝て'],
+    title: '本当に取れるか不安への対応',
+    icon: '&#10067;',
+    concern: 'お客様は本当に慰謝料を取れるか不安を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '本当に取れるのかご不安ですよね。当事務所の<strong>専門チームの交渉力</strong>で、お客様のご希望額に寄り添った交渉を行います。ご自身で進めるよりも<strong>経済的メリットが大きくなる</strong>ケースがほとんどです。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '専門チームはこれまで多くの不倫・離婚案件を扱ってきた実績がございます。<strong>お客様のご状況に合わせた最善の戦略</strong>をご提案いたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、請求の見通しを具体的にお伝えいたします。</strong>相談料は一切かかりませんので、お気軽にどうぞ。'
+      }
+    ],
+    tip: '専門チームの交渉力と実績を伝え、「一人で悩むより専門家に任せた方が有利」というメッセージを強調しましょう。',
+    strengths: ['expertTeam', 'freeCounseling']
+  },
+
+  reduceAmount: {
+    keywords: ['減額', '払いたくない', '高すぎ', '請求された', '被請求', '反論'],
+    title: '減額したい（被請求）への対応',
+    icon: '&#128181;',
+    concern: 'お客様は慰謝料を請求されており、減額を希望しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '慰謝料を請求されてご不安ですよね。まず、<strong>請求された金額がそのまま確定するわけではございません</strong>。相場を踏まえた<strong>減額交渉の余地は十分にあります</strong>。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '当事務所の専門チームが、お客様の<strong>ご希望に寄り添った減額交渉</strong>を行います。相手方の請求額が相場より高い場合は、<strong>適正な金額まで減額できる可能性</strong>がございます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '請求されたからといって焦る必要はありません。<strong>まずは無料相談で、適正な金額の見通しを一緒に確認しましょう。</strong>'
+      }
+    ],
+    tip: '被請求のお客様は焦りや恐怖を感じていることが多いです。「そのまま確定しない」ことを最初に伝え、安心感を与えましょう。',
+    strengths: ['expertTeam', 'freeCounseling']
+  },
+
+  divorceDilemma: {
+    keywords: ['離婚', '迷', 'どうすべき', '決められ', '悩'],
+    title: '離婚すべきか迷っているお客様への対応',
+    icon: '&#128148;',
+    concern: 'お客様は離婚すべきかどうか迷っています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '離婚するかどうか、<strong>今すぐ決める必要はございません</strong>。まずは法的にどのような選択肢があるかを知ることが大切です。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '無料相談で<strong>ご状況を整理する</strong>ことで、気持ちが楽になる方も多くいらっしゃいます。離婚する場合・しない場合、それぞれの<strong>メリット・デメリットを一緒に考え</strong>ましょう。その後の<strong>生活の再スタートまで寄り添い</strong>ます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '決断を急ぐ必要はありません。<strong>まずは無料相談で、選択肢を一緒に整理してみませんか？</strong>'
+      }
+    ],
+    tip: '離婚を迷っている方には「今すぐ決めなくていい」と伝えることが重要です。選択肢を知ること自体に価値があるというメッセージを。',
+    strengths: ['freeCounseling', 'lifeRestart']
+  },
+
+  rebuild: {
+    keywords: ['再構築', 'やり直', '修復', '許', '戻', '関係'],
+    title: '再構築を希望されるお客様への対応',
+    icon: '&#128156;',
+    concern: 'お客様は夫婦関係の再構築を希望しています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '再構築を目指されるお気持ち、<strong>とても大切なこと</strong>です。実は、<strong>慰謝料請求と再構築は矛盾しません</strong>。けじめとして慰謝料を求めた上で、関係修復に進まれる方もいらっしゃいます。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: 'お気持ちに寄り添った方法を一緒に考えます。<strong>不貞相手への慰謝料請求</strong>をすることで、けじめをつけて再出発される方も多くいらっしゃいます。専門チームがお客様のご希望に合わせた対応をいたします。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: '<strong>まずは無料相談で、再構築を視野に入れた最善の方法を一緒に考えましょう。</strong>'
+      }
+    ],
+    tip: '再構築の気持ちを否定せず受け止めることが重要です。慰謝料請求と再構築は両立できるという事例を伝えましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  },
+
+  mentalPain: {
+    keywords: ['辛い', '苦し', '眠れ', '食べ', '精神', 'メンタル', 'うつ', 'ストレス'],
+    title: '精神的に辛いお客様への対応',
+    icon: '&#128557;',
+    concern: 'お客様は精神的に強い苦痛を感じています。',
+    scripts: [
+      {
+        label: 'response',
+        labelText: '推奨トーク',
+        text: '本当にお辛い中、お電話くださったこと、心から感謝いたします。<strong>お気持ちは十分にお察しいたします</strong>。お一人で抱え込まないでください。'
+      },
+      {
+        label: 'point',
+        labelText: '補足ポイント',
+        text: '弁護士にお任せいただくことで、<strong>精神的なご負担を大きく軽減</strong>できます。相手方との交渉はすべて代行いたしますので、安心してお任せください。<strong>生活の再スタートが切れるまで最後まで寄り添い</strong>ます。'
+      },
+      {
+        label: 'close',
+        labelText: 'クロージング',
+        text: 'まずは一歩踏み出してみませんか。<strong>無料相談でお話しいただくだけで、気持ちが楽になる方も多い</strong>ですよ。'
+      }
+    ],
+    tip: '精神的に辛い方には、まず共感と感謝を伝えることが最優先です。具体的な解決策は後回しでも構いません。寄り添う姿勢を示しましょう。',
+    strengths: ['expertTeam', 'lifeRestart']
+  }
+};
+
+const OPENING_SCRIPT = {
+  title: 'オープニングトーク',
+  icon: '&#128075;',
+  scripts: [
+    {
+      label: 'response',
+      labelText: '第一声',
+      text: 'お電話ありがとうございます。家事事件のご相談ですね。当事務所では不倫・離婚に関する<strong>無料相談</strong>を行っておりますので、まずはお話をお聞かせいただければと思います。<strong>お辛い状況の中、ご連絡くださりありがとうございます。</strong>'
+    }
+  ]
+};
+
+const CLOSING_SCRIPT = {
+  title: 'クロージング（予約獲得）',
+  icon: '&#127919;',
+  scripts: [
+    {
+      label: 'close',
+      labelText: '予約誘導トーク',
+      text: 'ここまでのお話を踏まえまして、<strong>無料相談で詳しくご状況をお伺いし、最善の方法をご提案</strong>させていただければと思います。<strong>専門チームがお客様の希望に寄り添って対応</strong>いたします。<strong>費用は一切かかりませんし、来所も不要</strong>ですので、お気軽にご利用ください。'
+    },
+    {
+      label: 'close',
+      labelText: '日程調整',
+      text: 'それでは、無料相談の日程を調整させていただきます。<strong>お電話でもWEBでも、ご希望の方法で対応可能</strong>です。<strong>ご都合の良いお日にちとお時間帯</strong>をお教えいただけますか？'
+    }
+  ]
+};
+
+// Tag button handling
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const textarea = document.getElementById('memoInput');
+    const tag = this.dataset.tag;
+
+    if (this.classList.contains('active')) {
+      textarea.value = textarea.value ? textarea.value + '、' + tag : tag;
+    } else {
+      textarea.value = textarea.value
+        .replace(new RegExp('[、,]?' + tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[、,]?'), '')
+        .replace(/^[、,]+|[、,]+$/g, '');
+    }
+
+    updateCharCount();
+  });
+});
+
+// Character count
+document.getElementById('memoInput').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('memoInput').value.length;
+}
+
+// Script generation
+function generateScript() {
+  const memo = document.getElementById('memoInput').value;
+  const caseType = document.getElementById('caseType').value;
+
+  if (!memo.trim()) {
+    alert('懸念事項を入力してください。タグのクリックまたはフリーメモへの入力をお願いします。');
+    return;
+  }
+
+  const matchedConcerns = [];
+  const memoLower = memo.toLowerCase();
+
+  for (const [key, concern] of Object.entries(CONCERN_SCRIPTS)) {
+    for (const keyword of concern.keywords) {
+      if (memoLower.includes(keyword)) {
+        matchedConcerns.push(concern);
+        break;
+      }
+    }
+  }
+
+  if (matchedConcerns.length === 0) {
+    matchedConcerns.push(CONCERN_SCRIPTS.cost);
+    matchedConcerns.push(CONCERN_SCRIPTS.evidence);
+    matchedConcerns.push(CONCERN_SCRIPTS.mentalPain);
+  }
+
+  renderScripts(matchedConcerns, caseType);
+}
+
+function renderScripts(concerns, caseType) {
+  const output = document.getElementById('scriptOutput');
+  const emptyState = document.getElementById('emptyState');
+
+  emptyState.style.display = 'none';
+  output.style.display = 'block';
+
+  let html = '';
+
+  // Opening
+  html += renderSection(OPENING_SCRIPT, []);
+
+  // Matched concern scripts
+  concerns.forEach(concern => {
+    html += renderSection(concern, concern.strengths || []);
+  });
+
+  // Case type supplement
+  if (caseType) {
+    const caseScript = getConditionSupplement(caseType);
+    if (caseScript) {
+      html += renderSection(caseScript, []);
+    }
+  }
+
+  // Closing
+  html += renderSection(CLOSING_SCRIPT, ['freeCounseling', 'expertTeam', 'noVisit', 'lifeRestart']);
+
+  output.innerHTML = html;
+}
+
+function renderSection(section, strengthKeys) {
+  let html = `
+    <div class="script-section">
+      <div class="script-section-title">
+        <span class="icon">${section.icon}</span>
+        ${section.title}
+        <button class="copy-btn" onclick="copySection(this)">コピー</button>
+      </div>
+      <div class="script-card">`;
+
+  if (section.concern) {
+    html += `<div><span class="script-label label-concern">顧客の懸念</span></div>
+             <div class="script-text">${section.concern}</div>
+             <hr class="script-divider">`;
+  }
+
+  section.scripts.forEach((script, i) => {
+    const labelClass = 'label-' + script.label;
+    html += `<div><span class="script-label ${labelClass}">${script.labelText}</span></div>
+             <div class="script-text">${script.text}</div>`;
+    if (i < section.scripts.length - 1) {
+      html += '<hr class="script-divider">';
+    }
+  });
+
+  if (strengthKeys && strengthKeys.length > 0) {
+    html += '<hr class="script-divider"><div>';
+    strengthKeys.forEach(key => {
+      const s = STRENGTHS[key];
+      if (s) {
+        html += `<span class="strength-badge">${s.label}</span>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  if (section.tip) {
+    html += `<div class="tip-box">
+               <div class="tip-box-title">対応のポイント</div>
+               ${section.tip}
+             </div>`;
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function getConditionSupplement(caseType) {
+  const supplements = {
+    claim: {
+      title: '請求（単独請求）の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '不倫の相手方に対する慰謝料請求ですね。<strong>専門チームがお客様のご希望額に寄り添い、相手方と直接交渉</strong>いたします。お客様が相手方と連絡を取る必要は<strong>一切ございません</strong>。'
+      }]
+    },
+    double_claim: {
+      title: 'Ｗ請求（不配＆不貞相手への請求）の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '配偶者と不貞相手の双方への請求ですね。Ｗ請求は交渉先が複数になるため、<strong>専門チームが一括で対応し、トータルでの回収額を最大化</strong>するよう交渉いたします。'
+      }]
+    },
+    chastity: {
+      title: '貞操権侵害のご相談への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '貞操権侵害のご相談ですね。交際相手が既婚者であることを隠していた場合など、<strong>お客様の権利を守るための請求が可能</strong>です。専門チームが丁寧にご状況をお伺いいたします。'
+      }]
+    },
+    defendant: {
+      title: '被請求の方への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '慰謝料を請求されているのですね。<strong>請求された金額がそのまま確定するわけではありません</strong>。専門チームが相場を踏まえた<strong>適正な減額交渉</strong>を行い、お客様のご希望に寄り添います。'
+      }]
+    },
+    divorce: {
+      title: '離婚のご相談への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '離婚のご相談ですね。財産分与・慰謝料・親権・養育費など、離婚に関わる<strong>すべての事項について専門チームが最善の方法をご提案</strong>いたします。お子様がいらっしゃる場合は、<strong>お子様への影響も最小限にする方法</strong>を一緒に考えます。'
+      }]
+    },
+    childSupport: {
+      title: '養育費のご相談への補足トーク',
+      icon: '&#128137;',
+      scripts: [{
+        label: 'point',
+        labelText: '相談内容別補足',
+        text: '養育費のご相談ですね。<strong>お子様の将来のために大切な権利</strong>です。適正な金額の算定から、相手方との交渉、不払い時の対応まで、<strong>専門チームが最後まで寄り添います</strong>。'
+      }]
+    }
+  };
+
+  return supplements[caseType] || null;
+}
+
+function clearAll() {
+  document.getElementById('memoInput').value = '';
+  document.getElementById('ageGroup').value = '';
+  document.getElementById('gender').value = '';
+  document.getElementById('caseType').value = '';
+  document.getElementById('channel').value = '';
+
+  document.querySelectorAll('.tag-btn.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  updateCharCount();
+
+  document.getElementById('scriptOutput').style.display = 'none';
+  document.getElementById('scriptOutput').innerHTML = '';
+  document.getElementById('emptyState').style.display = '';
+}
+
+function copySection(btn) {
+  const card = btn.closest('.script-section');
+  const textElements = card.querySelectorAll('.script-text');
+  let text = '';
+  textElements.forEach(el => {
+    text += el.textContent.trim() + '\n\n';
+  });
+
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = 'コピー完了';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
