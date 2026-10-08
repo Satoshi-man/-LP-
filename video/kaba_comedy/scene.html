@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=block" rel="stylesheet">
+<script src="env.js"></script>
+<style>
+:root{--navy:#14254a;--gold:#e8b931;--orange:#f08a1c;--red:#e0483a;--ink:#2a2140;--hip:#9b8fc0;--hip2:#ab9fd0;--hipd:#8577b0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#fdf1dc}
+body{font-family:'M PLUS Rounded 1c',sans-serif;position:relative;color:var(--ink)}
+#room{position:absolute;inset:0}
+#wall{position:absolute;left:0;right:0;top:0;height:1320px;background:repeating-linear-gradient(90deg,#fdf1dc 0 60px,#f9e9cd 60px 120px)}
+#floor{position:absolute;left:0;right:0;top:1320px;bottom:0;background:repeating-linear-gradient(90deg,#d9a066 0 180px,#cf955b 180px 186px)}
+#win{position:absolute;left:640px;top:330px;width:330px;height:380px;border:22px solid #fff;border-radius:16px;background:linear-gradient(#8fd3f4,#c9ecfb);overflow:hidden}
+#win:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:14px;margin-left:-7px;background:#fff}
+#sun{position:absolute;left:40px;top:40px;width:90px;height:90px;border-radius:50%;background:#ffd84d}
+#sofa{position:absolute;left:110px;top:1000px;width:860px;height:420px}
+#sofa .back{position:absolute;left:40px;right:40px;top:0;height:300px;background:#e8735a;border-radius:60px 60px 20px 20px}
+#sofa .seat{position:absolute;left:40px;right:40px;top:230px;height:150px;background:#f08a6e;border-radius:30px}
+#sofa .arm{position:absolute;top:120px;width:120px;height:260px;background:#d9604a;border-radius:50px}
+#clock{position:absolute;left:150px;top:300px;width:190px;height:190px;border-radius:50%;background:#fff;border:14px solid #c98b4a}
+#clock i{position:absolute;left:50%;top:50%;width:8px;margin-left:-4px;background:#333;border-radius:4px;transform-origin:50% 0}
+#night{position:absolute;inset:0;background:#0d1530;opacity:0}
+#hipwrap{z-index:3;position:absolute;left:0;top:0;width:600px;height:720px;transform-origin:300px 360px}
+.layer{position:absolute;inset:0}
+.card{position:absolute;background:#fff;border-radius:34px;box-shadow:0 14px 0 rgba(0,0,0,.12),0 20px 40px rgba(0,0,0,.18);text-align:center;font-weight:900}
+.sub{z-index:4;position:absolute;left:50px;right:50px;top:1540px;text-align:center;font-weight:900;font-size:58px;line-height:1.35;color:#fff;
+ paint-order:stroke fill;-webkit-text-stroke:14px #2a2140;letter-spacing:.02em}
+.sub.h{color:#ffe14d}
+.spk{display:inline-block;font-size:32px;-webkit-text-stroke:0;color:#fff;background:#2a2140;border-radius:30px;padding:4px 22px;margin-bottom:10px}
+.note{position:absolute;left:50px;right:50px;top:1790px;font-size:26px;font-weight:700;color:#5a4a3a;text-align:center}
+#brand{position:absolute;left:0;right:0;top:1850px;text-align:center;font-weight:800;font-size:30px;letter-spacing:.2em;color:#7a5a3a}
+.bub{position:absolute;background:#fff;border:8px solid #2a2140;border-radius:60px;font-weight:900;padding:20px 40px;white-space:nowrap}
+.digit{display:inline-block;width:132px;text-align:center;vertical-align:top}
+.digit b{display:block;font-size:190px;font-weight:900;line-height:1;color:var(--orange);-webkit-text-stroke:10px #fff;paint-order:stroke fill;text-shadow:0 10px 0 rgba(0,0,0,.15)}
+.digit i{display:block;font-style:normal;font-size:60px;font-weight:900;color:var(--ink);margin-top:6px}
+</style></head>
+<body>
+<div id="room">
+  <div id="wall"></div><div id="floor"></div>
+  <div id="win"><div id="sun"></div></div>
+  <div id="clock"><i id="hh" style="height:55px"></i><i id="mm" style="height:75px"></i></div>
+  <div id="sofa"><div class="back"></div><div class="seat"></div><div class="arm" style="left:0"></div><div class="arm" style="right:0"></div></div>
+</div>
+<div id="night"></div>
+<div id="fx" class="layer"></div>
+
+<div id="hipwrap">
+<svg viewBox="0 0 600 720" width="600" height="720" overflow="visible">
+  <defs>
+    <clipPath id="ceL"><ellipse cx="235" cy="150" rx="36" ry="40"/></clipPath>
+    <clipPath id="ceR"><ellipse cx="365" cy="150" rx="36" ry="40"/></clipPath>
+  </defs>
+  <!-- body -->
+  <ellipse cx="220" cy="680" rx="70" ry="34" fill="#8577b0"/>
+  <ellipse cx="380" cy="680" rx="70" ry="34" fill="#8577b0"/>
+  <ellipse cx="300" cy="530" rx="215" ry="165" fill="#9b8fc0"/>
+  <ellipse cx="300" cy="570" rx="140" ry="105" fill="#c9c0e6"/>
+  <g id="bag" opacity="0">
+    <path d="M220 470 Q200 650 300 660 Q400 650 380 470 Q340 440 300 450 Q260 440 220 470Z" fill="#c8913e"/>
+    <path d="M250 455 Q300 420 350 455" stroke="#8a5a20" stroke-width="12" fill="none"/>
+    <text x="300" y="610" text-anchor="middle" font-size="120" font-weight="900" fill="#ffe14d" stroke="#8a5a20" stroke-width="6" paint-order="stroke" font-family="M PLUS Rounded 1c">¥</text>
+  </g>
+  <g id="armL"><ellipse cx="110" cy="520" rx="48" ry="85" fill="#9b8fc0"/></g>
+  <g id="armR"><ellipse cx="490" cy="520" rx="48" ry="85" fill="#9b8fc0"/>
+    <g id="phone"><rect x="455" y="420" width="70" height="120" rx="12" fill="#2a2140"/><rect x="463" y="432" width="54" height="90" rx="6" fill="#8fd3f4"/></g>
+  </g>
+  <!-- head -->
+  <g id="head">
+    <ellipse cx="195" cy="80" rx="32" ry="40" fill="#9b8fc0"/><ellipse cx="195" cy="84" rx="16" ry="22" fill="#f3a6c0"/>
+    <ellipse cx="405" cy="80" rx="32" ry="40" fill="#9b8fc0"/><ellipse cx="405" cy="84" rx="16" ry="22" fill="#f3a6c0"/>
+    <ellipse cx="300" cy="175" rx="155" ry="125" fill="#9b8fc0"/>
+    <ellipse id="mouthIn" cx="300" cy="370" rx="160" ry="20" fill="#7a2340"/>
+    <ellipse id="tongue" cx="300" cy="400" rx="90" ry="20" fill="#e86a8a"/>
+    <g id="jaw">
+      <ellipse cx="300" cy="370" rx="175" ry="62" fill="#8d81b6"/>
+      <rect x="200" y="282" width="36" height="58" rx="14" fill="#fff"/>
+      <rect x="364" y="282" width="36" height="58" rx="14" fill="#fff"/>
+    </g>
+    <ellipse cx="300" cy="275" rx="195" ry="100" fill="#ab9fd0"/>
+    <ellipse cx="245" cy="240" rx="15" ry="22" fill="#5b4f80"/><ellipse cx="355" cy="240" rx="15" ry="22" fill="#5b4f80"/>
+    <circle cx="165" cy="300" r="30" fill="#f3a6c0" opacity=".7"/><circle cx="435" cy="300" r="30" fill="#f3a6c0" opacity=".7"/>
+    <path id="smile" d="M240 330 Q300 330 360 330" stroke="#5b4f80" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <g id="eyeL"><ellipse cx="235" cy="150" rx="36" ry="40" fill="#fff"/><circle class="pup" cx="238" cy="155" r="17" fill="#2a2140"/><circle class="hl" cx="244" cy="147" r="6" fill="#fff"/>
+      <rect class="lid" clip-path="url(#ceL)" x="195" y="108" width="80" height="0" fill="#9b8fc0"/></g>
+    <g id="eyeR"><ellipse cx="365" cy="150" rx="36" ry="40" fill="#fff"/><circle class="pup" cx="362" cy="155" r="17" fill="#2a2140"/><circle class="hl" cx="368" cy="147" r="6" fill="#fff"/>
+      <rect class="lid" clip-path="url(#ceR)" x="325" y="108" width="80" height="0" fill="#9b8fc0"/></g>
+    <g id="sleepEyes" opacity="0" stroke="#2a2140" stroke-width="9" fill="none" stroke-linecap="round">
+      <path d="M205 160 Q235 180 265 160"/><path d="M335 160 Q365 180 395 160"/></g>
+    <g id="happyEyes" opacity="0" stroke="#2a2140" stroke-width="11" fill="none" stroke-linecap="round">
+      <path d="M205 160 Q235 120 265 160"/><path d="M335 160 Q365 120 395 160"/></g>
+  </g>
+</svg>
+</div>
+
+<div id="ui" class="layer" style="z-index:2">
+  <!-- B cards -->
+  <div class="card cb" data-in="4.9" style="left:80px;top:230px;width:920px;padding:30px 20px;font-size:54px">過去の借入の調査は<br><span style="color:var(--orange);font-size:78px">すべて当事務所が代行</span></div>
+  <div class="card cb" data-in="6.6" style="left:80px;top:530px;width:440px;padding:28px 10px;font-size:46px">自分で集める資料<br><span style="color:var(--orange);font-size:74px">基本ナシ</span></div>
+  <div class="card cb" data-in="8.2" style="left:560px;top:530px;width:440px;padding:28px 10px;font-size:46px">ご自宅で<br><span style="color:var(--orange);font-size:74px">待つだけ</span></div>
+  <!-- D -->
+  <div id="later" style="position:absolute;left:0;right:0;top:300px;text-align:center;font-size:84px;font-weight:900;color:#fff;opacity:0">しばらくして…</div>
+  <div id="zzz" style="position:absolute;left:640px;top:780px;font-size:110px;font-weight:900;color:#fff;opacity:0">Z<span style="font-size:80px">z</span><span style="font-size:60px">z</span></div>
+  <div id="pinpon" class="bub" style="left:560px;top:520px;font-size:70px;opacity:0;color:var(--orange)">ピンポーン♪</div>
+  <!-- E -->
+  <div id="env" class="card" style="left:240px;top:250px;width:600px;padding:34px 10px;font-size:52px;opacity:0;border:8px solid var(--orange)">過払い金<br><span style="font-size:70px;color:var(--red)">返還のお知らせ</span></div>
+  <div id="eee" style="position:absolute;left:0;right:0;top:240px;text-align:center;font-size:150px;font-weight:900;color:var(--red);-webkit-text-stroke:16px #fff;paint-order:stroke fill;opacity:0">えええーっ!?</div>
+  <!-- F cards -->
+  <div class="card cf" data-in="17.2" style="left:70px;top:220px;width:940px;padding:30px 20px;font-size:50px">取引なし・過払い金なしなら<br>弁護士費用 <span style="color:var(--red);font-size:110px;vertical-align:middle">0円</span>
+    <span style="display:inline-block;vertical-align:middle;margin-left:16px;transform:rotate(-10deg);border:9px solid var(--red);color:var(--red);border-radius:18px;padding:4px 18px;font-size:46px;background:#fff">無料で終了</span></div>
+  <div class="card cf" data-in="19.6" style="left:70px;top:570px;width:940px;padding:30px 20px;font-size:50px;background:var(--gold)">回収できた場合<span style="color:var(--red)">のみ</span><br><span style="font-size:96px;color:var(--navy)">成功報酬</span></div>
+  <!-- H end card -->
+  <div id="end" style="position:absolute;inset:0;opacity:0">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,#fff7e3,#ffd98a)"></div>
+    <div style="position:absolute;left:0;right:0;top:230px;text-align:center;font-size:66px;font-weight:900">過払い金のご相談は</div>
+    <div style="position:absolute;left:0;right:0;top:360px;text-align:center" id="digits">
+      <span class="digit"><b>3</b><i>サ</i></span><span class="digit"><b>1</b><i>イ</i></span><span class="digit"><b>6</b><i>ム</i></span><span class="digit" style="width:60px"><b>-</b><i>&nbsp;</i></span><span class="digit"><b>7</b><i>ナ</i></span><span class="digit"><b>4</b><i>シ</i></span><span class="digit"><b>2</b><i>ニ</i></span>
+    </div>
+    <div id="logo" class="card" style="left:90px;top:720px;width:900px;padding:40px 10px">
+      <div style="font-size:110px;color:var(--navy)">アディーレ</div><div style="font-size:62px;color:var(--navy);letter-spacing:.3em">法律事務所</div></div>
+  </div>
+</div>
+
+<div id="sub" class="sub"></div>
+<div id="note" class="note"></div>
+<div id="brand">アディーレ法律事務所</div>
+
+<script>
+const DUR=29.5, FPS=30;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo=x=>1-Math.pow(1-x,3);
+const eb=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const lerp=(a,b,p)=>a+(b-a)*p;
+const $=id=>document.getElementById(id);
+const C=ENV.cues;
+const SUBS=[
+ ['h1','カバ','過払い金？ でも手続きとか<br>めんどくさいんでしょ〜？',0.4,4.3],
+ ['n1','ナレーション','ご安心ください。過去の借入の調査は<br>すべてアディーレが代行。',4.5,7.6],
+ ['n1','ナレーション','ご自宅で、待つだけです。',7.6,10.15],
+ ['h2','カバ','え、待つだけでいいの？',10.3,11.75],
+ ['h3','カバ','えええーっ!?<br>こんなに戻ってきたの!?',14.6,16.95],
+ ['n2','ナレーション','過払い金がなければ、費用は無料。',17.1,19.5],
+ ['n2','ナレーション','回収できた場合のみ<br>成功報酬です。',19.5,22.0],
+ ['h4','カバ','それなら、相談しない手はないね！',22.1,24.6],
+ ['n3','ナレーション','サイムナシニ。<br>アディーレ法律事務所。',24.8,27.6],
+];
+// coins
+const fx=$('fx'); const coins=[];
+(function(){let r=7;const R=()=>{r=(r*16807)%2147483647;return r/2147483647};
+ for(let i=0;i<46;i++){const d=document.createElement('div');const bill=i%4===0;
+  d.style.cssText=`position:absolute;left:0;top:0;width:${bill?150:90}px;height:${bill?80:90}px;border-radius:${bill?'10px':'50%'};background:${bill?'#9ad19a':'#f2c230'};border:7px solid ${bill?'#5a9a5a':'#c8901a'};font:900 ${bill?40:50}px 'M PLUS Rounded 1c';color:${bill?'#3a7a3a':'#c8901a'};text-align:center;line-height:${bill?66:76}px;opacity:0`;
+  d.textContent='¥';fx.appendChild(d);coins.push({d,x:R()*1000,t0:14.4+R()*2.4,v:700+R()*500,rot:R()*720-360});}})();
+
+function hip(o){ // x,y center px, s scale, m mouth, lid, eye, smile, sleep, happy, armR, phone, bag, rot
+  $('hipwrap').style.transform=`translate(${o.x-300}px,${o.y-360}px) scale(${o.s}) rotate(${o.rot||0}deg)`;
+  const m=o.m;
+  $('jaw').setAttribute('transform',`translate(0 ${m*120})`);$('head').setAttribute('transform',`translate(0 ${-m*45}) rotate(${-m*6} 300 300)`);
+  $('mouthIn').setAttribute('cy',370+m*60);$('mouthIn').setAttribute('ry',20+m*70);
+  $('tongue').setAttribute('cy',400+m*100);$('tongue').setAttribute('ry',20+m*25);$('tongue').style.opacity=m>0.05?1:0;
+  const sm=o.smile; $('smile').setAttribute('d',`M240 ${330-sm*8} Q300 ${330+sm*45} 360 ${330-sm*8}`);$('smile').style.opacity=clamp(1-m*4);
+  ['eyeL','eyeR'].forEach((id,i)=>{const g=$(id);const cx=i?365:235;
+    g.setAttribute('transform',`translate(${cx} 150) scale(${o.eye}) translate(${-cx} -150)`);
+    g.querySelector('.lid').setAttribute('height',o.lid*82);
+    g.querySelectorAll('.pup').forEach(p=>p.setAttribute('r',o.eye>1.3?9:17));
+    g.style.opacity=(o.sleep||o.happy)?0:1});
+  $('sleepEyes').style.opacity=o.sleep?1:0; $('happyEyes').style.opacity=o.happy?1:0;
+  $('armR').setAttribute('transform',`rotate(${o.armR||0} 470 470)`);
+  $('armL').setAttribute('transform',`rotate(${o.armL||0} 130 470)`);
+  $('phone').style.opacity=o.phone?1:0; $('bag').style.opacity=o.bag?1:0;
+}
+function mouthAt(t){const f=Math.floor(t*FPS);return ENV.mouth[f]||0}
+function pop(el,t,t0,base=''){const p=clamp((t-t0)/0.4);el.style.opacity=clamp(p*3);el.style.transform=`${base} scale(${p<=0?0.3:0.3+0.7*eb(p)})`;}
+
+function render(t){
+  const mv=mouthAt(t);
+  const bob=Math.sin(t*4)*6;
+  let o={x:540,y:1010+bob,s:1.15,m:mv*0.75,lid:0.45,eye:1,smile:-0.2,armR:0,phone:0,bag:0,sleep:0,happy:0,rot:0};
+  // clock
+  const spin=t<11.8?t*6:t<14.2?t*6+(t-11.8)*1500:t*6+3600;
+  $('mm').style.transform=`rotate(${180+spin}deg)`;$('hh').style.transform=`rotate(${180+spin/12}deg)`;
+  // night
+  $('night').style.opacity= t<11.8?0 : t<12.2?(t-11.8)/0.4*0.6 : t<13.3?0.6 : t<13.6?0.6*(1-(t-13.3)/0.3):0;
+  $('room').style.filter='';
+  // reset ui
+  document.querySelectorAll('.cb,.cf').forEach(e=>e.style.opacity=0);
+  ['later','zzz','pinpon','env','eee','end'].forEach(id=>$(id).style.opacity=0);
+  $('note').textContent='';
+  if(t<4.4){ // A
+    o.phone=1;o.armR=-25;o.lid=0.5;o.smile=-0.3;
+  } else if(t<10.2){ // B
+    const p=eo(clamp((t-4.4)/0.5));
+    o.x=lerp(540,540,p);o.y=lerp(1010,1130,p)+bob;o.s=lerp(1.15,0.95,p);o.lid=0.45;o.phone=1;o.armR=-25;
+    document.querySelectorAll('.cb').forEach(e=>pop(e,t,+e.dataset.in));
+  } else if(t<11.8){ // C
+    const p=eb(clamp((t-10.2)/0.4));o.lid=0;o.eye=lerp(1,1.15,p);o.smile=0.3;o.m=mv*0.75;o.armR=-25;o.phone=1;
+  } else if(t<14.2){ // D sleep
+    o.sleep=1;o.m=0.08+0.06*Math.sin(t*5);o.y=1010+Math.sin(t*3)*10;o.rot=Math.sin(t*1.5)*3;o.smile=0.3;
+    const lp=clamp((t-11.9)/0.4);$('later').style.opacity=t<13.3?lp:clamp(1-(t-13.3)/0.3);
+    $('zzz').style.opacity=t<13.4?0.5+0.5*Math.sin(t*6):0;$('zzz').style.transform=`translateY(${-((t*60)%60)}px)`;
+    if(t>13.4){pop($('pinpon'),t,13.4);o.sleep=0;o.lid=0;o.eye=1.1;o.m=0;}
+    $('note').textContent=t>11.9?'※期間は事案により異なります。':'';
+  } else if(t<17.0){ // E surprise
+    pop($('env'),t,14.2); if(t>14.6){$('env').style.opacity=0;}
+    const gag=clamp((t-14.45)/0.15);
+    o.m=Math.max(gag*0.85+mv*0.15, mv);o.eye=lerp(1,1.75,eb(clamp((t-14.45)/0.3)));o.lid=0;
+    const sh=t>14.45?Math.sin(t*70)*10*clamp(1-(t-14.45)/1.8):0;o.x=540+sh;o.y=1010;o.s=1.25;o.armL=40;o.armR=-40;
+    if(t>14.6) pop($('eee'),t,14.6);
+    $('note').textContent='※イメージです。過払い金の有無・金額は事案により異なります。';
+  } else if(t<22.0){ // F
+    const p=eo(clamp((t-17)/0.5));o.x=lerp(540,540,p);o.y=lerp(1010,1180,p)+bob;o.s=lerp(1.25,0.85,p);
+    o.happy=1;o.bag=1;o.m=0;o.smile=1;o.armL=-20;o.armR=20;
+    document.querySelectorAll('.cf').forEach(e=>pop(e,t,+e.dataset.in));
+    $('note').textContent='※弁護士費用の詳細・条件は事務所の基準によります。';
+  } else if(t<24.6){ // G
+    const p=eb(clamp((t-22)/0.4));o.s=lerp(0.85,1.15,p);o.y=1010+bob;o.lid=0;o.eye=1.05;o.smile=1;o.armR=lerp(0,-130,p);o.m=mv*0.75;o.bag=0;
+  } else { // H end
+    const p=clamp((t-24.6)/0.4);$('end').style.opacity=p;
+    document.querySelectorAll('#digits .digit').forEach((d,i)=>{const q=clamp((t-24.85-i*0.15)/0.35);d.style.opacity=clamp(q*3);d.style.transform=`scale(${q<=0?0.3:0.3+0.7*eb(q)})`});
+    pop($('logo'),t,25.9);
+    o.x=840;o.y=1330+Math.sin(t*5)*8;o.s=0.6;o.happy=1;o.smile=1;o.armR=-120+Math.sin(t*10)*20;o.m=0;
+  }
+  hip(o);
+  // coins
+  coins.forEach(c=>{const l=t-c.t0;if(t<14.4||t>17.1||l<0){c.d.style.opacity=0;return}
+    c.d.style.opacity=1;c.d.style.transform=`translate(${c.x}px,${-150+c.v*l+300*l*l}px) rotate(${c.rot*l}deg)`;});
+  // subtitles
+  const s=SUBS.find(x=>t>=x[3]&&t<x[4]+0.1);const sub=$('sub');
+  if(s){sub.className='sub'+(s[1]==='カバ'?' h':'');sub.innerHTML=`<span class="spk">${s[1]}</span><br>${s[2]}`}else sub.innerHTML='';
+}
+window.render=render;window.DUR=DUR;render(0);
+</script>
+</body></html>
