@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=block" rel="stylesheet">
+<script src="env.js"></script>
+<style>
+:root{--navy:#14254a;--gold:#e8b931;--orange:#f08a1c;--red:#d93a2b;--ink:#2a2140}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#8fd3f4}
+body{font-family:'M PLUS Rounded 1c',sans-serif;position:relative;color:var(--ink)}
+#sky{position:absolute;inset:0;background:linear-gradient(#7cc8f0 0%,#bfe8fb 55%,#e6f7ff 70%)}
+.cloud{position:absolute;background:#fff;border-radius:100px;opacity:.95}
+.cloud:before,.cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud:before{width:55%;height:150%;left:15%;top:-70%}.cloud:after{width:40%;height:120%;left:48%;top:-45%}
+#hill{position:absolute;left:-200px;right:-200px;top:1180px;height:1200px;border-radius:50% 50% 0 0;background:#8fd16a}
+#ground{position:absolute;left:0;right:0;top:1420px;bottom:0;background:#79bf55}
+.tree{position:absolute;width:220px;height:320px}
+.tree i{position:absolute;left:90px;top:170px;width:40px;height:150px;background:#9a6b3f;border-radius:10px}
+.tree b{position:absolute;left:0;top:0;width:220px;height:220px;border-radius:50%;background:#5aa84a}
+.ch{position:absolute;left:0;top:0;z-index:6}
+.layer{position:absolute;inset:0}
+.telop{position:absolute;left:30px;right:30px;top:120px;text-align:center;font-weight:900;font-size:84px;line-height:1.22;color:var(--red);
+  -webkit-text-stroke:18px #fff;paint-order:stroke fill;filter:drop-shadow(0 6px 0 rgba(0,0,0,.18));z-index:8}
+.telop.long{font-size:66px}
+.spk{display:inline-block;font-size:36px;-webkit-text-stroke:0;color:#fff;border-radius:30px;padding:4px 26px;margin-bottom:8px;filter:none}
+.card{position:absolute;background:#fff;border-radius:34px;box-shadow:0 12px 0 rgba(0,0,0,.12),0 18px 40px rgba(0,0,0,.15);text-align:center;font-weight:900;z-index:5}
+.boom{position:absolute;left:0;right:0;text-align:center;font-weight:900;color:#fff;z-index:9;opacity:0;-webkit-text-stroke:22px var(--red);paint-order:stroke fill;filter:drop-shadow(0 10px 0 rgba(0,0,0,.25))}
+.note{position:absolute;left:40px;right:40px;top:1800px;font-size:26px;font-weight:800;color:#2f5a20;text-align:center;z-index:6}
+#brand{position:absolute;left:0;right:0;top:1850px;text-align:center;font-weight:800;font-size:30px;letter-spacing:.2em;color:#2f5a20;z-index:6}
+.digit{display:inline-block;width:132px;text-align:center;vertical-align:top}
+.digit b{display:block;font-size:190px;font-weight:900;line-height:1;color:var(--orange);-webkit-text-stroke:10px #fff;paint-order:stroke fill}
+.digit i{display:block;font-style:normal;font-size:60px;font-weight:900;color:var(--ink);margin-top:6px}
+.coin{position:absolute;left:0;top:0;width:80px;height:80px;border-radius:50%;background:#f2c230;border:7px solid #c8901a;font:900 46px 'M PLUS Rounded 1c';color:#c8901a;text-align:center;line-height:66px;opacity:0;z-index:4}
+.spark{position:absolute;left:0;top:0;color:#fff7a8;font-size:60px;z-index:4;opacity:0;text-shadow:0 0 12px #fff}
+</style></head>
+<body>
+<div id="sky"></div>
+<div class="cloud" id="cl1" style="width:260px;height:80px;top:520px"></div>
+<div class="cloud" id="cl2" style="width:200px;height:64px;top:680px"></div>
+<div class="tree" style="left:-40px;top:900px"><i></i><b></b></div>
+<div class="tree" style="left:900px;top:930px"><i></i><b></b></div>
+<div id="hill"></div><div id="ground"></div>
+<div id="fx" class="layer" style="z-index:4"></div>
+
+<!-- NASHI -->
+<div class="ch" id="nashi" style="width:500px;height:720px">
+<svg viewBox="0 0 500 720" width="500" height="720" overflow="visible">
+ <defs>
+  <radialGradient id="pg" cx="40%" cy="40%" r="70%"><stop offset="0" stop-color="#fbe58a"/><stop offset=".6" stop-color="#efd060"/><stop offset="1" stop-color="#d9b23e"/></radialGradient>
+  <clipPath id="pclip"><path id="pshape" d="M250 70 C330 70 352 170 348 235 C344 300 455 345 455 505 C455 650 355 700 250 700 C145 700 45 650 45 505 C45 345 156 300 152 235 C148 170 170 70 250 70Z"/></clipPath>
+  <pattern id="chk" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#24346b"/><rect width="12" height="12" fill="#fff"/><rect x="12" y="12" width="12" height="12" fill="#fff"/></pattern>
+  <pattern id="apr" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="#fffaf0"/><circle cx="15" cy="15" r="7" fill="#f08a1c"/><circle cx="45" cy="42" r="6" fill="#6ab04c"/><circle cx="45" cy="12" r="4" fill="#e0483a"/></pattern>
+ </defs>
+ <g id="nWings" opacity=".75"><ellipse cx="95" cy="330" rx="80" ry="45" fill="#bfe9ff" transform="rotate(-30 95 330)"/><ellipse cx="405" cy="330" rx="80" ry="45" fill="#bfe9ff" transform="rotate(30 405 330)"/></g>
+ <g id="nArmL"><path d="M80 470 Q20 430 10 360" stroke="#c98a4a" stroke-width="26" fill="none" stroke-linecap="round"/><circle cx="10" cy="352" r="26" fill="#d99a5a"/></g>
+ <g id="nArmR"><path d="M420 470 Q480 520 470 590" stroke="#c98a4a" stroke-width="26" fill="none" stroke-linecap="round"/><circle cx="470" cy="598" r="26" fill="#d99a5a"/></g>
+ <path d="M250 75 Q245 30 262 0" stroke="#7a4a20" stroke-width="18" fill="none" stroke-linecap="round"/>
+ <ellipse cx="300" cy="30" rx="48" ry="20" fill="#6ab04c" transform="rotate(-25 300 30)"/>
+ <use href="#pshape" fill="url(#pg)"/>
+ <g clip-path="url(#pclip)">
+  <g fill="#c9a23a" opacity=".55" id="speck"></g>
+  <path d="M30 520 Q250 470 470 520 L470 720 L30 720Z" fill="url(#apr)"/>
+  <path d="M30 520 Q250 470 470 520" stroke="#e8d8c0" stroke-width="8" fill="none"/>
+  <rect x="100" y="178" width="300" height="46" fill="url(#chk)" transform="rotate(-4 250 200)"/>
+ </g>
+ <g transform="translate(395 186) rotate(-10)"><ellipse cx="0" cy="0" rx="30" ry="22" fill="url(#chk)"/><path d="M10 10 L50 60 L30 64Z M-5 15 L10 72 L-10 70Z" fill="#24346b"/></g>
+ <!-- face -->
+ <g id="nFace">
+  <path id="nBrowL" d="M160 268 Q190 252 220 266" stroke="#9a5a2a" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path id="nBrowR" d="M280 266 Q310 252 340 268" stroke="#9a5a2a" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <g id="nEyes"><ellipse cx="195" cy="310" rx="20" ry="26" fill="#1a1a1a"/><ellipse cx="305" cy="310" rx="20" ry="26" fill="#1a1a1a"/>
+   <circle cx="201" cy="300" r="7" fill="#fff"/><circle cx="311" cy="300" r="7" fill="#fff"/></g>
+  <g id="nHappy" opacity="0" stroke="#1a1a1a" stroke-width="10" fill="none" stroke-linecap="round"><path d="M175 315 Q195 290 215 315"/><path d="M285 315 Q305 290 325 315"/></g>
+  <ellipse cx="150" cy="360" rx="26" ry="16" fill="#f5a37a" opacity=".55"/><ellipse cx="350" cy="360" rx="26" ry="16" fill="#f5a37a" opacity=".55"/>
+  <path id="nSmile" d="M205 365 Q250 400 295 365" stroke="#6a3a1a" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <ellipse id="nMouth" cx="250" cy="378" rx="34" ry="4" fill="#7a2a20"/>
+ </g>
+ <!-- tie -->
+ <path d="M185 425 Q250 440 315 425 L300 455 Q250 465 200 455Z" fill="#f08a3c"/>
+ <path d="M238 450 L262 450 L278 560 L250 590 L222 560Z" fill="#e8743a"/>
+</svg></div>
+
+<!-- HIPPO -->
+<div class="ch" id="hippo" style="width:600px;height:720px">
+<svg viewBox="0 0 600 720" width="600" height="720" overflow="visible">
+  <defs><clipPath id="ceL"><ellipse cx="235" cy="150" rx="36" ry="40"/></clipPath><clipPath id="ceR"><ellipse cx="365" cy="150" rx="36" ry="40"/></clipPath></defs>
+  <ellipse cx="220" cy="680" rx="70" ry="34" fill="#8577b0"/><ellipse cx="380" cy="680" rx="70" ry="34" fill="#8577b0"/>
+  <ellipse cx="300" cy="530" rx="215" ry="165" fill="#9b8fc0"/><ellipse cx="300" cy="570" rx="140" ry="105" fill="#c9c0e6"/>
+  <g id="bag"><path d="M200 470 Q180 660 300 670 Q420 660 400 470 Q350 440 300 450 Q250 440 200 470Z" fill="#c8913e"/>
+    <path d="M245 455 Q300 418 355 455" stroke="#8a5a20" stroke-width="12" fill="none"/>
+    <text x="300" y="615" text-anchor="middle" font-size="130" font-weight="900" fill="#ffe14d" stroke="#8a5a20" stroke-width="6" paint-order="stroke" font-family="M PLUS Rounded 1c">¥</text></g>
+  <g id="hArmL"><ellipse cx="150" cy="540" rx="48" ry="85" fill="#9b8fc0" transform="rotate(-35 150 540)"/></g>
+  <g id="hArmR"><ellipse cx="450" cy="540" rx="48" ry="85" fill="#9b8fc0" transform="rotate(35 450 540)"/></g>
+  <g id="hHead">
+    <ellipse cx="195" cy="80" rx="32" ry="40" fill="#9b8fc0"/><ellipse cx="195" cy="84" rx="16" ry="22" fill="#f3a6c0"/>
+    <ellipse cx="405" cy="80" rx="32" ry="40" fill="#9b8fc0"/><ellipse cx="405" cy="84" rx="16" ry="22" fill="#f3a6c0"/>
+    <ellipse cx="300" cy="175" rx="155" ry="125" fill="#9b8fc0"/>
+    <ellipse id="hMouthIn" cx="300" cy="370" rx="160" ry="20" fill="#7a2340"/>
+    <ellipse id="hTongue" cx="300" cy="400" rx="90" ry="20" fill="#e86a8a"/>
+    <g id="hJaw"><ellipse cx="300" cy="370" rx="175" ry="62" fill="#8d81b6"/>
+      <rect x="200" y="282" width="36" height="58" rx="14" fill="#fff"/><rect x="364" y="282" width="36" height="58" rx="14" fill="#fff"/></g>
+    <ellipse cx="300" cy="275" rx="195" ry="100" fill="#ab9fd0"/>
+    <ellipse cx="245" cy="240" rx="15" ry="22" fill="#5b4f80"/><ellipse cx="355" cy="240" rx="15" ry="22" fill="#5b4f80"/>
+    <circle cx="165" cy="300" r="30" fill="#f3a6c0" opacity=".7"/><circle cx="435" cy="300" r="30" fill="#f3a6c0" opacity=".7"/>
+    <path id="hSmile" d="M240 330 Q300 330 360 330" stroke="#5b4f80" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <g id="hEyes">
+     <g><ellipse cx="235" cy="150" rx="36" ry="40" fill="#fff"/><circle class="pup" cx="238" cy="155" r="17" fill="#2a2140"/><circle cx="244" cy="147" r="6" fill="#fff"/></g>
+     <g><ellipse cx="365" cy="150" rx="36" ry="40" fill="#fff"/><circle class="pup" cx="362" cy="155" r="17" fill="#2a2140"/><circle cx="368" cy="147" r="6" fill="#fff"/></g>
+    </g>
+    <g id="hHappy" opacity="0" stroke="#2a2140" stroke-width="11" fill="none" stroke-linecap="round"><path d="M205 160 Q235 120 265 160"/><path d="M335 160 Q365 120 395 160"/></g>
+    <g id="hAngry" opacity="0" stroke="#2a2140" stroke-width="14" stroke-linecap="round"><path d="M195 95 L270 125"/><path d="M405 95 L330 125"/></g>
+    <g id="hTears" opacity="0" fill="#6cc4ff"><path d="M215 190 Q200 230 215 250 Q232 230 215 190Z"/><path d="M385 190 Q370 230 385 250 Q402 230 385 190Z"/></g>
+  </g>
+</svg></div>
+
+<!-- TORI -->
+<div class="ch" id="tori" style="width:400px;height:420px">
+<svg viewBox="0 0 400 420" width="400" height="420" overflow="visible">
+  <path d="M180 30 Q190 0 205 25 Q220 -5 225 35" fill="#ff7a5a"/>
+  <g id="tWingL"><ellipse cx="85" cy="220" rx="70" ry="40" fill="#5ab0d8" transform="rotate(-20 140 220)"/></g>
+  <g id="tWingR"><ellipse cx="315" cy="220" rx="70" ry="40" fill="#5ab0d8" transform="rotate(20 260 220)"/></g>
+  <path d="M160 340 L150 400 M150 400 L130 410 M150 400 L165 412" stroke="#f0a020" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <path d="M240 340 L250 400 M250 400 L235 412 M250 400 L270 410" stroke="#f0a020" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <circle cx="200" cy="200" r="150" fill="#7ec8e3"/>
+  <ellipse cx="200" cy="260" rx="100" ry="85" fill="#f4fbff"/>
+  <ellipse cx="150" cy="160" rx="24" ry="30" fill="#1a1a1a"/><ellipse cx="250" cy="160" rx="24" ry="30" fill="#1a1a1a"/>
+  <circle cx="157" cy="150" r="8" fill="#fff"/><circle cx="257" cy="150" r="8" fill="#fff"/>
+  <ellipse cx="120" cy="210" rx="22" ry="13" fill="#ff9fb0" opacity=".7"/><ellipse cx="280" cy="210" rx="22" ry="13" fill="#ff9fb0" opacity=".7"/>
+  <g id="tBeakL"><path d="M165 205 Q200 255 235 205Z" fill="#f08a1c"/></g>
+  <path d="M160 205 Q200 165 240 205Z" fill="#ffb02e"/>
+</svg></div>
+
+<div class="card" id="c1" style="left:70px;top:520px;width:440px;padding:22px 10px;font-size:40px;opacity:0">ナシにするのは<br><span style="font-size:80px;color:var(--navy);position:relative">借金<span style="position:absolute;left:-14px;top:-24px;font-size:120px;color:var(--red);line-height:1">✕</span></span></div>
+<div class="card" id="c2" style="left:570px;top:520px;width:440px;padding:22px 10px;font-size:40px;opacity:0;background:var(--gold)">払い過ぎた利息<br><span style="font-size:62px;color:var(--navy)">過払い金は<br><span style="color:var(--red)">なくさない！</span></span></div>
+
+<div class="boom" id="bKaba" style="top:560px;font-size:300px">カバ</div>
+<div class="boom" id="bTori" style="top:560px;font-size:300px;-webkit-text-stroke-color:#1a7ab0">トリ</div>
+
+<div id="end" class="layer" style="opacity:0;z-index:5">
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,#fff7e3,#ffd98a)"></div>
+  <div style="position:absolute;left:0;right:0;top:220px;text-align:center;font-size:62px;font-weight:900">債務整理・過払い金のご相談は</div>
+  <div style="position:absolute;left:0;right:0;top:340px;text-align:center" id="digits">
+   <span class="digit"><b>3</b><i>サ</i></span><span class="digit"><b>1</b><i>イ</i></span><span class="digit"><b>6</b><i>ム</i></span><span class="digit" style="width:60px"><b>-</b><i>&nbsp;</i></span><span class="digit"><b>7</b><i>ナ</i></span><span class="digit"><b>4</b><i>シ</i></span><span class="digit"><b>2</b><i>ニ</i></span></div>
+  <div class="card" id="logo" style="left:90px;top:690px;width:900px;padding:36px 10px"><div style="font-size:110px;color:var(--navy)">アディーレ</div><div style="font-size:62px;color:var(--navy);letter-spacing:.3em">法律事務所</div></div>
+</div>
+
+<div id="telop" class="telop"></div>
+<div id="note" class="note"></div>
+<div id="brand">アディーレ法律事務所</div>
+
+<script>
+const E=ENV,C=E.cues,DUR=E.dur,FPS=30;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo=x=>1-Math.pow(1-x,3);
+const eb=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const lerp=(a,b,p)=>a+(b-a)*p;
+const $=id=>document.getElementById(id);
+const S=(id,attr,v)=>$(id).setAttribute(attr,v);
+const SPK={n:['ナシ','#d9a21a'],h:['カバ','#7a6ab0'],b:['トリ','#2a90c0'],x:['みんな','#d93a2b']};
+const K='<span style="color:#7a4ab0">“カバ”</span>', T='<span style="color:#1a7ab0">“トリ”</span>';
+// [start,end,speaker,text,long]
+const TEL=[
+ [C.n1[0],C.n1[1]+.1,'n','僕は債務をナシにする<br>アディーレの妖精だよ'],
+ [C.n2[0],C.n2[1]+.1,'n','今日もみんなの借金を<br>ナシにしていくよ！'],
+ [C.h1a[0],C.h1b[1],'h','嫌だ！この…'],
+ [C.h1b[1],C.h1c[1]+.1,'h',K+'らい金は<br>僕のだ！'],
+ [C.h1d[0],C.h1d[1]+.1,'h','ナシにされるなんて<br>絶対に嫌だ！'],
+ [C.h2[0],(C.h2[0]+C.h2[1])/2+.2,'h','ずっと面倒だと思っていた<br>過払い金の手続きが',1],
+ [(C.h2[0]+C.h2[1])/2+.2,C.h2[1]+.1,'h','ただ家で待っているだけで<br>戻ってきたんだよ!?',1],
+ [C.n3[0],C.n3[1]+.1,'n','大丈夫、大丈夫。<br>僕がナシにするのは“借金”さ',1],
+ [C.n4[0],C.n4[1]+.1,'n','払い過ぎていた利息の回収である<br>過払い金は、なくさないよ',1],
+ [C.n5[0],C.n5[1]+.2,'n','それはこの'+T+'に<br>取り戻してもらうよ！'],
+ [C.b1a[0],C.b1c[1]+.2,'b','過払い金を〜〜<br>'+T+'もど〜〜す！'],
+ [C.all[0],C.all[1]+.3,'x','債務はナシニ！<br>過払い金はトリ戻〜す！'],
+];
+const m=(k,t)=>(E.mouth[k]||[])[Math.floor(t*FPS)]||0;
+// specks on pear
+(function(){let r=11,s='';const R=()=>{r=(r*16807)%2147483647;return r/2147483647};for(let i=0;i<90;i++)s+=`<circle cx="${50+R()*400}" cy="${90+R()*600}" r="${2+R()*3}"/>`;$('speck').innerHTML=s})();
+// coins & sparkles
+const fx=$('fx'),coins=[],sparks=[];
+(function(){let r=3;const R=()=>{r=(r*16807)%2147483647;return r/2147483647};
+ for(let i=0;i<22;i++){const d=document.createElement('div');d.className='coin';d.textContent='¥';fx.appendChild(d);coins.push({d,t0:C.b1c[0]-0.3+i*0.07,y0:300+R()*700,dy:R()*80})}
+ for(let i=0;i<24;i++){const d=document.createElement('div');d.className='spark';d.textContent='✦';fx.appendChild(d);sparks.push({d,i,ph:R()*6,ox:R()*160-80,oy:R()*200-100})}})();
+
+function place(id,x,y,s,rot=0,w=0,h=0){const el=$(id);const W=el.offsetWidth,H=el.offsetHeight;el.style.transform=`translate(${x-W/2}px,${y-H/2}px) rotate(${rot}deg) scale(${s})`;el.style.transformOrigin='50% 50%'}
+function nashi(o){
+  const k=o.m;S('nMouth','ry',4+k*30);S('nMouth','cy',378+k*10);S('nMouth','rx',30+k*8);$('nSmile').style.opacity=clamp(1-k*3);
+  $('nEyes').style.opacity=o.happy?0:1;$('nHappy').style.opacity=o.happy?1:0;
+  S('nArmL','transform',`rotate(${o.armL||0} 80 470)`);S('nArmR','transform',`rotate(${o.armR||0} 420 470)`);
+  S('nWings','transform',`translate(250 330) scale(${1+0.12*Math.sin(o.t*18)},1) translate(-250 -330)`);
+  place('nashi',o.x,o.y,o.s,o.rot||0);
+}
+function hippo(o){
+  const k=o.m;S('hJaw','transform',`translate(0 ${k*120})`);S('hHead','transform',`translate(0 ${-k*40}) rotate(${-k*5} 300 300)`);
+  S('hMouthIn','cy',370+k*60);S('hMouthIn','ry',20+k*70);S('hTongue','cy',400+k*100);$('hTongue').style.opacity=k>.05?1:0;
+  const sm=o.smile;S('hSmile','d',`M240 ${330-sm*8} Q300 ${330+sm*45} 360 ${330-sm*8}`);$('hSmile').style.opacity=clamp(1-k*4);
+  $('hEyes').style.opacity=o.happy?0:1;$('hHappy').style.opacity=o.happy?1:0;$('hAngry').style.opacity=o.angry?1:0;$('hTears').style.opacity=o.tears?1:0;
+  if(o.tears)S('hTears','transform',`translate(0 ${(o.t*120)%50})`);
+  $('hEyes').querySelectorAll('.pup').forEach(p=>p.setAttribute('r',o.small?9:17));
+  S('hEyes','transform',`translate(300 150) scale(${o.eye||1}) translate(-300 -150)`);
+  place('hippo',o.x,o.y,o.s,o.rot||0);
+}
+function tori(o){
+  S('tBeakL','transform',`translate(0 ${o.m*45})`);
+  const f=o.fly?Math.sin(o.t*30)*35:Math.sin(o.t*6)*8;
+  S('tWingL','transform',`rotate(${f} 150 220)`);S('tWingR','transform',`rotate(${-f} 250 220)`);
+  place('tori',o.x,o.y,o.s,o.rot||0);
+}
+function popEl(el,t,t0,dur=.4){const p=clamp((t-t0)/dur);el.style.opacity=clamp(p*3);el.style.transform=`scale(${p<=0?.3:.3+.7*eb(p)})`;return p}
+
+function render(t){
+  const bob=Math.sin(t*3)*12;
+  $('cl1').style.left=(((t*25)+100)%1400-260)+'px';$('cl2').style.left=(((t*18)+700)%1400-260)+'px';
+  // defaults
+  const enter=eo(clamp((t-0)/1.0));
+  let N={t,x:lerp(-300,285,enter),y:1290+bob,s:1.05,m:m('n',t),armL:0,armR:0,happy:0,rot:lerp(-20,0,enter)};
+  let H={t,x:800,y:1370,s:.95,m:m('h',t)*.8,smile:.8,happy:1,eye:1};
+  let B={t,x:1400,y:300,s:.9,m:m('b',t),fly:1};
+  // sparkles trail around nashi
+  const sparkOn=t<1.5||(t>C.n2[0]&&t<C.n2[1])||(t>C.all[0]&&t<C.all[1]);
+  ['c1','c2','bKaba','bTori','end'].forEach(i=>$(i).style.opacity=0);
+  let note='';
+  if(t<C.n2[0]){ N.armL=10*Math.sin(t*4); H.happy=1;H.smile=1;
+  } else if(t<C.h1a[0]){ // n2: nashi raises arm, hippo notices
+    N.armL=lerp(0,60,eo(clamp((t-C.n2[0])/.4)));N.happy=t>C.n2[1]-1?1:0;
+    H.happy=0;H.smile=lerp(1,-.2,clamp((t-C.n2[0]-1)/.5));H.eye=lerp(1,1.15,clamp((t-C.n2[0]-1)/.5));
+  } else if(t<C.h2[0]){ // h1 angry
+    H.happy=0;H.angry=1;H.smile=-.5;H.m=Math.max(m('h',t)*.85,.05);
+    const sh=Math.sin(t*50)*6;H.x=800+sh;H.rot=Math.sin(t*12)*2;
+    if(t>=C.h1b[0]&&t<C.h1b[1]+.5){const p=popEl($('bKaba'),t,C.h1b[0],.25);$('bKaba').style.opacity=t>C.h1b[1]+.3?clamp(1-(t-C.h1b[1]-.3)/.2):clamp(p*3);H.s=.95+.1*Math.sin(clamp((t-C.h1b[0])/.5)*Math.PI)}
+    N.armL=0;N.rot=-6; N.x=285-20*eo(clamp((t-C.h1a[0])/.3));
+  } else if(t<C.n3[0]){ // h2 crying/pleading
+    H.happy=0;H.tears=1;H.smile=-.6;H.m=m('h',t)*.85;H.eye=1.1;H.rot=Math.sin(t*3)*3;H.x=lerp(800,775,eo(clamp((t-C.h2[0])/.5)));
+    N.rot=-4;
+    note='※イメージです。過払い金の有無・金額は事案により異なります。';
+  } else if(t<C.n5[0]){ // n3 n4 explain
+    N.armR=-30+Math.sin(t*6)*15;H.happy=0;H.smile=.2;H.eye=1;
+    popEl($('c1'),t,C.n3[0]+1.6);
+    if(t>C.n4[0]+.3)popEl($('c2'),t,C.n4[0]+.3);
+    if(t>C.n4[0]+2.5){H.happy=1;H.smile=1}
+  } else if(t<C.b1a[0]){ // n5 point up, bird flies in
+    N.armR=lerp(-30,-150,eo(clamp((t-C.n5[0])/.4)));N.happy=1;H.happy=0;H.smile=.4;H.eye=1.1;
+    const p=eo(clamp((t-(C.n5[1]-1.4))/1.4));B.x=lerp(1350,540,p);B.y=lerp(250,700,p)+Math.sin(t*5)*15;B.rot=lerp(-20,0,p);
+  } else if(t<C.all[0]){ // bird line
+    B.x=540;B.y=700+Math.sin(t*5)*10;B.fly=1;B.s=.9;N.happy=1;H.happy=0;H.eye=1.2;H.smile=.6;
+    if(t>=C.b1b[0]&&t<C.b1b[1]+.5){const p=popEl($('bTori'),t,C.b1b[0],.25);$('bTori').style.opacity=t>C.b1b[1]+.3?clamp(1-(t-C.b1b[1]-.3)/.2):clamp(p*3);B.s=.9+.15*Math.sin(clamp((t-C.b1b[0])/.6)*Math.PI)}
+    if(t>C.b1c[0]){H.happy=1;H.smile=1;H.eye=1}
+    note='※イメージです。過払い金の有無・金額は事案により異なります。';
+  } else { // chorus + end
+    const j=t<C.all[1]?Math.abs(Math.sin((t-C.all[0])*Math.PI*1.6))*-60:0;
+    N.happy=1;N.armL=60;N.armR=-150;N.y=1290+j;H.happy=1;H.smile=1;H.y=1370+j*0.8;B.x=540;B.y=700+j;
+    if(t>C.all[1]+.2){ // end card
+      const p=clamp((t-C.all[1]-.2)/.4);$('end').style.opacity=p;
+      document.querySelectorAll('#digits .digit').forEach((d,i)=>{const q=clamp((t-C.all[1]-.4-i*.12)/.35);d.style.opacity=clamp(q*3);d.style.transform=`scale(${q<=0?.3:.3+.7*eb(q)})`});
+      popEl($('logo'),t,C.all[1]+1.2);
+      N.x=210;N.y=1450+Math.sin(t*5)*8;N.s=.68;H.x=545;H.y=1490;H.s=.6;B.x=880;B.y=1460+Math.sin(t*6)*10;B.s=.7;
+      H.m=0;N.m=0;B.m=0;
+    }
+  }
+  nashi(N);hippo(H);tori(B);
+  sparks.forEach(s=>{const on=sparkOn&&!(t>C.all[1]+.2);const ang=t*2+s.ph;
+    s.d.style.opacity=on?(0.5+0.5*Math.sin(t*8+s.ph)):0;
+    s.d.style.transform=`translate(${N.x+Math.cos(ang)*(180+s.ox)}px,${N.y-150+Math.sin(ang)*(260+s.oy)}px) scale(${.5+.5*Math.sin(t*6+s.ph)})`});
+  coins.forEach(c=>{const l=(t-c.t0)/0.8;if(l<0||l>1||t>C.all[0]){c.d.style.opacity=0;return}
+    const x=lerp(-100,H.x-40,eo(l)),y=lerp(c.y0,H.y+40,eo(l))-Math.sin(l*Math.PI)*200;c.d.style.opacity=1;c.d.style.transform=`translate(${x}px,${y}px) rotate(${l*360}deg)`});
+  // telop
+  const tl=TEL.find(x=>t>=x[0]-0.05&&t<x[1]);const el=$('telop');
+  if(tl&&!(t>C.all[1]+.2)){const[sp,col]=SPK[tl[2]];el.className='telop'+(tl[4]?' long':'');
+    el.innerHTML=`<span class="spk" style="background:${col}">${sp}</span><br>${tl[3]}`;
+    const p=clamp((t-tl[0])/.2);el.style.transform=`scale(${.85+.15*eo(p)})`;el.style.opacity=1}
+  else el.innerHTML='';
+  $('note').textContent=note;
+}
+window.render=render;window.DUR=DUR;render(0);
+</script>
+</body></html>
