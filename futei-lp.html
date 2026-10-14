@@ -29,6 +29,7 @@
     }
 
     html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 72px; }
 
     body {
       font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
@@ -126,7 +127,34 @@
     .countdown .label { font-weight: 700; color: var(--deep); font-size: .95rem; }
     .countdown .num { font-size: 2.4rem; font-weight: 900; color: var(--aqua-dark); line-height: 1; }
     .countdown .unit { font-weight: 700; color: var(--deep); }
-    .hero-cta { margin-top: 30px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-cta { margin: 30px auto 0; max-width: 760px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .btn-main { flex-direction: column; gap: 2px; padding: 18px 20px; font-size: 1.12rem; line-height: 1.45; border-radius: 22px; }
+    .btn-main small { font-size: .78rem; font-weight: 700; opacity: .9; }
+    .btn-main .ico { font-size: 1.5rem; line-height: 1; }
+    .hero-sublink { margin-top: 14px; }
+    .hero-sublink a { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--aqua-dark); border-bottom: 2px solid rgba(31, 163, 198, .35); padding-bottom: 2px; }
+    /* diagnosis */
+    .shindan { background: linear-gradient(180deg, #fff8e8 0%, var(--white) 100%); }
+    .sd-box { margin: 40px auto 0; max-width: 760px; background: var(--white); border-radius: 26px; box-shadow: var(--shadow); padding: 34px; border: 1px solid var(--border); }
+    .sd-q { padding: 16px 0; border-bottom: 1px dashed var(--border); }
+    .sd-q:last-of-type { border-bottom: none; }
+    .sd-q h3 { font-size: 1rem; color: var(--deep); }
+    .sd-q h3 span { color: var(--teal); margin-right: 8px; }
+    .sd-opts { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .sd-opts label { position: relative; display: block; cursor: pointer; font-weight: 500; }
+    .sd-opts input { position: absolute; opacity: 0; pointer-events: none; }
+    .sd-opts span { display: block; border: 2px solid var(--border); border-radius: 999px; padding: 8px 18px; background: var(--sky2); transition: all .15s; }
+    .sd-opts input:checked + span { border-color: var(--aqua); background: var(--aqua); color: var(--white); font-weight: 700; }
+    .sd-opts input:focus-visible + span { outline: 3px solid var(--sun); }
+    .sd-submit { margin-top: 20px; width: 100%; border: none; cursor: pointer; font-family: inherit; }
+    .sd-err { margin-top: 10px; color: #c0392b; font-weight: 700; font-size: .9rem; min-height: 1.2em; text-align: center; }
+    .sd-result { margin-top: 10px; border-radius: 22px; background: var(--deep); color: var(--white); padding: 28px; text-align: center; }
+    .sd-result .k { font-size: .9rem; color: var(--mint); font-weight: 700; }
+    .sd-result .v { margin-top: 4px; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 900; color: var(--sun); }
+    .sd-result ul { margin: 6px auto 0; max-width: 520px; text-align: left; font-size: .92rem; padding-left: 1.2em; }
+    .sd-result .msg { margin-top: 12px; font-size: .95rem; }
+    .sd-result .cta2 { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sd-result .note { margin-top: 14px; font-size: .75rem; color: rgba(255, 255, 255, .7); text-align: left; }
     .hero-points { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .hero-points span {
       background: rgba(255, 255, 255, .8); color: var(--deep); font-size: .85rem; font-weight: 700;
@@ -312,7 +340,8 @@
       section { padding: 64px 0; }
       .header-tel, .btn-header { display: none; }
       .hero { padding: 48px 0 84px; }
-      .hero-cta .btn { width: 100%; }
+      .hero-cta, .sd-result .cta2 { grid-template-columns: 1fr; }
+      .sd-box { padding: 22px 18px; }
       .flow-steps { grid-template-columns: 1fr; }
       .why-item { grid-template-columns: 1fr; gap: 6px; padding: 22px; }
       .check-list { padding: 18px 20px; }
@@ -367,9 +396,10 @@
       <span class="num js-days">--</span><span class="unit">日</span>
     </div>
     <div class="hero-cta">
-      <a href="#contact" class="btn btn-sun">今年のうちに無料相談する</a>
-      <a href="tel:0120-000-000" class="btn btn-outline">電話で相談する</a>
+      <a href="tel:0120-000-000" class="btn btn-aqua btn-main"><span class="ico">&#9742;</span>電話で話を聞いてみる<small>推定時間 5分程度</small></a>
+      <a href="#shindan" class="btn btn-sun btn-main"><span class="ico">&#9998;</span>まずは回収できる慰謝料を<br>無料WEB診断で計算してみる</a>
     </div>
+    <p class="hero-sublink"><a href="#contact">WEBで相談してみる &rarr;</a></p>
     <div class="hero-points">
       <span>相談料 何度でも無料</span>
       <span>着手金 原則0円</span>
@@ -380,6 +410,38 @@
   <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0 40 C 240 0, 480 70, 720 40 S 1200 10, 1440 40 L1440 70 L0 70Z" fill="#fff"/>
   </svg>
+</section>
+
+<!-- ═══ WEB DIAGNOSIS ═══ -->
+<section class="shindan" id="shindan">
+  <div class="container">
+    <p class="sec-label">WEB CHECK</p>
+    <h2 class="sec-title">回収できる慰謝料を、<br><em>無料WEB診断</em>で計算してみる</h2>
+    <p class="sec-lead">5つの質問に答えるだけ。お名前やご連絡先の入力は不要です。</p>
+    <form class="sd-box" id="sdForm" novalidate>
+      <div class="sd-q"><h3><span>Q1</span>あなたのお立場は？</h3><div class="sd-opts">
+        <label><input type="radio" name="role" value="claim"><span>慰謝料を請求したい</span></label>
+        <label><input type="radio" name="role" value="claimed"><span>慰謝料を請求された</span></label></div></div>
+      <div class="sd-q"><h3><span>Q2</span>不貞が発覚した後の、ご夫婦の状況は？</h3><div class="sd-opts">
+        <label><input type="radio" name="status" value="stay"><span>同居を続けている</span></label>
+        <label><input type="radio" name="status" value="apart"><span>別居している</span></label>
+        <label><input type="radio" name="status" value="divorce"><span>離婚した・離婚する予定</span></label></div></div>
+      <div class="sd-q"><h3><span>Q3</span>婚姻期間は？</h3><div class="sd-opts">
+        <label><input type="radio" name="years" value="0"><span>3年未満</span></label>
+        <label><input type="radio" name="years" value="1"><span>3年〜10年</span></label>
+        <label><input type="radio" name="years" value="2"><span>10年以上</span></label></div></div>
+      <div class="sd-q"><h3><span>Q4</span>不貞関係が続いていた期間は？</h3><div class="sd-opts">
+        <label><input type="radio" name="span" value="0"><span>半年未満</span></label>
+        <label><input type="radio" name="span" value="1"><span>半年以上</span></label>
+        <label><input type="radio" name="span" value="9"><span>わからない</span></label></div></div>
+      <div class="sd-q"><h3><span>Q5</span>未成年のお子さまはいますか？</h3><div class="sd-opts">
+        <label><input type="radio" name="kids" value="1"><span>いる</span></label>
+        <label><input type="radio" name="kids" value="0"><span>いない</span></label></div></div>
+      <button type="submit" class="btn btn-sun sd-submit">診断結果を見る（無料）</button>
+      <p class="sd-err" id="sdErr" role="alert"></p>
+      <div class="sd-result" id="sdResult" hidden aria-live="polite"></div>
+    </form>
+  </div>
 </section>
 
 <!-- ═══ YEAR-END MESSAGE ═══ -->
@@ -697,6 +759,34 @@
     document.querySelector('.js-days').textContent = days;
     if (days === 0) document.querySelector('.js-count-label').innerHTML = '本日、' + y + '年最終日。残り';
   })();
+
+  // WEB diagnosis
+  document.getElementById('sdForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = e.target, v = function (n) { var c = f.querySelector('input[name=' + n + ']:checked'); return c ? c.value : null; };
+    var a = { role: v('role'), status: v('status'), years: v('years'), span: v('span'), kids: v('kids') };
+    var err = document.getElementById('sdErr'), out = document.getElementById('sdResult');
+    if (Object.keys(a).some(function (k) { return a[k] === null; })) { err.textContent = 'すべての質問にお答えください。'; out.hidden = true; return; }
+    err.textContent = '';
+    var range = { stay: '数十万〜100万円程度', apart: '100万〜200万円程度', divorce: '200万〜300万円程度' }[a.status];
+    var up = [];
+    if (a.years === '2') up.push('婚姻期間が10年以上と長い');
+    if (a.span === '1') up.push('不貞関係が半年以上続いていた');
+    if (a.kids === '1') up.push('未成年のお子さまがいる');
+    if (a.status === 'divorce') up.push('不貞をきっかけに離婚に至った（至る予定）');
+    var cta = '<div class="cta2"><a class="btn btn-aqua" href="tel:0120-000-000">電話で話を聞いてみる</a><a class="btn btn-sun" href="#contact">WEBで相談してみる</a></div>';
+    var note = '<p class="note">※本診断は、裁判例などで一般的に示される目安をもとにした簡易的なものであり、実際に回収できる金額を保証するものではありません。証拠の有無、相手方の資力、その他個別の事情により金額は大きく異なります。</p>';
+    if (a.role === 'claimed') {
+      out.innerHTML = '<div class="k">請求されている慰謝料の一般的な目安</div><div class="v">' + range + '</div>' +
+        '<p class="msg">請求された金額がこの目安を大きく上回る場合、減額できる可能性があります。<br>回答する前に、まずは弁護士にご相談ください。</p>' + cta + note;
+    } else {
+      out.innerHTML = '<div class="k">あなたのケースの慰謝料の目安</div><div class="v">' + range + '</div>' +
+        (up.length ? '<p class="msg" style="color:var(--mint);font-weight:700">金額が高くなる方向に考慮されやすい事情</p><ul>' + up.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') +
+        '<p class="msg">実際に請求できる金額は、証拠や個別の事情で変わります。<br>相談料は何度でも無料。正確な見通しは弁護士にお聞きください。</p>' + cta + note;
+    }
+    out.hidden = false;
+    out.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   // Tabs
   document.querySelectorAll('.tab').forEach(function (tab) {
