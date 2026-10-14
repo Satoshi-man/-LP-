@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>不貞・不倫の慰謝料問題 | 年内のご相談受付中 | アドワイア法律事務所</title>
-  <meta name="description" content="配偶者の不貞・不倫による慰謝料請求、または慰謝料を請求された方へ。今年のうちに、第二の人生への第一歩を。弁護士が交渉の窓口となり、新しい年を身軽に迎えるお手伝いをします。">
+  <meta name="description" content="配偶者の不貞・不倫による慰謝料請求、または慰謝料を請求された方へ。今年のうちに、第二の人生への第一歩を。弁護士が交渉の窓口となり、新しい年を身軽に迎えるお手伝いをします。相談料は何度でも無料、着手金は原則0円の完全成功報酬制。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
@@ -235,6 +235,19 @@
     .fee-table td { background: var(--white); }
     .fee-table tr:last-child th, .fee-table tr:last-child td { border-bottom: none; }
     .tbd { color: #c0392b; font-weight: 700; }
+    .fee-points { margin: 44px auto 0; max-width: 860px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .fee-point { background: linear-gradient(180deg, var(--sky), var(--white)); border: 1px solid var(--border); border-radius: 22px; padding: 24px 16px; text-align: center; box-shadow: var(--shadow); }
+    .fee-point .k { font-weight: 700; color: var(--deep); font-size: .95rem; }
+    .fee-point .v { margin-top: 4px; font-weight: 900; color: var(--aqua-dark); font-size: clamp(1.5rem, 3.6vw, 2.1rem); line-height: 1.3; }
+    .fee-point .v small { font-size: .55em; color: var(--deep); }
+    .fee-point .s { margin-top: 6px; font-size: .82rem; color: var(--text-light); }
+    .free-end { margin: 24px auto 0; max-width: 860px; border-radius: 24px; padding: 26px 30px; background: var(--deep); color: var(--white); display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+    .free-end .badge { width: 104px; height: 104px; border-radius: 50%; background: var(--sun); color: var(--deep); display: grid; place-items: center; text-align: center; font-weight: 900; line-height: 1.25; font-size: 1.05rem; }
+    .free-end h3 { font-size: 1.2rem; line-height: 1.5; }
+    .free-end h3 em { font-style: normal; color: var(--sun); }
+    .free-end ul { margin-top: 10px; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+    .free-end li { background: rgba(255, 255, 255, .12); border-radius: 999px; padding: 4px 14px; font-size: .85rem; }
+    .free-end p { margin-top: 10px; font-size: .85rem; color: rgba(255, 255, 255, .8); }
     .fee-note { max-width: 760px; margin: 14px auto 0; font-size: .82rem; color: var(--text-light); }
 
     /* ─── FAQ ─── */
@@ -305,6 +318,9 @@
       .fee-table th, .fee-table td { display: block; width: 100%; }
       .fee-table th { border-bottom: none; padding-bottom: 6px; }
       .fixed-bar { display: grid; }
+      .fee-points { grid-template-columns: 1fr; }
+      .free-end { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 20px; }
+      .free-end ul { justify-content: center; }
     }
     @media (min-width: 641px) { body { padding-bottom: 0; } }
     @media (prefers-reduced-motion: reduce) {
@@ -320,7 +336,7 @@
     <div class="logo">アドワイア法律事務所<small>不貞・不倫の慰謝料問題</small></div>
     <div class="header-actions">
       <div class="header-tel">
-        <small>平日 9:00〜18:00 ／ 秘密厳守</small>
+        <small>相談料 何度でも無料 ／ 平日 9:00〜18:00</small>
         <a href="tel:0120-000-000">0120-000-000</a>
       </div>
       <a href="#contact" class="btn-header">年内のご相談を予約</a>
@@ -349,12 +365,13 @@
       <span class="num js-days">--</span><span class="unit">日</span>
     </div>
     <div class="hero-cta">
-      <a href="#contact" class="btn btn-sun">今年のうちに相談する</a>
+      <a href="#contact" class="btn btn-sun">今年のうちに無料相談する</a>
       <a href="tel:0120-000-000" class="btn btn-outline">電話で相談する</a>
     </div>
     <div class="hero-points">
-      <span>慰謝料を請求したい方</span>
-      <span>慰謝料を請求された方</span>
+      <span>相談料 何度でも無料</span>
+      <span>着手金 原則0円</span>
+      <span>完全成功報酬</span>
       <span>秘密厳守</span>
     </div>
   </div>
@@ -530,8 +547,8 @@
       </div>
       <div class="why-item reveal">
         <div class="n">03</div>
-        <div><h3>費用は事前に、わかりやすく</h3>
-          <p>ご依頼前に費用の内訳と見込みをご説明し、ご納得いただいてから正式にお引き受けします。</p></div>
+        <div><h3>相談は何度でも無料。費用は成功したときだけ。</h3>
+          <p>相談料は何度でも無料です。着手金は原則いただかない完全成功報酬制なので、手元にまとまったお金がなくてもご依頼いただけます。費用の内訳はご依頼前にご説明し、ご納得いただいてから正式にお引き受けします。</p></div>
       </div>
     </div>
   </div>
@@ -544,7 +561,7 @@
     <h2 class="sec-title">ご相談から解決までの流れ</h2>
     <div class="flow-steps">
       <div class="step reveal"><h3>お問い合わせ</h3><p>お電話またはWEBフォームから、ご相談日時をご予約ください。</p></div>
-      <div class="step reveal"><h3>弁護士とのご相談</h3><p>状況やご希望を伺い、見通しと費用をご説明します。</p></div>
+      <div class="step reveal"><h3>弁護士とのご相談</h3><p>状況やご希望を伺い、見通しと費用をご説明します。相談料は何度でも無料です。</p></div>
       <div class="step reveal"><h3>ご依頼・交渉開始</h3><p>ご納得いただけたらご依頼。弁護士が相手方との交渉の窓口になります。</p></div>
       <div class="step reveal"><h3>合意・解決</h3><p>合意内容を示談書にまとめ、新しい生活へのスタートを切ります。</p></div>
     </div>
@@ -555,15 +572,29 @@
 <section>
   <div class="container">
     <p class="sec-label">FEE</p>
-    <h2 class="sec-title">弁護士費用</h2>
+    <h2 class="sec-title">弁護士費用は、<em>完全成功報酬制</em></h2>
+    <p class="sec-lead">「費用が心配で相談できない」ということがないように。<br>相談は何度でも無料、着手金は原則0円です。</p>
+    <div class="fee-points">
+      <div class="fee-point reveal"><div class="k">相談料</div><div class="v">何度でも<br>無料</div><div class="s">納得できるまでご相談ください</div></div>
+      <div class="fee-point reveal"><div class="k">着手金</div><div class="v">原則<br>0<small>円</small></div><div class="s">ご依頼時のお支払いは原則不要</div></div>
+      <div class="fee-point reveal"><div class="k">報酬金</div><div class="v">完全<br>成功報酬</div><div class="s">成功したときだけお支払い</div></div>
+    </div>
+    <div class="free-end reveal">
+      <div class="badge">費用<br>0円で<br>終了</div>
+      <div>
+        <h3>慰謝料請求が困難になった場合は、<br><em>費用をいただかずに終了</em>します。</h3>
+        <ul><li>証拠が足りなかった</li><li>相手方と連絡が取れなくなった</li><li>相手方の所在がわからなくなった</li></ul>
+        <p>ご依頼後に、こうした事情で慰謝料の請求が難しくなった場合も、費用のご負担はありません。</p>
+      </div>
+    </div>
     <table class="fee-table">
-      <tr><th>ご相談料</th><td><span class="tbd">【要確認】</span></td></tr>
-      <tr><th>着手金（慰謝料を請求する場合）</th><td><span class="tbd">【要確認】</span></td></tr>
-      <tr><th>着手金（慰謝料を請求された場合）</th><td><span class="tbd">【要確認】</span></td></tr>
-      <tr><th>報酬金</th><td><span class="tbd">【要確認】</span></td></tr>
-      <tr><th>実費</th><td>郵便代・印紙代などの実費が別途かかります</td></tr>
+      <tr><th>ご相談料</th><td><strong>何度でも無料</strong></td></tr>
+      <tr><th>着手金</th><td><strong>原則0円</strong></td></tr>
+      <tr><th>報酬金</th><td><strong>完全成功報酬</strong>　<span class="tbd">【報酬額・割合を要確認】</span></td></tr>
+      <tr><th>慰謝料請求が困難となった場合</th><td><strong>費用はいただかず、無料で終了</strong></td></tr>
+      <tr><th>実費</th><td>郵便代・印紙代などの実費 <span class="tbd">【無料終了時の扱いを要確認】</span></td></tr>
     </table>
-    <p class="fee-note">※費用は税込表示です。事案の内容により異なる場合がありますので、詳細はご相談時にご説明します。</p>
+    <p class="fee-note">※事案の内容により、例外的に着手金が発生する場合があります。その場合も、ご依頼前に必ずご説明し、ご納得いただいてからお引き受けします。</p>
   </div>
 </section>
 
@@ -580,6 +611,10 @@
       <details>
         <summary>離婚するつもりはありません。それでも慰謝料を請求できますか？</summary>
         <div class="a">離婚しない場合でも、不貞相手に対して慰謝料を請求できる場合があります。ただし、金額は離婚に至った場合と比べて低くなる傾向があります。</div>
+      </details>
+      <details>
+        <summary>証拠が足りなかったり、相手に連絡がつかなくなったりした場合、費用はかかりますか？</summary>
+        <div class="a">ご依頼後に、証拠が足りなかった場合や、相手方と連絡が取れなくなった・所在がわからなくなった場合など、慰謝料の請求が困難になったときは、費用をいただかずに終了します。相談料も何度でも無料ですので、まずはお気軽にご相談ください。</div>
       </details>
       <details>
         <summary>家族や職場に知られずに進められますか？</summary>
@@ -602,7 +637,7 @@
   <div class="container">
     <p class="sec-label">CONTACT</p>
     <h2 class="mincho"><span class="nw">妥協なき</span><span class="nw">第二の人生への</span><span class="nw">第一歩を、</span><br>今年のうちに。</h2>
-    <p class="cta-lead"><span class="nw">来年は、肩の荷を下ろして迎えましょう。</span><span class="nw">ご相談内容は秘密厳守です。</span></p>
+    <p class="cta-lead"><span class="nw">来年は、肩の荷を下ろして迎えましょう。</span><span class="nw">相談料は何度でも無料、</span><span class="nw">着手金は原則0円です。</span></p>
     <div class="cta-box">
       <div class="cta-card">
         <h3>お電話でのご相談予約</h3>
@@ -627,7 +662,7 @@
             <select name="time"><option>いつでも可</option><option>平日 午前</option><option>平日 午後</option><option>平日 18時以降</option></select>
           </label>
           <label>ご相談の概要（任意）<textarea name="message" placeholder="差し支えない範囲でご記入ください"></textarea></label>
-          <button type="submit" class="btn btn-sun" style="border:none;cursor:pointer">年内のご相談を予約する</button>
+          <button type="submit" class="btn btn-sun" style="border:none;cursor:pointer">年内の無料相談を予約する</button>
           <p class="form-msg" id="formMsg" role="status"></p>
         </form>
       </div>
@@ -644,7 +679,7 @@
 </footer>
 
 <div class="fixed-bar">
-  <a href="tel:0120-000-000" style="background:var(--aqua);color:#fff">電話で相談<small>平日 9:00〜18:00</small></a>
+  <a href="tel:0120-000-000" style="background:var(--aqua);color:#fff">無料で電話相談<small>平日 9:00〜18:00</small></a>
   <a href="#contact" style="background:var(--sun);color:var(--deep)">年内に予約する<small>WEBで24時間受付</small></a>
 </div>
 
