@@ -374,7 +374,7 @@ let activeEntity = 'all';
 
 const fmt = n => Math.round(n).toLocaleString('ja-JP');
 const pct = n => n.toFixed(1) + '%';
-const fmtMan = n => fmt(n / 10000) + '万円';
+const fmtYen = n => fmt(n) + '円';
 
 function getAllKeys() { return GROUPS.flatMap(g => g.items.map(it => it.key)); }
 function currentMonthData() { return MONTH_DATA[MONTHS[selectedMonthIndex].key]; }
@@ -471,12 +471,18 @@ function updateCompositionHighlight() {
 function renderRoas() {
   const m = currentMonthData();
   const el = document.getElementById('roas-row');
-  const adSpend = m.adSpend[activeEntity];
-  const revenue = m.revenue[activeEntity];
   const ent = ENTITIES.find(e => e.key === activeEntity);
 
+  if (activeEntity === 'all' || activeEntity === 'proper') {
+    el.innerHTML = `<p class="roas-note-box">広告費・期待収益・ROASは、リージェネ代理店経由（アシロ・セルフ・オーガニック・リード合計実績）のみ表示しています。</p>`;
+    return;
+  }
+
+  const adSpend = m.adSpend[activeEntity];
+  const revenue = m.revenue[activeEntity];
+
   if (!adSpend) {
-    el.innerHTML = `<p class="roas-note-box">${ent.label}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益：<strong>${fmtMan(revenue)}</strong>）。</p>`;
+    el.innerHTML = `<p class="roas-note-box">${ent.label}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益：<strong>${fmtYen(revenue)}</strong>）。</p>`;
     return;
   }
   const roas = (revenue / adSpend) * 100;
@@ -485,11 +491,11 @@ function renderRoas() {
     <div class="roas-row">
       <div class="roas-tile">
         <div class="roas-label">広告費</div>
-        <div class="roas-value">${fmtMan(adSpend)}</div>
+        <div class="roas-value">${fmtYen(adSpend)}</div>
       </div>
       <div class="roas-tile">
         <div class="roas-label">期待収益</div>
-        <div class="roas-value">${fmtMan(revenue)}</div>
+        <div class="roas-value">${fmtYen(revenue)}</div>
       </div>
       <div class="roas-tile">
         <div class="roas-label">ROAS（期待収益 ÷ 広告費）</div>
@@ -559,8 +565,6 @@ function renderTables() {
   `;
 
   const roasEntities = [
-    { key: 'all', label: '全体実績' },
-    { key: 'proper', label: 'プロパー実績' },
     { key: 'lead', label: 'リード合計実績' },
     { key: 'ashiro', label: 'アシロ' },
     { key: 'self', label: 'セルフ' },
@@ -570,15 +574,15 @@ function renderTables() {
     const ad = m.adSpend[e.key];
     const rev = m.revenue[e.key];
     if (!ad) {
-      return `<tr><td>${e.label}</td><td class="na">広告費なし</td><td>${fmtMan(rev)}</td><td class="na">－</td></tr>`;
+      return `<tr><td>${e.label}</td><td class="na">広告費なし</td><td>${fmtYen(rev)}</td><td class="na">－</td></tr>`;
     }
     const roas = (rev / ad) * 100;
     const cls = roas >= 250 ? 'roas-good' : (roas < 150 ? 'roas-bad' : '');
-    return `<tr><td>${e.label}</td><td>${fmtMan(ad)}</td><td>${fmtMan(rev)}</td><td class="${cls}">${pct(roas)}</td></tr>`;
+    return `<tr><td>${e.label}</td><td>${fmtYen(ad)}</td><td>${fmtYen(rev)}</td><td class="${cls}">${pct(roas)}</td></tr>`;
   }).join('');
 
   const priceRows = GROUPS.flatMap(g => g.items).map(it =>
-    `<tr><td>${it.name}</td><td>${fmt(PRICES[it.key])}円</td></tr>`
+    `<tr><td>${it.name}</td><td>${fmtYen(PRICES[it.key])}</td></tr>`
   ).join('');
 
   el.innerHTML = `
@@ -595,15 +599,15 @@ function renderTables() {
         <thead><tr><th>流入経路</th><th>広告費</th><th>期待収益</th><th>ROAS</th></tr></thead>
         <tbody>${roasRows}</tbody>
       </table>
-      <p class="note">広告費・期待収益はご提供データの実績値をそのまま使用しています。</p>
+      <p class="note">広告費・期待収益・ROASはリージェネ代理店経由（アシロ・セルフ・オーガニック・リード合計実績）のみ掲載しています。数値はご提供データの実績値をそのまま使用しています。</p>
     </div>
     <div class="table-block">
-      <h3>症状別 単価表（参考）</h3>
+      <h3>症状別 リージェネ単価表（参考）</h3>
       <table class="data-table">
         <thead><tr><th>症状</th><th>単価</th></tr></thead>
         <tbody>${priceRows}</tbody>
       </table>
-      <p class="note">※この単価表は参考情報です。上表の期待収益は単価表からの逆算値ではなく、ご提供データの実績値を使用しています。</p>
+      <p class="note">※この単価はリージェネ（代理店）経由の受任1件に用いられる単価で、プロパー経由の単価とは異なります。参考情報であり、上表の期待収益は単価表からの逆算値ではなく、ご提供データの実績値を使用しています。</p>
     </div>
   `;
 }
