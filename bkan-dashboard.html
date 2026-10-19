@@ -158,6 +158,23 @@
   .roas-tile .roas-note { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
   .roas-note-box { font-size: .74rem; color: var(--text-muted); margin-bottom: 14px; }
 
+  /* ---- rate section ---- */
+  .rate-group { margin-bottom: 16px; }
+  .rate-group:last-child { margin-bottom: 0; }
+  .rate-group-head { font-size: .84rem; font-weight: 700; margin-bottom: 8px; }
+  .rate-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rate-line:last-child { margin-bottom: 0; }
+  .rate-tag { width: 110px; flex-shrink: 0; font-size: .74rem; font-weight: 700; }
+  .rate-track { flex: 1; height: 10px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .rate-val { width: 230px; flex-shrink: 0; text-align: right; font-size: .74rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .rate-val strong { color: var(--text-primary); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .rate-tag { width: 76px; font-size: .68rem; }
+    .rate-val { width: 160px; font-size: .68rem; }
+  }
+
   /* ---- breakdown bars ---- */
   .grp { margin-bottom: 18px; }
   .grp:last-child { margin-bottom: 0; }
@@ -196,7 +213,7 @@
 
 <header class="top">
   <h1>B型肝炎　リードジェネレーション実績サマリー<span class="badge-demo">実績データ・草案</span></h1>
-  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益はご提供いただいたデータに基づく実績値です（2026年4月度〜9月度）。</p>
+  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜9月度）。</p>
   <div class="month-picker">
     <span class="mp-label">対象月</span>
     <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -221,6 +238,12 @@
     <div id="breakdown"></div>
     <button class="table-toggle" id="table-toggle">＋ 症状別クロス集計・広告費対効果を表示</button>
     <div id="tables" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="sub-head">受任率（大カテ別・全体実績／プロパー実績／リード合計実績／リード代理店）</div>
+    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。いただいたデータの実績値から算出しています。</p>
+    <div id="rate-section"></div>
   </section>
 
 </main>
@@ -271,6 +294,19 @@ const MONTH_DATA = {
       mansei_j_nashi: { all: 16, proper: 8, lead: 8, ashiro: 2, self: 4, organic: 2 },
       carrier: { all: 166, proper: 103, lead: 63, ashiro: 24, self: 26, organic: 13 },
     },
+    meetings: {
+      shibou: { all: 90, proper: 41, lead: 49, ashiro: 12, self: 33, organic: 4 },
+      shibou_j: { all: 52, proper: 24, lead: 28, ashiro: 10, self: 17, organic: 1 },
+      kangan: { all: 38, proper: 20, lead: 18, ashiro: 8, self: 10, organic: 0 },
+      kangan_j: { all: 3, proper: 1, lead: 2, ashiro: 0, self: 2, organic: 0 },
+      kankouhen: { all: 27, proper: 13, lead: 14, ashiro: 1, self: 13, organic: 0 },
+      kankouhen_j_ari: { all: 8, proper: 4, lead: 4, ashiro: 1, self: 3, organic: 0 },
+      kankouhen_j_nashi: { all: 15, proper: 11, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      mansei: { all: 91, proper: 42, lead: 49, ashiro: 17, self: 27, organic: 5 },
+      mansei_j_ari: { all: 27, proper: 12, lead: 15, ashiro: 8, self: 7, organic: 0 },
+      mansei_j_nashi: { all: 23, proper: 15, lead: 8, ashiro: 2, self: 4, organic: 2 },
+      carrier: { all: 396, proper: 272, lead: 124, ashiro: 43, self: 66, organic: 15 },
+    },
     adSpend: { all: 160000000, proper: 83000000, lead: 77000000, ashiro: 30000000, self: 47000000, organic: 0 },
     revenue: { all: 393487123, proper: 234998305, lead: 158488818, ashiro: 50015774, self: 93948640, organic: 14524404 },
   },
@@ -287,6 +323,19 @@ const MONTH_DATA = {
       mansei_j_ari: { all: 41, proper: 22, lead: 19, ashiro: 7, self: 12, organic: 0 },
       mansei_j_nashi: { all: 5, proper: 3, lead: 2, ashiro: 0, self: 2, organic: 0 },
       carrier: { all: 149, proper: 97, lead: 52, ashiro: 19, self: 27, organic: 6 },
+    },
+    meetings: {
+      shibou: { all: 88, proper: 47, lead: 41, ashiro: 13, self: 26, organic: 2 },
+      shibou_j: { all: 50, proper: 24, lead: 26, ashiro: 4, self: 20, organic: 2 },
+      kangan: { all: 44, proper: 25, lead: 19, ashiro: 10, self: 7, organic: 2 },
+      kangan_j: { all: 3, proper: 1, lead: 2, ashiro: 1, self: 1, organic: 0 },
+      kankouhen: { all: 30, proper: 14, lead: 16, ashiro: 5, self: 10, organic: 1 },
+      kankouhen_j_ari: { all: 8, proper: 4, lead: 4, ashiro: 2, self: 2, organic: 0 },
+      kankouhen_j_nashi: { all: 8, proper: 7, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      mansei: { all: 84, proper: 44, lead: 40, ashiro: 16, self: 18, organic: 6 },
+      mansei_j_ari: { all: 48, proper: 23, lead: 25, ashiro: 8, self: 17, organic: 0 },
+      mansei_j_nashi: { all: 7, proper: 3, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      carrier: { all: 380, proper: 271, lead: 109, ashiro: 35, self: 63, organic: 11 },
     },
     adSpend: { all: 140000000, proper: 70000000, lead: 70000000, ashiro: 30000000, self: 40000000, organic: 0 },
     revenue: { all: 440136220, proper: 285660482, lead: 154475738, ashiro: 58401293, self: 83866669, organic: 12207776 },
@@ -305,6 +354,19 @@ const MONTH_DATA = {
       mansei_j_nashi: { all: 5, proper: 4, lead: 1, ashiro: 1, self: 0, organic: 0 },
       carrier: { all: 186, proper: 131, lead: 55, ashiro: 23, self: 26, organic: 6 },
     },
+    meetings: {
+      shibou: { all: 107, proper: 59, lead: 48, ashiro: 13, self: 34, organic: 1 },
+      shibou_j: { all: 40, proper: 13, lead: 27, ashiro: 11, self: 16, organic: 0 },
+      kangan: { all: 50, proper: 23, lead: 27, ashiro: 11, self: 14, organic: 2 },
+      kangan_j: { all: 7, proper: 3, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      kankouhen: { all: 30, proper: 13, lead: 17, ashiro: 5, self: 9, organic: 3 },
+      kankouhen_j_ari: { all: 3, proper: 2, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      kankouhen_j_nashi: { all: 2, proper: -1, lead: 3, ashiro: 3, self: 0, organic: 0 },
+      mansei: { all: 97, proper: 56, lead: 41, ashiro: 18, self: 18, organic: 5 },
+      mansei_j_ari: { all: 38, proper: 20, lead: 18, ashiro: 4, self: 12, organic: 2 },
+      mansei_j_nashi: { all: 5, proper: 4, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 412, proper: 304, lead: 108, ashiro: 52, self: 46, organic: 10 },
+    },
     adSpend: { all: 140000000, proper: 70000000, lead: 70000000, ashiro: 30000000, self: 40000000, organic: 0 },
     revenue: { all: 474288525, proper: 306337765, lead: 167950760, ashiro: 62675458, self: 89021161, organic: 16254141 },
   },
@@ -322,6 +384,19 @@ const MONTH_DATA = {
       mansei_j_nashi: { all: 5, proper: 2, lead: 3, ashiro: 0, self: 2, organic: 1 },
       carrier: { all: 190, proper: 118, lead: 72, ashiro: 35, self: 27, organic: 10 },
     },
+    meetings: {
+      shibou: { all: 72, proper: 36, lead: 36, ashiro: 14, self: 21, organic: 1 },
+      shibou_j: { all: 53, proper: 30, lead: 23, ashiro: 14, self: 8, organic: 1 },
+      kangan: { all: 49, proper: 33, lead: 16, ashiro: 3, self: 12, organic: 1 },
+      kangan_j: { all: 3, proper: 1, lead: 2, ashiro: 1, self: 1, organic: 0 },
+      kankouhen: { all: 28, proper: 17, lead: 11, ashiro: 4, self: 6, organic: 1 },
+      kankouhen_j_ari: { all: 9, proper: 5, lead: 4, ashiro: 3, self: 1, organic: 0 },
+      kankouhen_j_nashi: { all: 2, proper: -1, lead: 3, ashiro: 1, self: 2, organic: 0 },
+      mansei: { all: 88, proper: 51, lead: 37, ashiro: 14, self: 19, organic: 4 },
+      mansei_j_ari: { all: 41, proper: 23, lead: 18, ashiro: 7, self: 10, organic: 1 },
+      mansei_j_nashi: { all: 9, proper: 6, lead: 3, ashiro: 0, self: 2, organic: 1 },
+      carrier: { all: 438, proper: 324, lead: 114, ashiro: 58, self: 44, organic: 12 },
+    },
     adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
     revenue: { all: 444214985, proper: 292443796, lead: 151771189, ashiro: 63721465, self: 81596145, organic: 6453579 },
   },
@@ -332,12 +407,25 @@ const MONTH_DATA = {
       kangan: { all: 45, proper: 21, lead: 24, ashiro: 9, self: 15, organic: 0 },
       kangan_j: { all: 5, proper: 4, lead: 1, ashiro: 0, self: 1, organic: 0 },
       kankouhen: { all: 20, proper: 10, lead: 10, ashiro: 2, self: 7, organic: 1 },
-      kankouhen_j_ari: { all: 2, proper: -1, lead: 3, ashiro: 3, self: 0, organic: 0 },
+      kankouhen_j_ari: { all: 2, proper: 0, lead: 2, ashiro: 2, self: 0, organic: 0 },
       kankouhen_j_nashi: { all: 9, proper: 8, lead: 1, ashiro: 1, self: 0, organic: 0 },
       mansei: { all: 64, proper: 46, lead: 18, ashiro: 7, self: 9, organic: 2 },
       mansei_j_ari: { all: 41, proper: 23, lead: 18, ashiro: 7, self: 9, organic: 2 },
       mansei_j_nashi: { all: 5, proper: 2, lead: 3, ashiro: 1, self: 2, organic: 0 },
       carrier: { all: 174, proper: 121, lead: 53, ashiro: 26, self: 17, organic: 10 },
+    },
+    meetings: {
+      shibou: { all: 146, proper: 88, lead: 58, ashiro: 12, self: 45, organic: 1 },
+      shibou_j: { all: 55, proper: 34, lead: 21, ashiro: 8, self: 12, organic: 1 },
+      kangan: { all: 62, proper: 30, lead: 32, ashiro: 12, self: 17, organic: 3 },
+      kangan_j: { all: 5, proper: 4, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      kankouhen: { all: 30, proper: 10, lead: 20, ashiro: 6, self: 13, organic: 1 },
+      kankouhen_j_ari: { all: 3, proper: 1, lead: 2, ashiro: 2, self: 0, organic: 0 },
+      kankouhen_j_nashi: { all: 11, proper: 10, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      mansei: { all: 73, proper: 47, lead: 26, ashiro: 8, self: 15, organic: 3 },
+      mansei_j_ari: { all: 52, proper: 28, lead: 24, ashiro: 10, self: 11, organic: 3 },
+      mansei_j_nashi: { all: 8, proper: 4, lead: 4, ashiro: 1, self: 3, organic: 0 },
+      carrier: { all: 423, proper: 327, lead: 96, ashiro: 41, self: 43, organic: 12 },
     },
     adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
     revenue: { all: 532311411, proper: 361963739, lead: 170347672, ashiro: 60469476, self: 101930496, organic: 7947700 },
@@ -355,6 +443,19 @@ const MONTH_DATA = {
       mansei_j_ari: { all: 51, proper: 35, lead: 16, ashiro: 8, self: 8, organic: 0 },
       mansei_j_nashi: { all: 9, proper: 8, lead: 1, ashiro: 0, self: 1, organic: 0 },
       carrier: { all: 167, proper: 105, lead: 62, ashiro: 23, self: 26, organic: 13 },
+    },
+    meetings: {
+      shibou: { all: 147, proper: 68, lead: 79, ashiro: 20, self: 54, organic: 5 },
+      shibou_j: { all: 85, proper: 47, lead: 38, ashiro: 14, self: 24, organic: 0 },
+      kangan: { all: 49, proper: 33, lead: 16, ashiro: 4, self: 10, organic: 2 },
+      kangan_j: { all: 11, proper: 6, lead: 5, ashiro: 1, self: 3, organic: 1 },
+      kankouhen: { all: 33, proper: 17, lead: 16, ashiro: 3, self: 12, organic: 1 },
+      kankouhen_j_ari: { all: 11, proper: 4, lead: 7, ashiro: 1, self: 5, organic: 1 },
+      kankouhen_j_nashi: { all: 5, proper: 1, lead: 4, ashiro: 2, self: 2, organic: 0 },
+      mansei: { all: 71, proper: 39, lead: 32, ashiro: 13, self: 15, organic: 4 },
+      mansei_j_ari: { all: 61, proper: 40, lead: 21, ashiro: 11, self: 10, organic: 0 },
+      mansei_j_nashi: { all: 15, proper: 14, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      carrier: { all: 393, proper: 296, lead: 97, ashiro: 41, self: 41, organic: 15 },
     },
     adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
     revenue: { all: 550211813, proper: 351289369, lead: 198922444, ashiro: 60632944, self: 120898036, organic: 17391464 },
@@ -612,6 +713,26 @@ function renderTables() {
   `;
 }
 
+function renderRateSection() {
+  const m = currentMonthData();
+  const el = document.getElementById('rate-section');
+  el.innerHTML = GROUPS.map(g => {
+    const rows = ENTITIES.map(ent => {
+      const accepted = g.items.reduce((s, it) => s + (m.items[it.key][ent.key] || 0), 0);
+      const meetings = g.items.reduce((s, it) => s + (m.meetings[it.key][ent.key] || 0), 0);
+      const rate = meetings ? (accepted / meetings) * 100 : 0;
+      return `
+        <div class="rate-line">
+          <span class="rate-tag" style="color:${ent.color}">${ent.label}</span>
+          <div class="rate-track"><div class="rate-fill" style="width:${Math.max(0, rate)}%;background:${ent.color}"></div></div>
+          <div class="rate-val">受任率 <strong>${meetings ? pct(rate) : '－'}</strong>（受任${fmt(accepted)}／面談${fmt(meetings)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="rate-group"><div class="rate-group-head">${g.name}</div>${rows}</div>`;
+  }).join('');
+}
+
 function renderAll() {
   renderMonthButtons();
   renderKpis();
@@ -620,6 +741,7 @@ function renderAll() {
   renderRoas();
   renderBreakdown();
   renderTables();
+  renderRateSection();
 }
 
 document.getElementById('table-toggle').addEventListener('click', function () {
