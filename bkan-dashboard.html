@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B型肝炎 リード実績サマリー</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:    #fcfcfb;
+    --surface-2:    #f9f9f7;
+    --surface-card: #ffffff;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+
+    --s0: #898781; /* neutral (全体実績) */
+    --sp: #4a3aa7; /* violet (プロパー実績) */
+    --sl: #e87ba4; /* magenta (リード合計実績) */
+    --s1: #2a78d6; /* blue (アシロ) */
+    --s2: #eb6834; /* orange (セルフ) */
+    --s3: #1baf7a; /* aqua (オーガニック) */
+
+    --good:     #0ca30c;
+    --warning:  #fab219;
+    --critical: #d03b3b;
+
+    --lane-bg: #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:    #1a1a19;
+      --surface-2:    #0d0d0d;
+      --surface-card: #232322;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --border:    rgba(255,255,255,0.10);
+
+      --s0: #898781;
+      --sp: #9085e9;
+      --sl: #d55181;
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+
+      --lane-bg: #2c2c2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:    #1a1a19;
+    --surface-2:    #0d0d0d;
+    --surface-card: #232322;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --border:    rgba(255,255,255,0.10);
+
+    --s0: #898781;
+    --sp: #9085e9;
+    --sl: #d55181;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+
+    --lane-bg: #2c2c2a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    padding-bottom: 64px;
+  }
+
+  header.top {
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.top h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; }
+  header.top p { margin: 0 0 12px; font-size: .82rem; color: var(--text-muted); }
+  .badge-demo {
+    display: inline-block; font-size: .68rem; font-weight: 700; color: var(--s1);
+    border: 1px solid var(--s1); border-radius: 20px; padding: 1px 10px; margin-left: 8px; vertical-align: middle;
+  }
+
+  .month-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .month-picker .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); }
+  .month-btn {
+    font-family: inherit; font-size: .8rem; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+  }
+  .month-btn[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 24px; }
+
+  section.card {
+    background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 22px; margin-bottom: 20px;
+  }
+  section.card h2 { font-size: .98rem; font-weight: 700; margin: 0 0 4px; }
+  section.card .card-sub { font-size: .78rem; color: var(--text-muted); margin: 0 0 16px; }
+
+  .sub-head { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin: 22px 0 10px; }
+  .sub-head:first-of-type { margin-top: 0; }
+  .sub-note { font-size: .74rem; color: var(--text-muted); margin: -6px 0 12px; }
+
+  /* ---- KPI tiles ---- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 4px; }
+  .kpi-tile { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .kpi-tile .kpi-label { font-size: .76rem; color: var(--text-muted); margin-bottom: 6px; }
+  .kpi-tile .kpi-value { font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+  .kpi-tile .kpi-unit { font-size: .82rem; font-weight: 400; color: var(--text-secondary); margin-left: 2px; }
+  .kpi-tile.hero .kpi-value { color: var(--s1); }
+  .kpi-tile .kpi-meter { margin-top: 10px; height: 8px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .kpi-tile .kpi-meter-fill { height: 100%; background: var(--s1); }
+
+  /* ---- entity toggle ---- */
+  .agency-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .agency-btn {
+    font-family: inherit; font-size: .82rem; font-weight: 700; padding: 8px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .agency-btn .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .agency-btn.all-btn { border-style: dashed; }
+  .agency-btn.all-btn .swatch { border-radius: 2px; }
+  .agency-btn .cnt { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .agency-btn[aria-pressed="true"] { border-color: currentColor; border-style: solid; background: var(--surface-card); color: var(--text-primary); box-shadow: 0 0 0 1px currentColor inset; }
+
+  /* ---- composition bar ---- */
+  .comp-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; background: var(--lane-bg); }
+  .comp-seg { height: 100%; transition: opacity .15s; }
+  .comp-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 4px; font-size: .78rem; color: var(--text-secondary); }
+  .comp-legend .item { display: flex; align-items: center; gap: 6px; }
+  .comp-legend .item .swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ---- ROAS row ---- */
+  .roas-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 14px 0 4px; }
+  .roas-tile { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-1); }
+  .roas-tile .roas-label { font-size: .72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .roas-tile .roas-value { font-size: 1.3rem; font-weight: 700; }
+  .roas-tile .roas-note { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+  .roas-note-box { font-size: .74rem; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* ---- breakdown bars ---- */
+  .grp { margin-bottom: 18px; }
+  .grp:last-child { margin-bottom: 0; }
+  .grp-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .82rem; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--grid); padding-bottom: 6px; margin-bottom: 10px; }
+  .grp-head .grp-sub { font-weight: 400; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-cat { width: 200px; flex-shrink: 0; font-size: .8rem; color: var(--text-primary); }
+  .bar-lane { flex: 1; height: 18px; background: var(--lane-bg); border-radius: 4px; position: relative; }
+  .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .bar-figs { width: 140px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .bar-figs strong { color: var(--text-primary); font-weight: 700; }
+
+  /* ---- tables ---- */
+  .table-toggle { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--s1); background: none; border: none; cursor: pointer; padding: 0; margin-top: 18px; }
+  .table-block { overflow-x: auto; margin-top: 16px; }
+  .table-block h3 { font-size: .82rem; font-weight: 700; margin: 0 0 8px; }
+  .table-block p.note { font-size: .72rem; color: var(--text-muted); margin: 6px 0 0; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  table.data-table th, table.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.data-table thead th { color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--baseline); }
+  table.data-table tbody tr.grp-row td { background: var(--surface-1); font-weight: 700; color: var(--text-secondary); }
+  table.data-table tbody tr.total-row td { font-weight: 700; border-top: 1px solid var(--baseline); border-bottom: none; }
+  table.data-table td.roas-good { color: var(--good); font-weight: 700; }
+  table.data-table td.roas-bad { color: var(--critical); font-weight: 700; }
+  table.data-table td.na { color: var(--text-muted); }
+
+  @media (max-width: 640px) {
+    .bar-cat { width: 120px; font-size: .74rem; }
+    .bar-figs { width: 104px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>B型肝炎　リードジェネレーション実績サマリー<span class="badge-demo">実績データ・草案</span></h1>
+  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益はご提供いただいたデータに基づく実績値です（2026年4月度〜9月度）。</p>
+  <div class="month-picker">
+    <span class="mp-label">対象月</span>
+    <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>B型肝炎　ミクロ分析</h2>
+    <p class="card-sub">症状別・流入経路別の受任実績内訳。</p>
+    <div class="kpi-row" id="kpi-row"></div>
+  </section>
+
+  <section class="card">
+    <div class="sub-head">表示切替（全体実績／プロパー実績／リード合計実績／リード代理店）</div>
+    <p class="sub-note">選択した対象の症状別内訳が下に表示されます。</p>
+    <div class="agency-toggle" id="entity-toggle"></div>
+    <div class="comp-bar" id="comp-bar"></div>
+    <div class="comp-legend" id="comp-legend"></div>
+    <div id="roas-row"></div>
+    <div id="breakdown"></div>
+    <button class="table-toggle" id="table-toggle">＋ 症状別クロス集計・広告費対効果を表示</button>
+    <div id="tables" hidden></div>
+  </section>
+
+</main>
+
+<script>
+const PRICES = { shibou: 1144218, shibou_j: 637530, kangan: 1852079, kangan_j: 1205271, kankouhen: 1245613, kankouhen_j_ari: 1362536, kankouhen_j_nashi: 275300, mansei: 1096608, mansei_j_ari: 684593, mansei_j_nashi: 287079, carrier: 250216 };
+
+const GROUPS = [
+  { name: '病態あり', items: [
+    { key: 'shibou', name: '①死亡' },
+    { key: 'shibou_j', name: '②死亡除斥' },
+    { key: 'kangan', name: '③肝がん' },
+    { key: 'kangan_j', name: '④肝がん除斥' },
+    { key: 'kankouhen', name: '⑤肝硬変' },
+    { key: 'kankouhen_j_ari', name: '⑥肝硬変除斥治療歴あり' },
+    { key: 'kankouhen_j_nashi', name: '⑦肝硬変除斥治療歴なし' },
+    { key: 'mansei', name: '⑧慢性肝炎' },
+    { key: 'mansei_j_ari', name: '⑨慢性肝炎除斥治療歴あり' },
+    { key: 'mansei_j_nashi', name: '⑩慢性肝炎除斥治療歴なし' },
+  ]},
+  { name: 'キャリア', items: [
+    { key: 'carrier', name: 'キャリア' },
+  ]},
+];
+
+const MONTHS = [
+  { key: '2026-04', label: '2026年4月' },
+  { key: '2026-05', label: '2026年5月' },
+  { key: '2026-06', label: '2026年6月' },
+  { key: '2026-07', label: '2026年7月' },
+  { key: '2026-08', label: '2026年8月' },
+  { key: '2026-09', label: '2026年9月' },
+];
+let selectedMonthIndex = MONTHS.length - 1;
+
+const MONTH_DATA = {
+  '2026-04': {
+    items: {
+      shibou: { all: 74, proper: 34, lead: 40, ashiro: 8, self: 28, organic: 4 },
+      shibou_j: { all: 44, proper: 22, lead: 22, ashiro: 7, self: 14, organic: 1 },
+      kangan: { all: 27, proper: 15, lead: 12, ashiro: 5, self: 7, organic: 0 },
+      kangan_j: { all: 2, proper: 1, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      kankouhen: { all: 19, proper: 13, lead: 6, ashiro: 1, self: 5, organic: 0 },
+      kankouhen_j_ari: { all: 7, proper: 4, lead: 3, ashiro: 1, self: 2, organic: 0 },
+      kankouhen_j_nashi: { all: 9, proper: 5, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      mansei: { all: 76, proper: 39, lead: 37, ashiro: 12, self: 20, organic: 5 },
+      mansei_j_ari: { all: 22, proper: 10, lead: 12, ashiro: 7, self: 5, organic: 0 },
+      mansei_j_nashi: { all: 16, proper: 8, lead: 8, ashiro: 2, self: 4, organic: 2 },
+      carrier: { all: 166, proper: 103, lead: 63, ashiro: 24, self: 26, organic: 13 },
+    },
+    adSpend: { all: 160000000, proper: 83000000, lead: 77000000, ashiro: 30000000, self: 47000000, organic: 0 },
+    revenue: { all: 393487123, proper: 234998305, lead: 158488818, ashiro: 50015774, self: 93948640, organic: 14524404 },
+  },
+  '2026-05': {
+    items: {
+      shibou: { all: 72, proper: 39, lead: 33, ashiro: 7, self: 24, organic: 2 },
+      shibou_j: { all: 36, proper: 17, lead: 19, ashiro: 3, self: 14, organic: 2 },
+      kangan: { all: 30, proper: 14, lead: 16, ashiro: 8, self: 6, organic: 2 },
+      kangan_j: { all: 2, proper: 1, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      kankouhen: { all: 21, proper: 11, lead: 10, ashiro: 3, self: 6, organic: 1 },
+      kankouhen_j_ari: { all: 7, proper: 3, lead: 4, ashiro: 2, self: 2, organic: 0 },
+      kankouhen_j_nashi: { all: 3, proper: 2, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      mansei: { all: 76, proper: 43, lead: 33, ashiro: 15, self: 16, organic: 2 },
+      mansei_j_ari: { all: 41, proper: 22, lead: 19, ashiro: 7, self: 12, organic: 0 },
+      mansei_j_nashi: { all: 5, proper: 3, lead: 2, ashiro: 0, self: 2, organic: 0 },
+      carrier: { all: 149, proper: 97, lead: 52, ashiro: 19, self: 27, organic: 6 },
+    },
+    adSpend: { all: 140000000, proper: 70000000, lead: 70000000, ashiro: 30000000, self: 40000000, organic: 0 },
+    revenue: { all: 440136220, proper: 285660482, lead: 154475738, ashiro: 58401293, self: 83866669, organic: 12207776 },
+  },
+  '2026-06': {
+    items: {
+      shibou: { all: 90, proper: 50, lead: 40, ashiro: 13, self: 26, organic: 1 },
+      shibou_j: { all: 33, proper: 12, lead: 21, ashiro: 9, self: 12, organic: 0 },
+      kangan: { all: 39, proper: 23, lead: 16, ashiro: 7, self: 7, organic: 2 },
+      kangan_j: { all: 4, proper: 0, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      kankouhen: { all: 22, proper: 11, lead: 11, ashiro: 3, self: 5, organic: 3 },
+      kankouhen_j_ari: { all: 3, proper: 2, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      kankouhen_j_nashi: { all: 2, proper: 0, lead: 2, ashiro: 2, self: 0, organic: 0 },
+      mansei: { all: 85, proper: 53, lead: 32, ashiro: 14, self: 13, organic: 5 },
+      mansei_j_ari: { all: 33, proper: 19, lead: 14, ashiro: 3, self: 10, organic: 1 },
+      mansei_j_nashi: { all: 5, proper: 4, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 186, proper: 131, lead: 55, ashiro: 23, self: 26, organic: 6 },
+    },
+    adSpend: { all: 140000000, proper: 70000000, lead: 70000000, ashiro: 30000000, self: 40000000, organic: 0 },
+    revenue: { all: 474288525, proper: 306337765, lead: 167950760, ashiro: 62675458, self: 89021161, organic: 16254141 },
+  },
+  '2026-07': {
+    items: {
+      shibou: { all: 63, proper: 29, lead: 34, ashiro: 14, self: 20, organic: 0 },
+      shibou_j: { all: 48, proper: 29, lead: 19, ashiro: 12, self: 6, organic: 1 },
+      kangan: { all: 43, proper: 32, lead: 11, ashiro: 3, self: 8, organic: 0 },
+      kangan_j: { all: 3, proper: 1, lead: 2, ashiro: 1, self: 1, organic: 0 },
+      kankouhen: { all: 24, proper: 16, lead: 8, ashiro: 2, self: 5, organic: 1 },
+      kankouhen_j_ari: { all: 8, proper: 5, lead: 3, ashiro: 3, self: 0, organic: 0 },
+      kankouhen_j_nashi: { all: 2, proper: -1, lead: 3, ashiro: 1, self: 2, organic: 0 },
+      mansei: { all: 80, proper: 48, lead: 32, ashiro: 13, self: 18, organic: 1 },
+      mansei_j_ari: { all: 36, proper: 21, lead: 15, ashiro: 5, self: 9, organic: 1 },
+      mansei_j_nashi: { all: 5, proper: 2, lead: 3, ashiro: 0, self: 2, organic: 1 },
+      carrier: { all: 190, proper: 118, lead: 72, ashiro: 35, self: 27, organic: 10 },
+    },
+    adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
+    revenue: { all: 444214985, proper: 292443796, lead: 151771189, ashiro: 63721465, self: 81596145, organic: 6453579 },
+  },
+  '2026-08': {
+    items: {
+      shibou: { all: 125, proper: 82, lead: 43, ashiro: 9, self: 34, organic: 0 },
+      shibou_j: { all: 39, proper: 25, lead: 14, ashiro: 6, self: 7, organic: 1 },
+      kangan: { all: 45, proper: 21, lead: 24, ashiro: 9, self: 15, organic: 0 },
+      kangan_j: { all: 5, proper: 4, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      kankouhen: { all: 20, proper: 10, lead: 10, ashiro: 2, self: 7, organic: 1 },
+      kankouhen_j_ari: { all: 2, proper: -1, lead: 3, ashiro: 3, self: 0, organic: 0 },
+      kankouhen_j_nashi: { all: 9, proper: 8, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      mansei: { all: 64, proper: 46, lead: 18, ashiro: 7, self: 9, organic: 2 },
+      mansei_j_ari: { all: 41, proper: 23, lead: 18, ashiro: 7, self: 9, organic: 2 },
+      mansei_j_nashi: { all: 5, proper: 2, lead: 3, ashiro: 1, self: 2, organic: 0 },
+      carrier: { all: 174, proper: 121, lead: 53, ashiro: 26, self: 17, organic: 10 },
+    },
+    adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
+    revenue: { all: 532311411, proper: 361963739, lead: 170347672, ashiro: 60469476, self: 101930496, organic: 7947700 },
+  },
+  '2026-09': {
+    items: {
+      shibou: { all: 120, proper: 57, lead: 63, ashiro: 16, self: 43, organic: 4 },
+      shibou_j: { all: 74, proper: 43, lead: 31, ashiro: 12, self: 19, organic: 0 },
+      kangan: { all: 31, proper: 19, lead: 12, ashiro: 2, self: 8, organic: 2 },
+      kangan_j: { all: 9, proper: 4, lead: 5, ashiro: 1, self: 3, organic: 1 },
+      kankouhen: { all: 28, proper: 15, lead: 13, ashiro: 3, self: 10, organic: 0 },
+      kankouhen_j_ari: { all: 9, proper: 4, lead: 5, ashiro: 1, self: 3, organic: 1 },
+      kankouhen_j_nashi: { all: 3, proper: 1, lead: 2, ashiro: 1, self: 1, organic: 0 },
+      mansei: { all: 64, proper: 38, lead: 26, ashiro: 12, self: 11, organic: 3 },
+      mansei_j_ari: { all: 51, proper: 35, lead: 16, ashiro: 8, self: 8, organic: 0 },
+      mansei_j_nashi: { all: 9, proper: 8, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      carrier: { all: 167, proper: 105, lead: 62, ashiro: 23, self: 26, organic: 13 },
+    },
+    adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
+    revenue: { all: 550211813, proper: 351289369, lead: 198922444, ashiro: 60632944, self: 120898036, organic: 17391464 },
+  },
+};
+
+const ENTITIES = [
+  { key: 'all', label: '全体実績', color: 'var(--s0)', dashed: true },
+  { key: 'proper', label: 'プロパー実績', color: 'var(--sp)', dashed: true },
+  { key: 'lead', label: 'リード合計実績', color: 'var(--sl)', dashed: true },
+  { key: 'ashiro', label: 'アシロ', color: 'var(--s1)', dashed: false },
+  { key: 'self', label: 'セルフ', color: 'var(--s2)', dashed: false },
+  { key: 'organic', label: 'オーガニック', color: 'var(--s3)', dashed: false },
+];
+
+let activeEntity = 'all';
+
+const fmt = n => Math.round(n).toLocaleString('ja-JP');
+const pct = n => n.toFixed(1) + '%';
+const fmtMan = n => fmt(n / 10000) + '万円';
+
+function getAllKeys() { return GROUPS.flatMap(g => g.items.map(it => it.key)); }
+function currentMonthData() { return MONTH_DATA[MONTHS[selectedMonthIndex].key]; }
+function entityTotal(m, key) { return getAllKeys().reduce((s, k) => s + (m.items[k][key] || 0), 0); }
+
+function renderMonthButtons() {
+  const el = document.getElementById('month-buttons');
+  el.innerHTML = '';
+  MONTHS.forEach((mo, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'month-btn';
+    btn.textContent = mo.label;
+    btn.setAttribute('aria-pressed', i === selectedMonthIndex ? 'true' : 'false');
+    btn.addEventListener('click', () => { selectedMonthIndex = i; renderAll(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderKpis() {
+  const m = currentMonthData();
+  const all = entityTotal(m, 'all');
+  const lead = entityTotal(m, 'lead');
+  const occ = all ? (lead / all) * 100 : 0;
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-tile">
+      <div class="kpi-label">全体実績（全流入経路・受任数）</div>
+      <div class="kpi-value">${fmt(all)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計実績（受任数）</div>
+      <div class="kpi-value">${fmt(lead)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile hero">
+      <div class="kpi-label">リード占有率</div>
+      <div class="kpi-value">${pct(occ)}</div>
+      <div class="kpi-meter"><div class="kpi-meter-fill" style="width:${occ}%"></div></div>
+    </div>
+  `;
+}
+
+function renderEntityToggle() {
+  const m = currentMonthData();
+  const el = document.getElementById('entity-toggle');
+  el.innerHTML = '';
+  ENTITIES.forEach(ent => {
+    const btn = document.createElement('button');
+    btn.className = 'agency-btn' + (ent.dashed ? ' all-btn' : '');
+    btn.style.color = ent.color;
+    btn.setAttribute('aria-pressed', ent.key === activeEntity ? 'true' : 'false');
+    btn.innerHTML = `<span class="swatch" style="background:${ent.color}"></span>${ent.label}<span class="cnt">${fmt(entityTotal(m, ent.key))}件</span>`;
+    btn.addEventListener('click', () => { activeEntity = ent.key; renderEntityToggle(); updateCompositionHighlight(); renderRoas(); renderBreakdown(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderComposition() {
+  const m = currentMonthData();
+  const leadTotal = entityTotal(m, 'lead');
+  const subs = [
+    { key: 'ashiro', label: 'アシロ', color: 'var(--s1)' },
+    { key: 'self', label: 'セルフ', color: 'var(--s2)' },
+    { key: 'organic', label: 'オーガニック', color: 'var(--s3)' },
+  ];
+  const barEl = document.getElementById('comp-bar');
+  const legendEl = document.getElementById('comp-legend');
+  barEl.innerHTML = '';
+  legendEl.innerHTML = '';
+  subs.forEach(s => {
+    const t = entityTotal(m, s.key);
+    const p = leadTotal ? (t / leadTotal) * 100 : 0;
+    const seg = document.createElement('div');
+    seg.className = 'comp-seg';
+    seg.style.width = Math.max(0, p) + '%';
+    seg.style.background = s.color;
+    seg.title = `${s.label}：${fmt(t)}件（リード内 ${pct(p)}）`;
+    seg.dataset.entity = s.key;
+    barEl.appendChild(seg);
+
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = `<span class="swatch" style="background:${s.color}"></span>${s.label}（${pct(p)}）`;
+    legendEl.appendChild(item);
+  });
+  updateCompositionHighlight();
+}
+
+function updateCompositionHighlight() {
+  const showAll = activeEntity === 'all' || activeEntity === 'proper' || activeEntity === 'lead';
+  document.querySelectorAll('#comp-bar .comp-seg').forEach(seg => {
+    seg.style.opacity = (showAll || seg.dataset.entity === activeEntity) ? '1' : '.4';
+  });
+}
+
+function renderRoas() {
+  const m = currentMonthData();
+  const el = document.getElementById('roas-row');
+  const adSpend = m.adSpend[activeEntity];
+  const revenue = m.revenue[activeEntity];
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+
+  if (!adSpend) {
+    el.innerHTML = `<p class="roas-note-box">${ent.label}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益：<strong>${fmtMan(revenue)}</strong>）。</p>`;
+    return;
+  }
+  const roas = (revenue / adSpend) * 100;
+  const roasClass = roas >= 250 ? 'style="color:var(--good)"' : (roas < 150 ? 'style="color:var(--critical)"' : '');
+  el.innerHTML = `
+    <div class="roas-row">
+      <div class="roas-tile">
+        <div class="roas-label">広告費</div>
+        <div class="roas-value">${fmtMan(adSpend)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">期待収益</div>
+        <div class="roas-value">${fmtMan(revenue)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">ROAS（期待収益 ÷ 広告費）</div>
+        <div class="roas-value" ${roasClass}>${pct(roas)}</div>
+        <div class="roas-note">目安：250%以上=良好／150%未満=要注意</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const denom = entityTotal(m, activeEntity);
+  const maxVal = Math.max(...getAllKeys().map(k => m.items[k][activeEntity] || 0), 1);
+
+  const el = document.getElementById('breakdown');
+  el.innerHTML = GROUPS.map(g => {
+    const groupTotal = g.items.reduce((a, it) => a + (m.items[it.key][activeEntity] || 0), 0);
+    const groupShare = denom ? (groupTotal / denom) * 100 : 0;
+    const headHtml = g.name
+      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）</span></div>`
+      : '';
+    const rows = g.items.map(it => {
+      const v = m.items[it.key][activeEntity] || 0;
+      const w = (Math.max(0, v) / maxVal) * 100;
+      const share = denom ? (v / denom) * 100 : 0;
+      return `
+        <div class="bar-row">
+          <div class="bar-cat">${it.name}</div>
+          <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+          <div class="bar-figs"><strong>${fmt(v)}</strong>件（${pct(share)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="grp">${headHtml}${rows}</div>`;
+  }).join('');
+}
+
+function renderTables() {
+  const m = currentMonthData();
+  const el = document.getElementById('tables');
+  const cols = [
+    { key: 'ashiro', label: 'アシロ' },
+    { key: 'self', label: 'セルフ' },
+    { key: 'organic', label: 'オーガニック' },
+    { key: 'lead', label: 'リード計' },
+    { key: 'proper', label: 'プロパー実績' },
+    { key: 'all', label: '全体実績' },
+  ];
+  const headCols = cols.map(c => `<th>${c.label}</th>`).join('');
+  const bodyRows = GROUPS.map(g => {
+    const groupHead = g.name
+      ? `<tr class="grp-row"><td>${g.name}</td>${cols.map(() => '<td></td>').join('')}</tr>`
+      : '';
+    const itemRows = g.items.map(it => {
+      const cells = cols.map(c => `<td>${fmt(m.items[it.key][c.key] || 0)}</td>`).join('');
+      return `<tr><td>${it.name}</td>${cells}</tr>`;
+    }).join('');
+    return groupHead + itemRows;
+  }).join('');
+  const totalRow = `
+    <tr class="total-row">
+      <td>合計</td>
+      ${cols.map(c => `<td>${fmt(entityTotal(m, c.key))}</td>`).join('')}
+    </tr>
+  `;
+
+  const roasEntities = [
+    { key: 'all', label: '全体実績' },
+    { key: 'proper', label: 'プロパー実績' },
+    { key: 'lead', label: 'リード合計実績' },
+    { key: 'ashiro', label: 'アシロ' },
+    { key: 'self', label: 'セルフ' },
+    { key: 'organic', label: 'オーガニック' },
+  ];
+  const roasRows = roasEntities.map(e => {
+    const ad = m.adSpend[e.key];
+    const rev = m.revenue[e.key];
+    if (!ad) {
+      return `<tr><td>${e.label}</td><td class="na">広告費なし</td><td>${fmtMan(rev)}</td><td class="na">－</td></tr>`;
+    }
+    const roas = (rev / ad) * 100;
+    const cls = roas >= 250 ? 'roas-good' : (roas < 150 ? 'roas-bad' : '');
+    return `<tr><td>${e.label}</td><td>${fmtMan(ad)}</td><td>${fmtMan(rev)}</td><td class="${cls}">${pct(roas)}</td></tr>`;
+  }).join('');
+
+  const priceRows = GROUPS.flatMap(g => g.items).map(it =>
+    `<tr><td>${it.name}</td><td>${fmt(PRICES[it.key])}円</td></tr>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="table-block">
+      <h3>症状 × 流入経路 クロス集計（受任数・${MONTHS[selectedMonthIndex].label}度）</h3>
+      <table class="data-table">
+        <thead><tr><th>症状</th>${headCols}</tr></thead>
+        <tbody>${bodyRows}${totalRow}</tbody>
+      </table>
+    </div>
+    <div class="table-block">
+      <h3>流入経路別 広告費・期待収益・ROAS（${MONTHS[selectedMonthIndex].label}度）</h3>
+      <table class="data-table">
+        <thead><tr><th>流入経路</th><th>広告費</th><th>期待収益</th><th>ROAS</th></tr></thead>
+        <tbody>${roasRows}</tbody>
+      </table>
+      <p class="note">広告費・期待収益はご提供データの実績値をそのまま使用しています。</p>
+    </div>
+    <div class="table-block">
+      <h3>症状別 単価表（参考）</h3>
+      <table class="data-table">
+        <thead><tr><th>症状</th><th>単価</th></tr></thead>
+        <tbody>${priceRows}</tbody>
+      </table>
+      <p class="note">※この単価表は参考情報です。上表の期待収益は単価表からの逆算値ではなく、ご提供データの実績値を使用しています。</p>
+    </div>
+  `;
+}
+
+function renderAll() {
+  renderMonthButtons();
+  renderKpis();
+  renderEntityToggle();
+  renderComposition();
+  renderRoas();
+  renderBreakdown();
+  renderTables();
+}
+
+document.getElementById('table-toggle').addEventListener('click', function () {
+  const t = document.getElementById('tables');
+  t.hidden = !t.hidden;
+  this.textContent = (t.hidden ? '＋ ' : '－ ') + '症状別クロス集計・広告費対効果を表示';
+});
+
+renderAll();
+</script>
+
+</body>
+</html>
