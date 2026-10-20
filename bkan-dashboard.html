@@ -160,13 +160,14 @@
 
   /* ---- high-value zone ---- */
   .highzone-box {
-    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
-    border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;
-    background: var(--surface-1);
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
+    border-top: 1px solid var(--grid);
+    margin-top: 24px; padding-top: 16px; margin-bottom: 18px;
   }
-  .highzone-box .hz-label { font-size: .78rem; font-weight: 700; color: var(--text-secondary); }
-  .highzone-box .hz-value { font-size: 1.1rem; font-weight: 700; }
-  .highzone-box .hz-detail { font-size: .74rem; color: var(--text-muted); }
+  .highzone-box .hz-label { font-size: .82rem; font-weight: 700; color: var(--text-secondary); }
+  .highzone-box .hz-value { font-size: .82rem; font-weight: 700; }
+  .highzone-box .hz-detail { font-size: .78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .highzone-box .hz-note { flex-basis: 100%; font-size: .74rem; color: var(--text-muted); margin-top: 2px; }
 
   /* ---- rate section ---- */
   .rate-group { margin-bottom: 16px; }
@@ -247,7 +248,7 @@
     <div class="comp-legend" id="comp-legend"></div>
     <div id="roas-row"></div>
     <div id="breakdown"></div>
-    <div id="highzone-box"></div>
+    <div class="highzone-box" id="highzone-box"></div>
     <button class="table-toggle" id="table-toggle">＋ 症状別クロス集計・広告費対効果を表示</button>
     <div id="tables" hidden></div>
   </section>
@@ -665,6 +666,7 @@ function renderHighzone() {
     <span class="hz-label">高額ゾーン比率（${HIGHZONE_LABEL}）</span>
     <span class="hz-value" style="color:${ent.color}">${pct(ratio)}</span>
     <span class="hz-detail">（高額ゾーン ${fmt(hz)}件 ／ ${ent.label} ${fmt(total)}件）</span>
+    <span class="hz-note">※経路ごとに単価は異なりますが、高額ゾーン比率は事務所全体定義と同様の算出方法（高額ゾーン受任件数 ÷ 受任件数合計）です。</span>
   `;
 }
 
