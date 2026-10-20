@@ -158,6 +158,16 @@
   .roas-tile .roas-note { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
   .roas-note-box { font-size: .74rem; color: var(--text-muted); margin-bottom: 14px; }
 
+  /* ---- high-value zone ---- */
+  .highzone-box {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
+    border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;
+    background: var(--surface-1);
+  }
+  .highzone-box .hz-label { font-size: .78rem; font-weight: 700; color: var(--text-secondary); }
+  .highzone-box .hz-value { font-size: 1.1rem; font-weight: 700; }
+  .highzone-box .hz-detail { font-size: .74rem; color: var(--text-muted); }
+
   /* ---- rate section ---- */
   .rate-group { margin-bottom: 16px; }
   .rate-group:last-child { margin-bottom: 0; }
@@ -199,6 +209,7 @@
   table.data-table thead th { color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--baseline); }
   table.data-table tbody tr.grp-row td { background: var(--surface-1); font-weight: 700; color: var(--text-secondary); }
   table.data-table tbody tr.total-row td { font-weight: 700; border-top: 1px solid var(--baseline); border-bottom: none; }
+  table.data-table tbody tr.highzone-row td { color: var(--text-secondary); font-style: italic; }
   table.data-table td.roas-good { color: var(--good); font-weight: 700; }
   table.data-table td.roas-bad { color: var(--critical); font-weight: 700; }
   table.data-table td.na { color: var(--text-muted); }
@@ -236,6 +247,7 @@
     <div class="comp-legend" id="comp-legend"></div>
     <div id="roas-row"></div>
     <div id="breakdown"></div>
+    <div id="highzone-box"></div>
     <button class="table-toggle" id="table-toggle">＋ 症状別クロス集計・広告費対効果を表示</button>
     <div id="tables" hidden></div>
   </section>
@@ -473,9 +485,16 @@ const ENTITIES = [
 
 let activeEntity = 'all';
 
+const HIGHZONE_KEYS = ['shibou', 'kangan', 'kankouhen'];
+const HIGHZONE_LABEL = '①死亡＋③肝がん＋⑤肝硬変';
+
 const fmt = n => Math.round(n).toLocaleString('ja-JP');
 const pct = n => n.toFixed(1) + '%';
 const fmtYen = n => fmt(n) + '円';
+
+function highzoneCount(m, key) {
+  return HIGHZONE_KEYS.reduce((s, k) => s + (m.items[k][key] || 0), 0);
+}
 
 function getAllKeys() { return GROUPS.flatMap(g => g.items.map(it => it.key)); }
 function currentMonthData() { return MONTH_DATA[MONTHS[selectedMonthIndex].key]; }
@@ -526,7 +545,7 @@ function renderEntityToggle() {
     btn.style.color = ent.color;
     btn.setAttribute('aria-pressed', ent.key === activeEntity ? 'true' : 'false');
     btn.innerHTML = `<span class="swatch" style="background:${ent.color}"></span>${ent.label}<span class="cnt">${fmt(entityTotal(m, ent.key))}件</span>`;
-    btn.addEventListener('click', () => { activeEntity = ent.key; renderEntityToggle(); updateCompositionHighlight(); renderRoas(); renderBreakdown(); });
+    btn.addEventListener('click', () => { activeEntity = ent.key; renderEntityToggle(); updateCompositionHighlight(); renderRoas(); renderBreakdown(); renderHighzone(); });
     el.appendChild(btn);
   });
 }
@@ -636,6 +655,19 @@ function renderBreakdown() {
   }).join('');
 }
 
+function renderHighzone() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const hz = highzoneCount(m, activeEntity);
+  const total = entityTotal(m, activeEntity);
+  const ratio = total ? (hz / total) * 100 : 0;
+  document.getElementById('highzone-box').innerHTML = `
+    <span class="hz-label">高額ゾーン比率（${HIGHZONE_LABEL}）</span>
+    <span class="hz-value" style="color:${ent.color}">${pct(ratio)}</span>
+    <span class="hz-detail">（高額ゾーン ${fmt(hz)}件 ／ ${ent.label} ${fmt(total)}件）</span>
+  `;
+}
+
 function renderTables() {
   const m = currentMonthData();
   const el = document.getElementById('tables');
@@ -662,6 +694,17 @@ function renderTables() {
     <tr class="total-row">
       <td>合計</td>
       ${cols.map(c => `<td>${fmt(entityTotal(m, c.key))}</td>`).join('')}
+    </tr>
+  `;
+  const highzoneRow = `
+    <tr class="highzone-row">
+      <td>高額ゾーン比率</td>
+      ${cols.map(c => {
+        const hz = highzoneCount(m, c.key);
+        const total = entityTotal(m, c.key);
+        const ratio = total ? (hz / total) * 100 : 0;
+        return `<td>${fmt(hz)}件（${pct(ratio)}）</td>`;
+      }).join('')}
     </tr>
   `;
 
@@ -691,8 +734,9 @@ function renderTables() {
       <h3>症状 × 流入経路 クロス集計（受任数・${MONTHS[selectedMonthIndex].label}度）</h3>
       <table class="data-table">
         <thead><tr><th>症状</th>${headCols}</tr></thead>
-        <tbody>${bodyRows}${totalRow}</tbody>
+        <tbody>${bodyRows}${totalRow}${highzoneRow}</tbody>
       </table>
+      <p class="note">高額ゾーン比率＝${HIGHZONE_LABEL}の受任件数 ÷ その経路の受任件数合計。</p>
     </div>
     <div class="table-block">
       <h3>流入経路別 広告費・期待収益・ROAS（${MONTHS[selectedMonthIndex].label}度）</h3>
@@ -740,6 +784,7 @@ function renderAll() {
   renderComposition();
   renderRoas();
   renderBreakdown();
+  renderHighzone();
   renderTables();
   renderRateSection();
 }
