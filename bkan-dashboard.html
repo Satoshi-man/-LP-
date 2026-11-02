@@ -225,7 +225,7 @@
 
 <header class="top">
   <h1>B型肝炎　リードジェネレーション実績サマリー<span class="badge-demo">実績データ・草案</span></h1>
-  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜9月度）。</p>
+  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜10月度）。</p>
   <div class="month-picker">
     <span class="mp-label">対象月</span>
     <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -289,6 +289,7 @@ const MONTHS = [
   { key: '2026-07', label: '2026年7月' },
   { key: '2026-08', label: '2026年8月' },
   { key: '2026-09', label: '2026年9月' },
+  { key: '2026-10', label: '2026年10月' },
 ];
 let selectedMonthIndex = MONTHS.length - 1;
 
@@ -472,6 +473,36 @@ const MONTH_DATA = {
     },
     adSpend: { all: 130000000, proper: 70000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
     revenue: { all: 550211813, proper: 351289369, lead: 198922444, ashiro: 60632944, self: 120898036, organic: 17391464 },
+  },
+  '2026-10': {
+    items: {
+      shibou: { all: 102, proper: 58, lead: 44, ashiro: 5, self: 38, organic: 1 },
+      shibou_j: { all: 68, proper: 31, lead: 37, ashiro: 7, self: 30, organic: 0 },
+      kangan: { all: 42, proper: 25, lead: 17, ashiro: 7, self: 6, organic: 4 },
+      kangan_j: { all: 7, proper: 2, lead: 5, ashiro: 2, self: 2, organic: 1 },
+      kankouhen: { all: 29, proper: 12, lead: 17, ashiro: 4, self: 10, organic: 3 },
+      kankouhen_j_ari: { all: 1, proper: 0, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      kankouhen_j_nashi: { all: 10, proper: 8, lead: 2, ashiro: 0, self: 2, organic: 0 },
+      mansei: { all: 57, proper: 37, lead: 20, ashiro: 7, self: 7, organic: 6 },
+      mansei_j_ari: { all: 35, proper: 24, lead: 11, ashiro: 6, self: 3, organic: 2 },
+      mansei_j_nashi: { all: 3, proper: 3, lead: 0, ashiro: 0, self: 0, organic: 0 },
+      carrier: { all: 181, proper: 125, lead: 56, ashiro: 25, self: 25, organic: 6 },
+    },
+    meetings: {
+      shibou: { all: 120, proper: 65, lead: 55, ashiro: 6, self: 48, organic: 1 },
+      shibou_j: { all: 71, proper: 32, lead: 39, ashiro: 7, self: 32, organic: 0 },
+      kangan: { all: 51, proper: 30, lead: 21, ashiro: 7, self: 10, organic: 4 },
+      kangan_j: { all: 11, proper: 5, lead: 6, ashiro: 2, self: 3, organic: 1 },
+      kankouhen: { all: 32, proper: 13, lead: 19, ashiro: 4, self: 11, organic: 4 },
+      kankouhen_j_ari: { all: 1, proper: 0, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      kankouhen_j_nashi: { all: 14, proper: 12, lead: 2, ashiro: 0, self: 2, organic: 0 },
+      mansei: { all: 69, proper: 38, lead: 31, ashiro: 9, self: 16, organic: 6 },
+      mansei_j_ari: { all: 39, proper: 25, lead: 14, ashiro: 8, self: 4, organic: 2 },
+      mansei_j_nashi: { all: 5, proper: 4, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 417, proper: 332, lead: 85, ashiro: 36, self: 38, organic: 11 },
+    },
+    adSpend: { all: 134000000, proper: 74000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
+    revenue: { all: 507533670, proper: 329524471, lead: 178009199, ashiro: 48580546, self: 106483883, organic: 22944770 },
   },
 };
 
