@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B型肝炎 リード詳細分析</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:    #fcfcfb;
+    --surface-2:    #f9f9f7;
+    --surface-card: #ffffff;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+
+    --s0: #898781; /* neutral (リード合計) */
+    --s1: #2a78d6; /* blue (アシロ) */
+    --s2: #eb6834; /* orange (セルフ) */
+    --s3: #1baf7a; /* aqua (オーガニック) */
+
+    --good:     #0ca30c;
+    --warning:  #fab219;
+    --critical: #d03b3b;
+
+    --lane-bg: #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:    #1a1a19;
+      --surface-2:    #0d0d0d;
+      --surface-card: #232322;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --border:    rgba(255,255,255,0.10);
+
+      --s0: #898781;
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+
+      --lane-bg: #2c2c2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:    #1a1a19;
+    --surface-2:    #0d0d0d;
+    --surface-card: #232322;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --border:    rgba(255,255,255,0.10);
+
+    --s0: #898781;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+
+    --lane-bg: #2c2c2a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    padding-bottom: 64px;
+  }
+
+  header.top {
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.top h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; }
+  header.top p { margin: 0 0 12px; font-size: .82rem; color: var(--text-muted); }
+  .badge-demo {
+    display: inline-block; font-size: .68rem; font-weight: 700; color: var(--s1);
+    border: 1px solid var(--s1); border-radius: 20px; padding: 1px 10px; margin-left: 8px; vertical-align: middle;
+  }
+
+  .month-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .month-picker .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); }
+  .month-btn {
+    font-family: inherit; font-size: .8rem; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+  }
+  .month-btn[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+  .month-btn--note { border-style: dashed; }
+  .month-btn--note[aria-pressed="true"] { background: var(--warning); border-color: var(--warning); }
+  .period-note { font-size: .78rem; color: var(--warning); font-weight: 700; margin: 0 0 16px; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+
+  section.card {
+    background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 22px; margin-bottom: 20px;
+  }
+  section.card h2 { font-size: .98rem; font-weight: 700; margin: 0 0 4px; }
+  section.card .card-sub { font-size: .78rem; color: var(--text-muted); margin: 0 0 16px; }
+
+  .sub-head { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin: 22px 0 10px; }
+  .sub-head:first-of-type { margin-top: 0; }
+  .sub-note { font-size: .74rem; color: var(--text-muted); margin: -6px 0 12px; }
+
+  /* ---- KPI tiles ---- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 4px; }
+  .kpi-tile { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .kpi-tile .kpi-label { font-size: .76rem; color: var(--text-muted); margin-bottom: 6px; }
+  .kpi-tile .kpi-value { font-size: 1.6rem; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+  .kpi-tile .kpi-unit { font-size: .82rem; font-weight: 400; color: var(--text-secondary); margin-left: 2px; }
+  .kpi-tile.hero .kpi-value { color: var(--s1); }
+
+  /* ---- entity toggle ---- */
+  .agency-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .agency-btn {
+    font-family: inherit; font-size: .82rem; font-weight: 700; padding: 8px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .agency-btn .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .agency-btn.all-btn { border-style: dashed; }
+  .agency-btn.all-btn .swatch { border-radius: 2px; }
+  .agency-btn .cnt { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .agency-btn[aria-pressed="true"] { border-color: currentColor; border-style: solid; background: var(--surface-card); color: var(--text-primary); box-shadow: 0 0 0 1px currentColor inset; }
+
+  /* ---- ROAS row ---- */
+  .roas-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 14px 0 4px; }
+  .roas-tile { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-1); }
+  .roas-tile .roas-label { font-size: .72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .roas-tile .roas-value { font-size: 1.3rem; font-weight: 700; }
+  .roas-tile .roas-note { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+  .roas-note-box { font-size: .74rem; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* ---- high-value zone ---- */
+  .highzone-box {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
+    border-top: 1px solid var(--grid);
+    margin-top: 24px; padding-top: 16px; margin-bottom: 18px;
+  }
+  .highzone-box .hz-label { font-size: .82rem; font-weight: 700; color: var(--text-secondary); }
+  .highzone-box .hz-value { font-size: .82rem; font-weight: 700; }
+  .highzone-box .hz-detail { font-size: .78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .highzone-box .hz-note { flex-basis: 100%; font-size: .74rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---- rate section ---- */
+  .rate-group { margin-bottom: 16px; }
+  .rate-group:last-child { margin-bottom: 0; }
+  .rate-group-head { font-size: .84rem; font-weight: 700; margin-bottom: 8px; }
+  .rate-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rate-line:last-child { margin-bottom: 0; }
+  .rate-tag { width: 110px; flex-shrink: 0; font-size: .74rem; font-weight: 700; }
+  .rate-track { flex: 1; height: 10px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .rate-val { width: 230px; flex-shrink: 0; text-align: right; font-size: .74rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .rate-val strong { color: var(--text-primary); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .rate-tag { width: 76px; font-size: .68rem; }
+    .rate-val { width: 160px; font-size: .68rem; }
+  }
+
+  /* ---- breakdown bars ---- */
+  .grp { margin-bottom: 18px; }
+  .grp:last-child { margin-bottom: 0; }
+  .grp-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .82rem; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--grid); padding-bottom: 6px; margin-bottom: 10px; }
+  .grp-head .grp-sub { font-weight: 400; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-cat { width: 200px; flex-shrink: 0; font-size: .8rem; color: var(--text-primary); }
+  .bar-lane { flex: 1; height: 18px; background: var(--lane-bg); border-radius: 4px; position: relative; }
+  .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .bar-figs { width: 260px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .bar-figs strong { color: var(--text-primary); font-weight: 700; }
+  .bar-figs-sub { display: block; font-size: .7rem; color: var(--text-muted); margin-top: 1px; }
+
+  .bar-row--sub { margin-bottom: 6px; padding-left: 20px; }
+  .bar-row--sub .bar-cat { width: 180px; font-size: .74rem; color: var(--text-secondary); }
+  .bar-row--sub .bar-lane { height: 12px; }
+  .bar-row--sub .bar-fill { opacity: .6; }
+  .bar-row--sub .bar-figs { font-size: .72rem; }
+
+  /* ---- tables ---- */
+  .table-toggle { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--s1); background: none; border: none; cursor: pointer; padding: 0; margin-top: 18px; }
+  .table-block { overflow-x: auto; margin-top: 16px; }
+  .table-block h3 { font-size: .82rem; font-weight: 700; margin: 0 0 8px; }
+  .table-block p.note { font-size: .72rem; color: var(--text-muted); margin: 6px 0 0; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  table.data-table th, table.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.data-table thead th { color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--baseline); }
+  table.data-table tbody tr.grp-row td { background: var(--surface-1); font-weight: 700; color: var(--text-secondary); }
+  table.data-table tbody tr.total-row td { font-weight: 700; border-top: 1px solid var(--baseline); border-bottom: none; }
+  table.data-table tbody tr.highzone-row td { color: var(--text-secondary); font-style: italic; }
+  table.data-table td.roas-good { color: var(--good); font-weight: 700; }
+  table.data-table td.roas-bad { color: var(--critical); font-weight: 700; }
+  table.data-table td.na { color: var(--text-muted); }
+
+  @media (max-width: 640px) {
+    .bar-cat { width: 120px; font-size: .74rem; }
+    .bar-figs { width: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>B型肝炎　リード詳細分析<span class="badge-demo">実績データ・草案</span></h1>
+  <p>リードジェネレーション（WEB広告）経由の実績を、流入〜予約〜面談〜受任〜契約まで一気通貫で分析。プロパー・事務所全体は含まず、リード施策（アシロ・セルフ・オーガニック）のみを対象としています。</p>
+  <div class="month-picker">
+    <span class="mp-label">対象月</span>
+    <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <p class="period-note" id="period-note" hidden></p>
+    <h2>リード合計サマリー</h2>
+    <p class="card-sub">リード経由（アシロ＋セルフ＋オーガニック）合計の実績。</p>
+    <div class="kpi-row" id="kpi-row"></div>
+  </section>
+
+  <section class="card">
+    <div class="sub-head">表示切替（リード合計／アシロ／セルフ／オーガニック）</div>
+    <p class="sub-note">選択した経路の流入〜予約の内訳が下に表示されます。</p>
+    <div class="agency-toggle" id="entity-toggle"></div>
+    <div id="inflow-breakdown"></div>
+    <div id="reservation-breakdown"></div>
+  </section>
+
+  <section class="card">
+    <div class="sub-head">症状別受任内訳</div>
+    <p class="sub-note">選択した経路の症状別の受任実績が表示されます（経路切替は上のボタンと連動します）。</p>
+    <div id="roas-row"></div>
+    <div id="breakdown"></div>
+    <div class="highzone-box" id="highzone-box"></div>
+    <button class="table-toggle" id="table-toggle">＋ 詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）</button>
+    <div id="tables" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="sub-head">受任率（大カテ別・リード合計／アシロ／セルフ／オーガニック）</div>
+    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。いただいたデータの実績値から算出しています。</p>
+    <div id="rate-section"></div>
+  </section>
+
+</main>
+
+<script>
+const MONTH_DATA = {"4月": {"items": {"shibou": {"lead": 40, "ashiro": 8, "self": 28, "organic": 4}, "shibou_j": {"lead": 22, "ashiro": 7, "self": 14, "organic": 1}, "kangan": {"lead": 12, "ashiro": 5, "self": 7, "organic": 0}, "kangan_j": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen": {"lead": 6, "ashiro": 1, "self": 5, "organic": 0}, "kankouhen_j_ari": {"lead": 3, "ashiro": 1, "self": 2, "organic": 0}, "kankouhen_j_nashi": {"lead": 4, "ashiro": 0, "self": 4, "organic": 0}, "mansei": {"lead": 37, "ashiro": 12, "self": 20, "organic": 5}, "mansei_j_ari": {"lead": 12, "ashiro": 7, "self": 5, "organic": 0}, "mansei_j_nashi": {"lead": 8, "ashiro": 2, "self": 4, "organic": 2}, "carrier": {"lead": 63, "ashiro": 24, "self": 26, "organic": 13}}, "adSpend": {"lead": 77000000, "ashiro": 30000000, "self": 47000000, "organic": 0}, "revenue": {"lead": 158488818.10774, "ashiro": 50015774, "self": 93948640, "organic": 14524404.10774}, "meetings": {"shibou": {"lead": 49, "ashiro": 12, "self": 33, "organic": 4}, "shibou_j": {"lead": 28, "ashiro": 10, "self": 17, "organic": 1}, "kangan": {"lead": 18, "ashiro": 8, "self": 10, "organic": 0}, "kangan_j": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "kankouhen": {"lead": 14, "ashiro": 1, "self": 13, "organic": 0}, "kankouhen_j_ari": {"lead": 4, "ashiro": 1, "self": 3, "organic": 0}, "kankouhen_j_nashi": {"lead": 4, "ashiro": 0, "self": 4, "organic": 0}, "mansei": {"lead": 49, "ashiro": 17, "self": 27, "organic": 5}, "mansei_j_ari": {"lead": 15, "ashiro": 8, "self": 7, "organic": 0}, "mansei_j_nashi": {"lead": 8, "ashiro": 2, "self": 4, "organic": 2}, "carrier": {"lead": 124, "ashiro": 43, "self": 66, "organic": 15}}, "inflow": {"total": {"lead": 2584, "ashiro": 880, "self": 1551, "organic": 153}, "arial_ari": {"total": {"lead": 855, "ashiro": 340, "self": 488, "organic": 27}, "shibou": {"lead": 225, "ashiro": 78, "self": 142, "organic": 5}, "kangan": {"lead": 177, "ashiro": 72, "self": 102, "organic": 3}, "kankouhen": {"lead": 170, "ashiro": 69, "self": 98, "organic": 3}, "mansei": {"lead": 283, "ashiro": 121, "self": 146, "organic": 16}}, "ari_nashi": {"total": {"lead": 1011, "ashiro": 350, "self": 555, "organic": 106}, "carrier": {"lead": 1011, "ashiro": 350, "self": 555, "organic": 106}}, "nashi_ari": {"total": {"lead": 718, "ashiro": 190, "self": 508, "organic": 20}, "shibou": {"lead": 206, "ashiro": 104, "self": 100, "organic": 2}, "kangan": {"lead": 192, "ashiro": 86, "self": 102, "organic": 4}, "kankouhen": {"lead": 208, "ashiro": 0, "self": 200, "organic": 8}, "mansei": {"lead": 112, "ashiro": 0, "self": 106, "organic": 6}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.330882, "ashiro": 0.386364, "self": 0.314636, "organic": 0.176471}, "shibou": {"lead": 0.087074, "ashiro": 0.088636, "self": 0.091554, "organic": 0.03268}, "kangan": {"lead": 0.068498, "ashiro": 0.081818, "self": 0.065764, "organic": 0.019608}, "kankouhen": {"lead": 0.065789, "ashiro": 0.078409, "self": 0.063185, "organic": 0.019608}, "mansei": {"lead": 0.10952, "ashiro": 0.1375, "self": 0.094133, "organic": 0.104575}}, "ari_nashi": {"total": {"lead": 0.391254, "ashiro": 0.397727, "self": 0.357834, "organic": 0.69281}, "carrier": {"lead": 0.391254, "ashiro": 0.397727, "self": 0.357834, "organic": 0.69281}}, "nashi_ari": {"total": {"lead": 0.277864, "ashiro": 0.215909, "self": 0.327531, "organic": 0.130719}, "shibou": {"lead": 0.079721, "ashiro": 0.118182, "self": 0.064475, "organic": 0.013072}, "kangan": {"lead": 0.074303, "ashiro": 0.097727, "self": 0.065764, "organic": 0.026144}, "kankouhen": {"lead": 0.080495, "ashiro": 0, "self": 0.128949, "organic": 0.052288}, "mansei": {"lead": 0.043344, "ashiro": 0, "self": 0.068343, "organic": 0.039216}}}, "newCount": {"total": {"lead": 2014, "ashiro": 727, "self": 1173, "organic": 114}, "arial_ari": {"total": {"lead": 648, "ashiro": 276, "self": 349, "organic": 23}, "shibou": {"lead": 179, "ashiro": 64, "self": 110, "organic": 5}, "kangan": {"lead": 128, "ashiro": 60, "self": 65, "organic": 3}, "kankouhen": {"lead": 122, "ashiro": 52, "self": 68, "organic": 2}, "mansei": {"lead": 219, "ashiro": 100, "self": 106, "organic": 13}}, "ari_nashi": {"total": {"lead": 802, "ashiro": 289, "self": 433, "organic": 80}, "carrier": {"lead": 802, "ashiro": 289, "self": 433, "organic": 80}}, "nashi_ari": {"total": {"lead": 564, "ashiro": 162, "self": 391, "organic": 11}, "shibou": {"lead": 166, "ashiro": 93, "self": 72, "organic": 1}, "kangan": {"lead": 153, "ashiro": 69, "self": 83, "organic": 1}, "kankouhen": {"lead": 162, "ashiro": 0, "self": 157, "organic": 5}, "mansei": {"lead": 83, "ashiro": 0, "self": 79, "organic": 4}}}, "newRate": {"total": {"lead": 0.779412, "ashiro": 0.826136, "self": 0.756286, "organic": 0.745098}, "arial_ari": {"total": {"lead": 0.757895, "ashiro": 0.811765, "self": 0.715164, "organic": 0.851852}, "shibou": {"lead": 0.795556, "ashiro": 0.820513, "self": 0.774648, "organic": 1}, "kangan": {"lead": 0.723164, "ashiro": 0.833333, "self": 0.637255, "organic": 1}, "kankouhen": {"lead": 0.717647, "ashiro": 0.753623, "self": 0.693878, "organic": 0.666667}, "mansei": {"lead": 0.773852, "ashiro": 0.826446, "self": 0.726027, "organic": 0.8125}}, "ari_nashi": {"total": {"lead": 0.793274, "ashiro": 0.825714, "self": 0.78018, "organic": 0.754717}, "carrier": {"lead": 0.793274, "ashiro": 0.825714, "self": 0.78018, "organic": 0.754717}}, "nashi_ari": {"total": {"lead": 0.785515, "ashiro": 0.852632, "self": 0.769685, "organic": 0.55}, "shibou": {"lead": 0.805825, "ashiro": 0.894231, "self": 0.72, "organic": 0.5}, "kangan": {"lead": 0.796875, "ashiro": 0.802326, "self": 0.813725, "organic": 0.25}, "kankouhen": {"lead": 0.778846, "ashiro": null, "self": 0.785, "organic": 0.625}, "mansei": {"lead": 0.741071, "ashiro": null, "self": 0.745283, "organic": 0.666667}}}, "reservation": {"total": {"lead": 369, "ashiro": 121, "self": 223, "organic": 25}, "byoutai_ari": {"lead": 240, "ashiro": 73, "self": 153, "organic": 14}, "carrier": {"lead": 129, "ashiro": 48, "self": 70, "organic": 11}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.650407, "ashiro": 0.603306, "self": 0.686099, "organic": 0.56}, "carrier": {"lead": 0.349593, "ashiro": 0.396694, "self": 0.313901, "organic": 0.44}}}, "5月": {"items": {"shibou": {"lead": 33, "ashiro": 7, "self": 24, "organic": 2}, "shibou_j": {"lead": 19, "ashiro": 3, "self": 14, "organic": 2}, "kangan": {"lead": 16, "ashiro": 8, "self": 6, "organic": 2}, "kangan_j": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "kankouhen": {"lead": 10, "ashiro": 3, "self": 6, "organic": 1}, "kankouhen_j_ari": {"lead": 4, "ashiro": 2, "self": 2, "organic": 0}, "kankouhen_j_nashi": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "mansei": {"lead": 33, "ashiro": 15, "self": 16, "organic": 2}, "mansei_j_ari": {"lead": 19, "ashiro": 7, "self": 12, "organic": 0}, "mansei_j_nashi": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "carrier": {"lead": 52, "ashiro": 19, "self": 27, "organic": 6}}, "adSpend": {"lead": 70000000, "ashiro": 30000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 154475738.17438, "ashiro": 58401293, "self": 83866669, "organic": 12207776.17438}, "meetings": {"shibou": {"lead": 41, "ashiro": 13, "self": 26, "organic": 2}, "shibou_j": {"lead": 26, "ashiro": 4, "self": 20, "organic": 2}, "kangan": {"lead": 19, "ashiro": 10, "self": 7, "organic": 2}, "kangan_j": {"lead": 2, "ashiro": 1, "self": 1, "organic": 0}, "kankouhen": {"lead": 16, "ashiro": 5, "self": 10, "organic": 1}, "kankouhen_j_ari": {"lead": 4, "ashiro": 2, "self": 2, "organic": 0}, "kankouhen_j_nashi": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "mansei": {"lead": 40, "ashiro": 16, "self": 18, "organic": 6}, "mansei_j_ari": {"lead": 25, "ashiro": 8, "self": 17, "organic": 0}, "mansei_j_nashi": {"lead": 4, "ashiro": 0, "self": 4, "organic": 0}, "carrier": {"lead": 109, "ashiro": 35, "self": 63, "organic": 11}}, "inflow": {"total": {"lead": 2559, "ashiro": 882, "self": 1598, "organic": 79}, "arial_ari": {"total": {"lead": 835, "ashiro": 308, "self": 505, "organic": 22}, "shibou": {"lead": 240, "ashiro": 63, "self": 171, "organic": 6}, "kangan": {"lead": 165, "ashiro": 74, "self": 87, "organic": 4}, "kankouhen": {"lead": 165, "ashiro": 55, "self": 108, "organic": 2}, "mansei": {"lead": 265, "ashiro": 116, "self": 139, "organic": 10}}, "ari_nashi": {"total": {"lead": 940, "ashiro": 360, "self": 525, "organic": 55}, "carrier": {"lead": 940, "ashiro": 360, "self": 525, "organic": 55}}, "nashi_ari": {"total": {"lead": 784, "ashiro": 214, "self": 568, "organic": 2}, "shibou": {"lead": 198, "ashiro": 91, "self": 107, "organic": 0}, "kangan": {"lead": 201, "ashiro": 86, "self": 114, "organic": 1}, "kankouhen": {"lead": 278, "ashiro": 37, "self": 240, "organic": 1}, "mansei": {"lead": 107, "ashiro": 0, "self": 107, "organic": 0}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.326299, "ashiro": 0.349206, "self": 0.31602, "organic": 0.278481}, "shibou": {"lead": 0.093787, "ashiro": 0.071429, "self": 0.107009, "organic": 0.075949}, "kangan": {"lead": 0.064478, "ashiro": 0.0839, "self": 0.054443, "organic": 0.050633}, "kankouhen": {"lead": 0.064478, "ashiro": 0.062358, "self": 0.067584, "organic": 0.025316}, "mansei": {"lead": 0.103556, "ashiro": 0.131519, "self": 0.086984, "organic": 0.126582}}, "ari_nashi": {"total": {"lead": 0.367331, "ashiro": 0.408163, "self": 0.328536, "organic": 0.696203}, "carrier": {"lead": 0.367331, "ashiro": 0.408163, "self": 0.328536, "organic": 0.696203}}, "nashi_ari": {"total": {"lead": 0.30637, "ashiro": 0.24263, "self": 0.355444, "organic": 0.025316}, "shibou": {"lead": 0.077374, "ashiro": 0.103175, "self": 0.066959, "organic": 0}, "kangan": {"lead": 0.078546, "ashiro": 0.097506, "self": 0.071339, "organic": 0.012658}, "kankouhen": {"lead": 0.108636, "ashiro": 0.04195, "self": 0.150188, "organic": 0.012658}, "mansei": {"lead": 0.041813, "ashiro": 0, "self": 0.066959, "organic": 0}}}, "newCount": {"total": {"lead": 1984, "ashiro": 717, "self": 1202, "organic": 65}, "arial_ari": {"total": {"lead": 619, "ashiro": 257, "self": 343, "organic": 19}, "shibou": {"lead": 178, "ashiro": 55, "self": 118, "organic": 5}, "kangan": {"lead": 118, "ashiro": 61, "self": 55, "organic": 2}, "kankouhen": {"lead": 115, "ashiro": 44, "self": 69, "organic": 2}, "mansei": {"lead": 208, "ashiro": 97, "self": 101, "organic": 10}}, "ari_nashi": {"total": {"lead": 723, "ashiro": 281, "self": 398, "organic": 44}, "carrier": {"lead": 723, "ashiro": 281, "self": 398, "organic": 44}}, "nashi_ari": {"total": {"lead": 642, "ashiro": 179, "self": 461, "organic": 2}, "shibou": {"lead": 155, "ashiro": 73, "self": 82, "organic": 0}, "kangan": {"lead": 174, "ashiro": 75, "self": 98, "organic": 1}, "kankouhen": {"lead": 234, "ashiro": 31, "self": 202, "organic": 1}, "mansei": {"lead": 79, "ashiro": 0, "self": 79, "organic": 0}}}, "newRate": {"total": {"lead": 0.775303, "ashiro": 0.812925, "self": 0.75219, "organic": 0.822785}, "arial_ari": {"total": {"lead": 0.741317, "ashiro": 0.834416, "self": 0.679208, "organic": 0.863636}, "shibou": {"lead": 0.741667, "ashiro": 0.873016, "self": 0.690058, "organic": 0.833333}, "kangan": {"lead": 0.715152, "ashiro": 0.824324, "self": 0.632184, "organic": 0.5}, "kankouhen": {"lead": 0.69697, "ashiro": 0.8, "self": 0.638889, "organic": 1}, "mansei": {"lead": 0.784906, "ashiro": 0.836207, "self": 0.726619, "organic": 1}}, "ari_nashi": {"total": {"lead": 0.769149, "ashiro": 0.780556, "self": 0.758095, "organic": 0.8}, "carrier": {"lead": 0.769149, "ashiro": 0.780556, "self": 0.758095, "organic": 0.8}}, "nashi_ari": {"total": {"lead": 0.818878, "ashiro": 0.836449, "self": 0.81162, "organic": 1}, "shibou": {"lead": 0.782828, "ashiro": 0.802198, "self": 0.766355, "organic": null}, "kangan": {"lead": 0.865672, "ashiro": 0.872093, "self": 0.859649, "organic": 1}, "kankouhen": {"lead": 0.841727, "ashiro": 0.837838, "self": 0.841667, "organic": 1}, "mansei": {"lead": 0.738318, "ashiro": null, "self": 0.738318, "organic": null}}}, "reservation": {"total": {"lead": 331, "ashiro": 111, "self": 196, "organic": 24}, "byoutai_ari": {"lead": 206, "ashiro": 71, "self": 122, "organic": 13}, "carrier": {"lead": 125, "ashiro": 40, "self": 74, "organic": 11}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.622356, "ashiro": 0.63964, "self": 0.622449, "organic": 0.541667}, "carrier": {"lead": 0.377644, "ashiro": 0.36036, "self": 0.377551, "organic": 0.458333}}}, "6月": {"items": {"shibou": {"lead": 40, "ashiro": 13, "self": 26, "organic": 1}, "shibou_j": {"lead": 21, "ashiro": 9, "self": 12, "organic": 0}, "kangan": {"lead": 16, "ashiro": 7, "self": 7, "organic": 2}, "kangan_j": {"lead": 4, "ashiro": 0, "self": 4, "organic": 0}, "kankouhen": {"lead": 11, "ashiro": 3, "self": 5, "organic": 3}, "kankouhen_j_ari": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 2, "self": 0, "organic": 0}, "mansei": {"lead": 32, "ashiro": 14, "self": 13, "organic": 5}, "mansei_j_ari": {"lead": 14, "ashiro": 3, "self": 10, "organic": 1}, "mansei_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "carrier": {"lead": 55, "ashiro": 23, "self": 26, "organic": 6}}, "adSpend": {"lead": 70000000, "ashiro": 30000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 167950759.75745, "ashiro": 62675458, "self": 89021161, "organic": 16254140.75745}, "meetings": {"shibou": {"lead": 48, "ashiro": 13, "self": 34, "organic": 1}, "shibou_j": {"lead": 27, "ashiro": 11, "self": 16, "organic": 0}, "kangan": {"lead": 27, "ashiro": 11, "self": 14, "organic": 2}, "kangan_j": {"lead": 4, "ashiro": 0, "self": 4, "organic": 0}, "kankouhen": {"lead": 17, "ashiro": 5, "self": 9, "organic": 3}, "kankouhen_j_ari": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "kankouhen_j_nashi": {"lead": 3, "ashiro": 3, "self": 0, "organic": 0}, "mansei": {"lead": 41, "ashiro": 18, "self": 18, "organic": 5}, "mansei_j_ari": {"lead": 18, "ashiro": 4, "self": 12, "organic": 2}, "mansei_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "carrier": {"lead": 108, "ashiro": 52, "self": 46, "organic": 10}}, "inflow": {"total": {"lead": 2478, "ashiro": 1129, "self": 1280, "organic": 69}, "arial_ari": {"total": {"lead": 698, "ashiro": 332, "self": 347, "organic": 19}, "shibou": {"lead": 195, "ashiro": 89, "self": 100, "organic": 6}, "kangan": {"lead": 132, "ashiro": 59, "self": 71, "organic": 2}, "kankouhen": {"lead": 164, "ashiro": 78, "self": 83, "organic": 3}, "mansei": {"lead": 207, "ashiro": 106, "self": 93, "organic": 8}}, "ari_nashi": {"total": {"lead": 786, "ashiro": 364, "self": 377, "organic": 45}, "carrier": {"lead": 786, "ashiro": 364, "self": 377, "organic": 45}}, "nashi_ari": {"total": {"lead": 994, "ashiro": 433, "self": 556, "organic": 5}, "shibou": {"lead": 263, "ashiro": 140, "self": 121, "organic": 2}, "kangan": {"lead": 255, "ashiro": 129, "self": 124, "organic": 2}, "kankouhen": {"lead": 385, "ashiro": 164, "self": 220, "organic": 1}, "mansei": {"lead": 91, "ashiro": 0, "self": 91, "organic": 0}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.281679, "ashiro": 0.294066, "self": 0.271094, "organic": 0.275362}, "shibou": {"lead": 0.078692, "ashiro": 0.078831, "self": 0.078125, "organic": 0.086957}, "kangan": {"lead": 0.053269, "ashiro": 0.052259, "self": 0.055469, "organic": 0.028986}, "kankouhen": {"lead": 0.066182, "ashiro": 0.069088, "self": 0.064844, "organic": 0.043478}, "mansei": {"lead": 0.083535, "ashiro": 0.093888, "self": 0.072656, "organic": 0.115942}}, "ari_nashi": {"total": {"lead": 0.317191, "ashiro": 0.322409, "self": 0.294531, "organic": 0.652174}, "carrier": {"lead": 0.317191, "ashiro": 0.322409, "self": 0.294531, "organic": 0.652174}}, "nashi_ari": {"total": {"lead": 0.40113, "ashiro": 0.383525, "self": 0.434375, "organic": 0.072464}, "shibou": {"lead": 0.106134, "ashiro": 0.124004, "self": 0.094531, "organic": 0.028986}, "kangan": {"lead": 0.102906, "ashiro": 0.11426, "self": 0.096875, "organic": 0.028986}, "kankouhen": {"lead": 0.155367, "ashiro": 0.145261, "self": 0.171875, "organic": 0.014493}, "mansei": {"lead": 0.036723, "ashiro": 0, "self": 0.071094, "organic": 0}}}, "newCount": {"total": {"lead": 1991, "ashiro": 961, "self": 977, "organic": 53}, "arial_ari": {"total": {"lead": 549, "ashiro": 282, "self": 253, "organic": 14}, "shibou": {"lead": 162, "ashiro": 79, "self": 79, "organic": 4}, "kangan": {"lead": 103, "ashiro": 50, "self": 52, "organic": 1}, "kankouhen": {"lead": 126, "ashiro": 66, "self": 57, "organic": 3}, "mansei": {"lead": 158, "ashiro": 87, "self": 65, "organic": 6}}, "ari_nashi": {"total": {"lead": 622, "ashiro": 302, "self": 283, "organic": 37}, "carrier": {"lead": 622, "ashiro": 302, "self": 283, "organic": 37}}, "nashi_ari": {"total": {"lead": 820, "ashiro": 377, "self": 441, "organic": 2}, "shibou": {"lead": 220, "ashiro": 123, "self": 97, "organic": 0}, "kangan": {"lead": 208, "ashiro": 110, "self": 97, "organic": 1}, "kankouhen": {"lead": 323, "ashiro": 144, "self": 178, "organic": 1}, "mansei": {"lead": 69, "ashiro": 0, "self": 69, "organic": 0}}}, "newRate": {"total": {"lead": 0.803471, "ashiro": 0.851196, "self": 0.763281, "organic": 0.768116}, "arial_ari": {"total": {"lead": 0.786533, "ashiro": 0.849398, "self": 0.729107, "organic": 0.736842}, "shibou": {"lead": 0.830769, "ashiro": 0.88764, "self": 0.79, "organic": 0.666667}, "kangan": {"lead": 0.780303, "ashiro": 0.847458, "self": 0.732394, "organic": 0.5}, "kankouhen": {"lead": 0.768293, "ashiro": 0.846154, "self": 0.686747, "organic": 1}, "mansei": {"lead": 0.763285, "ashiro": 0.820755, "self": 0.698925, "organic": 0.75}}, "ari_nashi": {"total": {"lead": 0.791349, "ashiro": 0.82967, "self": 0.750663, "organic": 0.822222}, "carrier": {"lead": 0.791349, "ashiro": 0.82967, "self": 0.750663, "organic": 0.822222}}, "nashi_ari": {"total": {"lead": 0.82495, "ashiro": 0.87067, "self": 0.793165, "organic": 0.4}, "shibou": {"lead": 0.836502, "ashiro": 0.878571, "self": 0.801653, "organic": 0}, "kangan": {"lead": 0.815686, "ashiro": 0.852713, "self": 0.782258, "organic": 0.5}, "kankouhen": {"lead": 0.838961, "ashiro": 0.878049, "self": 0.809091, "organic": 1}, "mansei": {"lead": 0.758242, "ashiro": null, "self": 0.758242, "organic": null}}}, "reservation": {"total": {"lead": 345, "ashiro": 136, "self": 184, "organic": 25}, "byoutai_ari": {"lead": 230, "ashiro": 83, "self": 132, "organic": 15}, "carrier": {"lead": 115, "ashiro": 53, "self": 52, "organic": 10}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.666667, "ashiro": 0.610294, "self": 0.717391, "organic": 0.6}, "carrier": {"lead": 0.333333, "ashiro": 0.389706, "self": 0.282609, "organic": 0.4}}}, "7月": {"items": {"shibou": {"lead": 34, "ashiro": 14, "self": 20, "organic": 0}, "shibou_j": {"lead": 19, "ashiro": 12, "self": 6, "organic": 1}, "kangan": {"lead": 11, "ashiro": 3, "self": 8, "organic": 0}, "kangan_j": {"lead": 2, "ashiro": 1, "self": 1, "organic": 0}, "kankouhen": {"lead": 8, "ashiro": 2, "self": 5, "organic": 1}, "kankouhen_j_ari": {"lead": 3, "ashiro": 3, "self": 0, "organic": 0}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 1, "self": 1, "organic": 0}, "mansei": {"lead": 32, "ashiro": 13, "self": 18, "organic": 1}, "mansei_j_ari": {"lead": 15, "ashiro": 5, "self": 9, "organic": 1}, "mansei_j_nashi": {"lead": 3, "ashiro": 0, "self": 2, "organic": 1}, "carrier": {"lead": 72, "ashiro": 35, "self": 27, "organic": 10}}, "adSpend": {"lead": 60000000, "ashiro": 20000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 151771189.3543, "ashiro": 63721465, "self": 81596145, "organic": 6453579.3543}, "meetings": {"shibou": {"lead": 36, "ashiro": 14, "self": 21, "organic": 1}, "shibou_j": {"lead": 23, "ashiro": 14, "self": 8, "organic": 1}, "kangan": {"lead": 16, "ashiro": 3, "self": 12, "organic": 1}, "kangan_j": {"lead": 2, "ashiro": 1, "self": 1, "organic": 0}, "kankouhen": {"lead": 11, "ashiro": 4, "self": 6, "organic": 1}, "kankouhen_j_ari": {"lead": 4, "ashiro": 3, "self": 1, "organic": 0}, "kankouhen_j_nashi": {"lead": 3, "ashiro": 1, "self": 2, "organic": 0}, "mansei": {"lead": 37, "ashiro": 14, "self": 19, "organic": 4}, "mansei_j_ari": {"lead": 18, "ashiro": 7, "self": 10, "organic": 1}, "mansei_j_nashi": {"lead": 3, "ashiro": 0, "self": 2, "organic": 1}, "carrier": {"lead": 114, "ashiro": 58, "self": 44, "organic": 12}}, "inflow": {"total": {"lead": 2319, "ashiro": 1174, "self": 1060, "organic": 85}, "arial_ari": {"total": {"lead": 761, "ashiro": 431, "self": 307, "organic": 23}, "shibou": {"lead": 176, "ashiro": 86, "self": 85, "organic": 5}, "kangan": {"lead": 137, "ashiro": 86, "self": 49, "organic": 2}, "kankouhen": {"lead": 184, "ashiro": 99, "self": 83, "organic": 2}, "mansei": {"lead": 264, "ashiro": 160, "self": 90, "organic": 14}}, "ari_nashi": {"total": {"lead": 784, "ashiro": 384, "self": 346, "organic": 54}, "carrier": {"lead": 784, "ashiro": 384, "self": 346, "organic": 54}}, "nashi_ari": {"total": {"lead": 774, "ashiro": 359, "self": 407, "organic": 8}, "shibou": {"lead": 165, "ashiro": 89, "self": 75, "organic": 1}, "kangan": {"lead": 209, "ashiro": 124, "self": 84, "organic": 1}, "kankouhen": {"lead": 317, "ashiro": 146, "self": 171, "organic": 0}, "mansei": {"lead": 83, "ashiro": 0, "self": 77, "organic": 6}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.328159, "ashiro": 0.367121, "self": 0.289623, "organic": 0.270588}, "shibou": {"lead": 0.075895, "ashiro": 0.073254, "self": 0.080189, "organic": 0.058824}, "kangan": {"lead": 0.059077, "ashiro": 0.073254, "self": 0.046226, "organic": 0.023529}, "kankouhen": {"lead": 0.079345, "ashiro": 0.084327, "self": 0.078302, "organic": 0.023529}, "mansei": {"lead": 0.113842, "ashiro": 0.136286, "self": 0.084906, "organic": 0.164706}}, "ari_nashi": {"total": {"lead": 0.338077, "ashiro": 0.327087, "self": 0.326415, "organic": 0.635294}, "carrier": {"lead": 0.338077, "ashiro": 0.327087, "self": 0.326415, "organic": 0.635294}}, "nashi_ari": {"total": {"lead": 0.333765, "ashiro": 0.305792, "self": 0.383962, "organic": 0.094118}, "shibou": {"lead": 0.071151, "ashiro": 0.075809, "self": 0.070755, "organic": 0.011765}, "kangan": {"lead": 0.090125, "ashiro": 0.105622, "self": 0.079245, "organic": 0.011765}, "kankouhen": {"lead": 0.136697, "ashiro": 0.124361, "self": 0.161321, "organic": 0}, "mansei": {"lead": 0.035791, "ashiro": 0, "self": 0.072642, "organic": 0.070588}}}, "newCount": {"total": {"lead": 1976, "ashiro": 1062, "self": 844, "organic": 70}, "arial_ari": {"total": {"lead": 633, "ashiro": 388, "self": 229, "organic": 16}, "shibou": {"lead": 153, "ashiro": 80, "self": 70, "organic": 3}, "kangan": {"lead": 121, "ashiro": 80, "self": 39, "organic": 2}, "kankouhen": {"lead": 150, "ashiro": 89, "self": 59, "organic": 2}, "mansei": {"lead": 209, "ashiro": 139, "self": 61, "organic": 9}}, "ari_nashi": {"total": {"lead": 661, "ashiro": 345, "self": 269, "organic": 47}, "carrier": {"lead": 661, "ashiro": 345, "self": 269, "organic": 47}}, "nashi_ari": {"total": {"lead": 682, "ashiro": 329, "self": 346, "organic": 7}, "shibou": {"lead": 143, "ashiro": 83, "self": 60, "organic": 0}, "kangan": {"lead": 180, "ashiro": 112, "self": 68, "organic": 0}, "kankouhen": {"lead": 283, "ashiro": 134, "self": 148, "organic": 1}, "mansei": {"lead": 76, "ashiro": 0, "self": 70, "organic": 6}}}, "newRate": {"total": {"lead": 0.852091, "ashiro": 0.9046, "self": 0.796226, "organic": 0.823529}, "arial_ari": {"total": {"lead": 0.8318, "ashiro": 0.900232, "self": 0.745928, "organic": 0.695652}, "shibou": {"lead": 0.869318, "ashiro": 0.930233, "self": 0.823529, "organic": 0.6}, "kangan": {"lead": 0.883212, "ashiro": 0.930233, "self": 0.795918, "organic": 1}, "kankouhen": {"lead": 0.815217, "ashiro": 0.89899, "self": 0.710843, "organic": 1}, "mansei": {"lead": 0.791667, "ashiro": 0.86875, "self": 0.677778, "organic": 0.642857}}, "ari_nashi": {"total": {"lead": 0.843112, "ashiro": 0.898438, "self": 0.777457, "organic": 0.87037}, "carrier": {"lead": 0.843112, "ashiro": 0.898438, "self": 0.777457, "organic": 0.87037}}, "nashi_ari": {"total": {"lead": 0.881137, "ashiro": 0.916435, "self": 0.850123, "organic": 0.875}, "shibou": {"lead": 0.866667, "ashiro": 0.932584, "self": 0.8, "organic": 0}, "kangan": {"lead": 0.861244, "ashiro": 0.903226, "self": 0.809524, "organic": 0}, "kankouhen": {"lead": 0.892744, "ashiro": 0.917808, "self": 0.865497, "organic": null}, "mansei": {"lead": 0.915663, "ashiro": null, "self": 0.909091, "organic": 1}}}, "reservation": {"total": {"lead": 313, "ashiro": 137, "self": 149, "organic": 27}, "byoutai_ari": {"lead": 200, "ashiro": 81, "self": 105, "organic": 14}, "carrier": {"lead": 113, "ashiro": 56, "self": 44, "organic": 13}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.638978, "ashiro": 0.591241, "self": 0.704698, "organic": 0.518519}, "carrier": {"lead": 0.361022, "ashiro": 0.408759, "self": 0.295302, "organic": 0.481481}}}, "8月": {"items": {"shibou": {"lead": 43, "ashiro": 9, "self": 34, "organic": 0}, "shibou_j": {"lead": 14, "ashiro": 6, "self": 7, "organic": 1}, "kangan": {"lead": 24, "ashiro": 9, "self": 15, "organic": 0}, "kangan_j": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen": {"lead": 10, "ashiro": 2, "self": 7, "organic": 1}, "kankouhen_j_ari": {"lead": 2, "ashiro": 2, "self": 0, "organic": 0}, "kankouhen_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "mansei": {"lead": 18, "ashiro": 7, "self": 9, "organic": 2}, "mansei_j_ari": {"lead": 18, "ashiro": 7, "self": 9, "organic": 2}, "mansei_j_nashi": {"lead": 3, "ashiro": 1, "self": 2, "organic": 0}, "carrier": {"lead": 53, "ashiro": 26, "self": 17, "organic": 10}}, "adSpend": {"lead": 60000000, "ashiro": 20000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 170347672.27277, "ashiro": 60469476, "self": 101930496, "organic": 7947700.27277}, "meetings": {"shibou": {"lead": 58, "ashiro": 12, "self": 45, "organic": 1}, "shibou_j": {"lead": 21, "ashiro": 8, "self": 12, "organic": 1}, "kangan": {"lead": 32, "ashiro": 12, "self": 17, "organic": 3}, "kangan_j": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen": {"lead": 20, "ashiro": 6, "self": 13, "organic": 1}, "kankouhen_j_ari": {"lead": 2, "ashiro": 2, "self": 0, "organic": 0}, "kankouhen_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "mansei": {"lead": 26, "ashiro": 8, "self": 15, "organic": 3}, "mansei_j_ari": {"lead": 24, "ashiro": 10, "self": 11, "organic": 3}, "mansei_j_nashi": {"lead": 4, "ashiro": 1, "self": 3, "organic": 0}, "carrier": {"lead": 96, "ashiro": 41, "self": 43, "organic": 12}}, "inflow": {"total": {"lead": 2548, "ashiro": 1149, "self": 1322, "organic": 77}, "arial_ari": {"total": {"lead": 811, "ashiro": 390, "self": 397, "organic": 24}, "shibou": {"lead": 215, "ashiro": 90, "self": 123, "organic": 2}, "kangan": {"lead": 136, "ashiro": 72, "self": 62, "organic": 2}, "kankouhen": {"lead": 214, "ashiro": 94, "self": 115, "organic": 5}, "mansei": {"lead": 246, "ashiro": 134, "self": 97, "organic": 15}}, "ari_nashi": {"total": {"lead": 797, "ashiro": 368, "self": 384, "organic": 45}, "carrier": {"lead": 797, "ashiro": 368, "self": 384, "organic": 45}}, "nashi_ari": {"total": {"lead": 940, "ashiro": 391, "self": 541, "organic": 8}, "shibou": {"lead": 183, "ashiro": 96, "self": 84, "organic": 3}, "kangan": {"lead": 237, "ashiro": 109, "self": 125, "organic": 3}, "kankouhen": {"lead": 422, "ashiro": 186, "self": 235, "organic": 1}, "mansei": {"lead": 98, "ashiro": 0, "self": 97, "organic": 1}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.318289, "ashiro": 0.339426, "self": 0.300303, "organic": 0.311688}, "shibou": {"lead": 0.08438, "ashiro": 0.078329, "self": 0.093041, "organic": 0.025974}, "kangan": {"lead": 0.053375, "ashiro": 0.062663, "self": 0.046899, "organic": 0.025974}, "kankouhen": {"lead": 0.083987, "ashiro": 0.08181, "self": 0.086989, "organic": 0.064935}, "mansei": {"lead": 0.096546, "ashiro": 0.116623, "self": 0.073374, "organic": 0.194805}}, "ari_nashi": {"total": {"lead": 0.312794, "ashiro": 0.320279, "self": 0.290469, "organic": 0.584416}, "carrier": {"lead": 0.312794, "ashiro": 0.320279, "self": 0.290469, "organic": 0.584416}}, "nashi_ari": {"total": {"lead": 0.368917, "ashiro": 0.340296, "self": 0.409228, "organic": 0.103896}, "shibou": {"lead": 0.071821, "ashiro": 0.083551, "self": 0.06354, "organic": 0.038961}, "kangan": {"lead": 0.093014, "ashiro": 0.094865, "self": 0.094554, "organic": 0.038961}, "kankouhen": {"lead": 0.16562, "ashiro": 0.16188, "self": 0.177761, "organic": 0.012987}, "mansei": {"lead": 0.038462, "ashiro": 0, "self": 0.073374, "organic": 0.012987}}}, "newCount": {"total": {"lead": 1985, "ashiro": 1008, "self": 914, "organic": 63}, "arial_ari": {"total": {"lead": 609, "ashiro": 341, "self": 250, "organic": 18}, "shibou": {"lead": 168, "ashiro": 76, "self": 91, "organic": 1}, "kangan": {"lead": 101, "ashiro": 63, "self": 36, "organic": 2}, "kankouhen": {"lead": 150, "ashiro": 78, "self": 70, "organic": 2}, "mansei": {"lead": 190, "ashiro": 124, "self": 53, "organic": 13}}, "ari_nashi": {"total": {"lead": 626, "ashiro": 324, "self": 265, "organic": 37}, "carrier": {"lead": 626, "ashiro": 324, "self": 265, "organic": 37}}, "nashi_ari": {"total": {"lead": 750, "ashiro": 343, "self": 399, "organic": 8}, "shibou": {"lead": 150, "ashiro": 82, "self": 65, "organic": 3}, "kangan": {"lead": 189, "ashiro": 98, "self": 88, "organic": 3}, "kankouhen": {"lead": 338, "ashiro": 163, "self": 174, "organic": 1}, "mansei": {"lead": 73, "ashiro": 0, "self": 72, "organic": 1}}}, "newRate": {"total": {"lead": 0.779042, "ashiro": 0.877285, "self": 0.691377, "organic": 0.818182}, "arial_ari": {"total": {"lead": 0.750925, "ashiro": 0.874359, "self": 0.629723, "organic": 0.75}, "shibou": {"lead": 0.781395, "ashiro": 0.844444, "self": 0.739837, "organic": 0.5}, "kangan": {"lead": 0.742647, "ashiro": 0.875, "self": 0.580645, "organic": 1}, "kankouhen": {"lead": 0.700935, "ashiro": 0.829787, "self": 0.608696, "organic": 0.4}, "mansei": {"lead": 0.772358, "ashiro": 0.925373, "self": 0.546392, "organic": 0.866667}}, "ari_nashi": {"total": {"lead": 0.785445, "ashiro": 0.880435, "self": 0.690104, "organic": 0.822222}, "carrier": {"lead": 0.785445, "ashiro": 0.880435, "self": 0.690104, "organic": 0.822222}}, "nashi_ari": {"total": {"lead": 0.797872, "ashiro": 0.877238, "self": 0.737523, "organic": 1}, "shibou": {"lead": 0.819672, "ashiro": 0.854167, "self": 0.77381, "organic": 1}, "kangan": {"lead": 0.797468, "ashiro": 0.899083, "self": 0.704, "organic": 1}, "kankouhen": {"lead": 0.800948, "ashiro": 0.876344, "self": 0.740426, "organic": 1}, "mansei": {"lead": 0.744898, "ashiro": null, "self": 0.742268, "organic": 1}}}, "reservation": {"total": {"lead": 321, "ashiro": 124, "self": 176, "organic": 21}, "byoutai_ari": {"lead": 222, "ashiro": 79, "self": 133, "organic": 10}, "carrier": {"lead": 99, "ashiro": 45, "self": 43, "organic": 11}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.691589, "ashiro": 0.637097, "self": 0.755682, "organic": 0.47619}, "carrier": {"lead": 0.308411, "ashiro": 0.362903, "self": 0.244318, "organic": 0.52381}}}, "9月": {"items": {"shibou": {"lead": 63, "ashiro": 16, "self": 43, "organic": 4}, "shibou_j": {"lead": 31, "ashiro": 12, "self": 19, "organic": 0}, "kangan": {"lead": 12, "ashiro": 2, "self": 8, "organic": 2}, "kangan_j": {"lead": 5, "ashiro": 1, "self": 3, "organic": 1}, "kankouhen": {"lead": 13, "ashiro": 3, "self": 10, "organic": 0}, "kankouhen_j_ari": {"lead": 5, "ashiro": 1, "self": 3, "organic": 1}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 1, "self": 1, "organic": 0}, "mansei": {"lead": 26, "ashiro": 12, "self": 11, "organic": 3}, "mansei_j_ari": {"lead": 16, "ashiro": 8, "self": 8, "organic": 0}, "mansei_j_nashi": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "carrier": {"lead": 62, "ashiro": 23, "self": 26, "organic": 13}}, "adSpend": {"lead": 60000000, "ashiro": 20000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 198922444.491044, "ashiro": 60632944, "self": 120898036, "organic": 17391464.491044}, "meetings": {"shibou": {"lead": 79, "ashiro": 20, "self": 54, "organic": 5}, "shibou_j": {"lead": 38, "ashiro": 14, "self": 24, "organic": 0}, "kangan": {"lead": 16, "ashiro": 4, "self": 10, "organic": 2}, "kangan_j": {"lead": 5, "ashiro": 1, "self": 3, "organic": 1}, "kankouhen": {"lead": 16, "ashiro": 3, "self": 12, "organic": 1}, "kankouhen_j_ari": {"lead": 7, "ashiro": 1, "self": 5, "organic": 1}, "kankouhen_j_nashi": {"lead": 4, "ashiro": 2, "self": 2, "organic": 0}, "mansei": {"lead": 32, "ashiro": 13, "self": 15, "organic": 4}, "mansei_j_ari": {"lead": 21, "ashiro": 11, "self": 10, "organic": 0}, "mansei_j_nashi": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "carrier": {"lead": 97, "ashiro": 41, "self": 41, "organic": 15}}, "inflow": {"total": {"lead": 2176, "ashiro": 1001, "self": 1105, "organic": 70}, "arial_ari": {"total": {"lead": 750, "ashiro": 358, "self": 367, "organic": 25}, "shibou": {"lead": 195, "ashiro": 76, "self": 111, "organic": 8}, "kangan": {"lead": 114, "ashiro": 51, "self": 60, "organic": 3}, "kankouhen": {"lead": 211, "ashiro": 106, "self": 103, "organic": 2}, "mansei": {"lead": 230, "ashiro": 125, "self": 93, "organic": 12}}, "ari_nashi": {"total": {"lead": 649, "ashiro": 306, "self": 300, "organic": 43}, "carrier": {"lead": 649, "ashiro": 306, "self": 300, "organic": 43}}, "nashi_ari": {"total": {"lead": 777, "ashiro": 337, "self": 438, "organic": 2}, "shibou": {"lead": 173, "ashiro": 90, "self": 83, "organic": 0}, "kangan": {"lead": 188, "ashiro": 91, "self": 96, "organic": 1}, "kankouhen": {"lead": 355, "ashiro": 156, "self": 198, "organic": 1}, "mansei": {"lead": 61, "ashiro": 0, "self": 61, "organic": 0}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.344669, "ashiro": 0.357642, "self": 0.332127, "organic": 0.357143}, "shibou": {"lead": 0.089614, "ashiro": 0.075924, "self": 0.100452, "organic": 0.114286}, "kangan": {"lead": 0.05239, "ashiro": 0.050949, "self": 0.054299, "organic": 0.042857}, "kankouhen": {"lead": 0.096967, "ashiro": 0.105894, "self": 0.093213, "organic": 0.028571}, "mansei": {"lead": 0.105699, "ashiro": 0.124875, "self": 0.084163, "organic": 0.171429}}, "ari_nashi": {"total": {"lead": 0.298254, "ashiro": 0.305694, "self": 0.271493, "organic": 0.614286}, "carrier": {"lead": 0.298254, "ashiro": 0.305694, "self": 0.271493, "organic": 0.614286}}, "nashi_ari": {"total": {"lead": 0.357077, "ashiro": 0.336663, "self": 0.39638, "organic": 0.028571}, "shibou": {"lead": 0.079504, "ashiro": 0.08991, "self": 0.075113, "organic": 0}, "kangan": {"lead": 0.086397, "ashiro": 0.090909, "self": 0.086878, "organic": 0.014286}, "kankouhen": {"lead": 0.163143, "ashiro": 0.155844, "self": 0.179186, "organic": 0.014286}, "mansei": {"lead": 0.028033, "ashiro": 0, "self": 0.055204, "organic": 0}}}, "newCount": {"total": {"lead": 1708, "ashiro": 881, "self": 770, "organic": 57}, "arial_ari": {"total": {"lead": 559, "ashiro": 307, "self": 231, "organic": 21}, "shibou": {"lead": 146, "ashiro": 66, "self": 73, "organic": 7}, "kangan": {"lead": 92, "ashiro": 49, "self": 40, "organic": 3}, "kankouhen": {"lead": 141, "ashiro": 76, "self": 64, "organic": 1}, "mansei": {"lead": 180, "ashiro": 116, "self": 54, "organic": 10}}, "ari_nashi": {"total": {"lead": 529, "ashiro": 271, "self": 223, "organic": 35}, "carrier": {"lead": 529, "ashiro": 271, "self": 223, "organic": 35}}, "nashi_ari": {"total": {"lead": 620, "ashiro": 303, "self": 316, "organic": 1}, "shibou": {"lead": 141, "ashiro": 84, "self": 57, "organic": 0}, "kangan": {"lead": 159, "ashiro": 83, "self": 75, "organic": 1}, "kankouhen": {"lead": 281, "ashiro": 136, "self": 145, "organic": 0}, "mansei": {"lead": 39, "ashiro": 0, "self": 39, "organic": 0}}}, "newRate": {"total": {"lead": 0.784926, "ashiro": 0.88012, "self": 0.696833, "organic": 0.814286}, "arial_ari": {"total": {"lead": 0.745333, "ashiro": 0.857542, "self": 0.629428, "organic": 0.84}, "shibou": {"lead": 0.748718, "ashiro": 0.868421, "self": 0.657658, "organic": 0.875}, "kangan": {"lead": 0.807018, "ashiro": 0.960784, "self": 0.666667, "organic": 1}, "kankouhen": {"lead": 0.668246, "ashiro": 0.716981, "self": 0.621359, "organic": 0.5}, "mansei": {"lead": 0.782609, "ashiro": 0.928, "self": 0.580645, "organic": 0.833333}}, "ari_nashi": {"total": {"lead": 0.8151, "ashiro": 0.885621, "self": 0.743333, "organic": 0.813953}, "carrier": {"lead": 0.8151, "ashiro": 0.885621, "self": 0.743333, "organic": 0.813953}}, "nashi_ari": {"total": {"lead": 0.797941, "ashiro": 0.89911, "self": 0.721461, "organic": 0.5}, "shibou": {"lead": 0.815029, "ashiro": 0.933333, "self": 0.686747, "organic": null}, "kangan": {"lead": 0.845745, "ashiro": 0.912088, "self": 0.78125, "organic": 1}, "kankouhen": {"lead": 0.791549, "ashiro": 0.871795, "self": 0.732323, "organic": 0}, "mansei": {"lead": 0.639344, "ashiro": null, "self": 0.639344, "organic": null}}}, "reservation": {"total": {"lead": 349, "ashiro": 120, "self": 208, "organic": 21}, "byoutai_ari": {"lead": 257, "ashiro": 74, "self": 169, "organic": 14}, "carrier": {"lead": 92, "ashiro": 46, "self": 39, "organic": 7}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.73639, "ashiro": 0.616667, "self": 0.8125, "organic": 0.666667}, "carrier": {"lead": 0.26361, "ashiro": 0.383333, "self": 0.1875, "organic": 0.333333}}}, "10月": {"items": {"shibou": {"lead": 44, "ashiro": 5, "self": 38, "organic": 1}, "shibou_j": {"lead": 37, "ashiro": 7, "self": 30, "organic": 0}, "kangan": {"lead": 17, "ashiro": 7, "self": 6, "organic": 4}, "kangan_j": {"lead": 5, "ashiro": 2, "self": 2, "organic": 1}, "kankouhen": {"lead": 17, "ashiro": 4, "self": 10, "organic": 3}, "kankouhen_j_ari": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "mansei": {"lead": 20, "ashiro": 7, "self": 7, "organic": 6}, "mansei_j_ari": {"lead": 11, "ashiro": 6, "self": 3, "organic": 2}, "mansei_j_nashi": {"lead": 0, "ashiro": 0, "self": 0, "organic": 0}, "carrier": {"lead": 56, "ashiro": 25, "self": 25, "organic": 6}}, "adSpend": {"lead": 60000000, "ashiro": 20000000, "self": 40000000, "organic": 0}, "revenue": {"lead": 178009198.88818, "ashiro": 48580546.32044, "self": 106483882.81459, "organic": 22944769.75315}, "meetings": {"shibou": {"lead": 55, "ashiro": 6, "self": 48, "organic": 1}, "shibou_j": {"lead": 39, "ashiro": 7, "self": 32, "organic": 0}, "kangan": {"lead": 21, "ashiro": 7, "self": 10, "organic": 4}, "kangan_j": {"lead": 6, "ashiro": 2, "self": 3, "organic": 1}, "kankouhen": {"lead": 19, "ashiro": 4, "self": 11, "organic": 4}, "kankouhen_j_ari": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "mansei": {"lead": 31, "ashiro": 9, "self": 16, "organic": 6}, "mansei_j_ari": {"lead": 14, "ashiro": 8, "self": 4, "organic": 2}, "mansei_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "carrier": {"lead": 85, "ashiro": 36, "self": 38, "organic": 11}}, "inflow": {"total": {"lead": 2036, "ashiro": 874, "self": 1085, "organic": 77}, "arial_ari": {"total": {"lead": 686, "ashiro": 301, "self": 361, "organic": 24}, "shibou": {"lead": 211, "ashiro": 84, "self": 121, "organic": 6}, "kangan": {"lead": 95, "ashiro": 40, "self": 51, "organic": 4}, "kankouhen": {"lead": 148, "ashiro": 61, "self": 83, "organic": 4}, "mansei": {"lead": 232, "ashiro": 116, "self": 106, "organic": 10}}, "ari_nashi": {"total": {"lead": 640, "ashiro": 280, "self": 314, "organic": 46}, "carrier": {"lead": 640, "ashiro": 280, "self": 314, "organic": 46}}, "nashi_ari": {"total": {"lead": 710, "ashiro": 293, "self": 410, "organic": 7}, "shibou": {"lead": 163, "ashiro": 75, "self": 86, "organic": 2}, "kangan": {"lead": 192, "ashiro": 95, "self": 96, "organic": 1}, "kankouhen": {"lead": 302, "ashiro": 123, "self": 176, "organic": 3}, "mansei": {"lead": 53, "ashiro": 0, "self": 52, "organic": 1}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.336935, "ashiro": 0.344394, "self": 0.332719, "organic": 0.311688}, "shibou": {"lead": 0.103635, "ashiro": 0.09611, "self": 0.111521, "organic": 0.077922}, "kangan": {"lead": 0.04666, "ashiro": 0.045767, "self": 0.047005, "organic": 0.051948}, "kankouhen": {"lead": 0.072692, "ashiro": 0.069794, "self": 0.076498, "organic": 0.051948}, "mansei": {"lead": 0.113949, "ashiro": 0.132723, "self": 0.097696, "organic": 0.12987}}, "ari_nashi": {"total": {"lead": 0.314342, "ashiro": 0.320366, "self": 0.289401, "organic": 0.597403}, "carrier": {"lead": 0.314342, "ashiro": 0.320366, "self": 0.289401, "organic": 0.597403}}, "nashi_ari": {"total": {"lead": 0.348723, "ashiro": 0.33524, "self": 0.37788, "organic": 0.090909}, "shibou": {"lead": 0.080059, "ashiro": 0.085812, "self": 0.079263, "organic": 0.025974}, "kangan": {"lead": 0.094303, "ashiro": 0.108696, "self": 0.088479, "organic": 0.012987}, "kankouhen": {"lead": 0.14833, "ashiro": 0.140732, "self": 0.162212, "organic": 0.038961}, "mansei": {"lead": 0.026031, "ashiro": 0, "self": 0.047926, "organic": 0.012987}}}, "newCount": {"total": {"lead": 1637, "ashiro": 788, "self": 785, "organic": 64}, "arial_ari": {"total": {"lead": 552, "ashiro": 275, "self": 255, "organic": 22}, "shibou": {"lead": 178, "ashiro": 75, "self": 97, "organic": 6}, "kangan": {"lead": 76, "ashiro": 37, "self": 37, "organic": 2}, "kankouhen": {"lead": 118, "ashiro": 54, "self": 60, "organic": 4}, "mansei": {"lead": 180, "ashiro": 109, "self": 61, "organic": 10}}, "ari_nashi": {"total": {"lead": 501, "ashiro": 245, "self": 220, "organic": 36}, "carrier": {"lead": 501, "ashiro": 245, "self": 220, "organic": 36}}, "nashi_ari": {"total": {"lead": 584, "ashiro": 268, "self": 310, "organic": 6}, "shibou": {"lead": 141, "ashiro": 70, "self": 70, "organic": 1}, "kangan": {"lead": 156, "ashiro": 82, "self": 73, "organic": 1}, "kankouhen": {"lead": 250, "ashiro": 116, "self": 131, "organic": 3}, "mansei": {"lead": 37, "ashiro": 0, "self": 36, "organic": 1}}}, "newRate": {"total": {"lead": 0.804028, "ashiro": 0.901602, "self": 0.723502, "organic": 0.831169}, "arial_ari": {"total": {"lead": 0.804665, "ashiro": 0.913621, "self": 0.706371, "organic": 0.916667}, "shibou": {"lead": 0.843602, "ashiro": 0.892857, "self": 0.801653, "organic": 1}, "kangan": {"lead": 0.8, "ashiro": 0.925, "self": 0.72549, "organic": 0.5}, "kankouhen": {"lead": 0.797297, "ashiro": 0.885246, "self": 0.722892, "organic": 1}, "mansei": {"lead": 0.775862, "ashiro": 0.939655, "self": 0.575472, "organic": 1}}, "ari_nashi": {"total": {"lead": 0.782813, "ashiro": 0.875, "self": 0.700637, "organic": 0.782609}, "carrier": {"lead": 0.782813, "ashiro": 0.875, "self": 0.700637, "organic": 0.782609}}, "nashi_ari": {"total": {"lead": 0.822535, "ashiro": 0.914676, "self": 0.756098, "organic": 0.857143}, "shibou": {"lead": 0.865031, "ashiro": 0.933333, "self": 0.813953, "organic": 0.5}, "kangan": {"lead": 0.8125, "ashiro": 0.863158, "self": 0.760417, "organic": 1}, "kankouhen": {"lead": 0.827815, "ashiro": 0.943089, "self": 0.744318, "organic": 1}, "mansei": {"lead": 0.698113, "ashiro": null, "self": 0.692308, "organic": 1}}}, "reservation": {"total": {"lead": 306, "ashiro": 85, "self": 194, "organic": 27}, "byoutai_ari": {"lead": 217, "ashiro": 49, "self": 151, "organic": 17}, "carrier": {"lead": 89, "ashiro": 36, "self": 43, "organic": 10}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.70915, "ashiro": 0.576471, "self": 0.778351, "organic": 0.62963}, "carrier": {"lead": 0.29085, "ashiro": 0.423529, "self": 0.221649, "organic": 0.37037}}}, "11月": {"items": {"shibou": {"lead": 24, "ashiro": 3, "self": 21, "organic": 0}, "shibou_j": {"lead": 10, "ashiro": 3, "self": 7, "organic": 0}, "kangan": {"lead": 3, "ashiro": 2, "self": 1, "organic": 0}, "kangan_j": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "kankouhen": {"lead": 6, "ashiro": 2, "self": 4, "organic": 0}, "kankouhen_j_ari": {"lead": 2, "ashiro": 1, "self": 0, "organic": 1}, "kankouhen_j_nashi": {"lead": 1, "ashiro": 0, "self": 1, "organic": 0}, "mansei": {"lead": 9, "ashiro": 3, "self": 5, "organic": 1}, "mansei_j_ari": {"lead": 5, "ashiro": 4, "self": 1, "organic": 0}, "mansei_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "carrier": {"lead": 14, "ashiro": 7, "self": 6, "organic": 1}}, "adSpend": {"lead": 24000000, "ashiro": 8000000, "self": 16000000, "organic": 0}, "revenue": {"lead": 68154620.481936, "ashiro": 20969946.205644, "self": 44475314.510298, "organic": 2709359.765994}, "meetings": {"shibou": {"lead": 33, "ashiro": 7, "self": 25, "organic": 1}, "shibou_j": {"lead": 12, "ashiro": 3, "self": 9, "organic": 0}, "kangan": {"lead": 4, "ashiro": 2, "self": 2, "organic": 0}, "kangan_j": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "kankouhen": {"lead": 8, "ashiro": 2, "self": 6, "organic": 0}, "kankouhen_j_ari": {"lead": 2, "ashiro": 1, "self": 0, "organic": 1}, "kankouhen_j_nashi": {"lead": 2, "ashiro": 0, "self": 2, "organic": 0}, "mansei": {"lead": 12, "ashiro": 4, "self": 7, "organic": 1}, "mansei_j_ari": {"lead": 7, "ashiro": 4, "self": 3, "organic": 0}, "mansei_j_nashi": {"lead": 1, "ashiro": 1, "self": 0, "organic": 0}, "carrier": {"lead": 19, "ashiro": 9, "self": 9, "organic": 1}}, "inflow": {"total": {"lead": 787, "ashiro": 321, "self": 433, "organic": 33}, "arial_ari": {"total": {"lead": 279, "ashiro": 125, "self": 142, "organic": 12}, "shibou": {"lead": 77, "ashiro": 29, "self": 46, "organic": 2}, "kangan": {"lead": 55, "ashiro": 26, "self": 26, "organic": 3}, "kankouhen": {"lead": 58, "ashiro": 24, "self": 32, "organic": 2}, "mansei": {"lead": 89, "ashiro": 46, "self": 38, "organic": 5}}, "ari_nashi": {"total": {"lead": 223, "ashiro": 99, "self": 105, "organic": 19}, "carrier": {"lead": 223, "ashiro": 99, "self": 105, "organic": 19}}, "nashi_ari": {"total": {"lead": 285, "ashiro": 97, "self": 186, "organic": 2}, "shibou": {"lead": 51, "ashiro": 19, "self": 31, "organic": 1}, "kangan": {"lead": 76, "ashiro": 32, "self": 44, "organic": 0}, "kankouhen": {"lead": 139, "ashiro": 46, "self": 92, "organic": 1}, "mansei": {"lead": 19, "ashiro": 0, "self": 19, "organic": 0}}}, "inflowRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "arial_ari": {"total": {"lead": 0.354511, "ashiro": 0.389408, "self": 0.327945, "organic": 0.363636}, "shibou": {"lead": 0.09784, "ashiro": 0.090343, "self": 0.106236, "organic": 0.060606}, "kangan": {"lead": 0.069886, "ashiro": 0.080997, "self": 0.060046, "organic": 0.090909}, "kankouhen": {"lead": 0.073698, "ashiro": 0.074766, "self": 0.073903, "organic": 0.060606}, "mansei": {"lead": 0.113088, "ashiro": 0.143302, "self": 0.08776, "organic": 0.151515}}, "ari_nashi": {"total": {"lead": 0.283355, "ashiro": 0.308411, "self": 0.242494, "organic": 0.575758}, "carrier": {"lead": 0.283355, "ashiro": 0.308411, "self": 0.242494, "organic": 0.575758}}, "nashi_ari": {"total": {"lead": 0.362135, "ashiro": 0.302181, "self": 0.429561, "organic": 0.060606}, "shibou": {"lead": 0.064803, "ashiro": 0.05919, "self": 0.071594, "organic": 0.030303}, "kangan": {"lead": 0.096569, "ashiro": 0.099688, "self": 0.101617, "organic": 0}, "kankouhen": {"lead": 0.17662, "ashiro": 0.143302, "self": 0.212471, "organic": 0.030303}, "mansei": {"lead": 0.024142, "ashiro": 0, "self": 0.04388, "organic": 0}}}, "newCount": {"total": {"lead": 626, "ashiro": 273, "self": 327, "organic": 26}, "arial_ari": {"total": {"lead": 226, "ashiro": 109, "self": 107, "organic": 10}, "shibou": {"lead": 67, "ashiro": 27, "self": 38, "organic": 2}, "kangan": {"lead": 46, "ashiro": 24, "self": 19, "organic": 3}, "kankouhen": {"lead": 41, "ashiro": 20, "self": 20, "organic": 1}, "mansei": {"lead": 72, "ashiro": 38, "self": 30, "organic": 4}}, "ari_nashi": {"total": {"lead": 173, "ashiro": 84, "self": 74, "organic": 15}, "carrier": {"lead": 173, "ashiro": 84, "self": 74, "organic": 15}}, "nashi_ari": {"total": {"lead": 227, "ashiro": 80, "self": 146, "organic": 1}, "shibou": {"lead": 47, "ashiro": 18, "self": 28, "organic": 1}, "kangan": {"lead": 55, "ashiro": 21, "self": 34, "organic": 0}, "kankouhen": {"lead": 112, "ashiro": 41, "self": 71, "organic": 0}, "mansei": {"lead": 13, "ashiro": 0, "self": 13, "organic": 0}}}, "newRate": {"total": {"lead": 0.795426, "ashiro": 0.850467, "self": 0.755196, "organic": 0.787879}, "arial_ari": {"total": {"lead": 0.810036, "ashiro": 0.872, "self": 0.753521, "organic": 0.833333}, "shibou": {"lead": 0.87013, "ashiro": 0.931034, "self": 0.826087, "organic": 1}, "kangan": {"lead": 0.836364, "ashiro": 0.923077, "self": 0.730769, "organic": 1}, "kankouhen": {"lead": 0.706897, "ashiro": 0.833333, "self": 0.625, "organic": 0.5}, "mansei": {"lead": 0.808989, "ashiro": 0.826087, "self": 0.789474, "organic": 0.8}}, "ari_nashi": {"total": {"lead": 0.775785, "ashiro": 0.848485, "self": 0.704762, "organic": 0.789474}, "carrier": {"lead": 0.775785, "ashiro": 0.848485, "self": 0.704762, "organic": 0.789474}}, "nashi_ari": {"total": {"lead": 0.796491, "ashiro": 0.824742, "self": 0.784946, "organic": 0.5}, "shibou": {"lead": 0.921569, "ashiro": 0.947368, "self": 0.903226, "organic": 1}, "kangan": {"lead": 0.723684, "ashiro": 0.65625, "self": 0.772727, "organic": null}, "kankouhen": {"lead": 0.805755, "ashiro": 0.891304, "self": 0.771739, "organic": 0}, "mansei": {"lead": 0.684211, "ashiro": null, "self": 0.684211, "organic": null}}}, "reservation": {"total": {"lead": 104, "ashiro": 36, "self": 62, "organic": 6}, "byoutai_ari": {"lead": 79, "ashiro": 25, "self": 50, "organic": 4}, "carrier": {"lead": 25, "ashiro": 11, "self": 12, "organic": 2}}, "reservationRatio": {"total": {"lead": 1, "ashiro": 1, "self": 1, "organic": 1}, "byoutai_ari": {"lead": 0.759615, "ashiro": 0.694444, "self": 0.806452, "organic": 0.666667}, "carrier": {"lead": 0.240385, "ashiro": 0.305556, "self": 0.193548, "organic": 0.333333}}}};
+</script>
+<script>
+const PRICES = { shibou: 1144218, shibou_j: 637530, kangan: 1852079, kangan_j: 1205271, kankouhen: 1245613, kankouhen_j_ari: 1362536, kankouhen_j_nashi: 275300, mansei: 1096608, mansei_j_ari: 684593, mansei_j_nashi: 287079, carrier: 250216 };
+
+const GROUPS = [
+  { name: '病態あり', items: [
+    { key: 'shibou', name: '①死亡' },
+    { key: 'shibou_j', name: '②死亡除斥' },
+    { key: 'kangan', name: '③肝がん' },
+    { key: 'kangan_j', name: '④肝がん除斥' },
+    { key: 'kankouhen', name: '⑤肝硬変' },
+    { key: 'kankouhen_j_ari', name: '⑥肝硬変除斥治療歴あり' },
+    { key: 'kankouhen_j_nashi', name: '⑦肝硬変除斥治療歴なし' },
+    { key: 'mansei', name: '⑧慢性肝炎' },
+    { key: 'mansei_j_ari', name: '⑨慢性肝炎除斥治療歴あり' },
+    { key: 'mansei_j_nashi', name: '⑩慢性肝炎除斥治療歴なし' },
+  ]},
+  { name: 'キャリア', items: [
+    { key: 'carrier', name: 'キャリア' },
+  ]},
+];
+
+const MONTHS = [
+  { key: '4月', label: '2026年4月', note: false },
+  { key: '5月', label: '2026年5月', note: false },
+  { key: '6月', label: '2026年6月', note: false },
+  { key: '7月', label: '2026年7月', note: false },
+  { key: '8月', label: '2026年8月', note: false },
+  { key: '9月', label: '2026年9月', note: false },
+  { key: '10月', label: '2026年10月', note: false },
+  { key: '11月', label: '2026年11月（12日時点）', note: true,
+    noteText: '※2026年11月度は、12日時点までの速報値です（月末までの確定実績ではありません）。' },
+];
+let selectedMonthIndex = MONTHS.length - 2; // default to latest full actual month (10月)
+
+const ENTITIES = [
+  { key: 'lead', label: 'リード合計', color: 'var(--s0)', dashed: true },
+  { key: 'ashiro', label: 'アシロ', color: 'var(--s1)', dashed: false },
+  { key: 'self', label: 'セルフ', color: 'var(--s2)', dashed: false },
+  { key: 'organic', label: 'オーガニック', color: 'var(--s3)', dashed: false },
+];
+
+let activeEntity = 'lead';
+
+const HIGHZONE_KEYS = ['shibou', 'kangan', 'kankouhen'];
+const HIGHZONE_LABEL = '①死亡＋③肝がん＋⑤肝硬変';
+
+const SYMPTOM_LABELS = { shibou: '死亡', kangan: '肝がん', kankouhen: '肝硬変', mansei: '慢性肝炎', carrier: 'キャリア' };
+const INFLOW_CATS = [
+  { key: 'arial_ari', label: 'ありあり（B肝診断あり・病態あり）', symptoms: ['shibou', 'kangan', 'kankouhen', 'mansei'] },
+  { key: 'ari_nashi', label: 'ありなし（B肝診断あり・病態なし＝キャリア）', symptoms: null },
+  { key: 'nashi_ari', label: 'なしあり（B肝診断なし・病態あり）', symptoms: ['shibou', 'kangan', 'kankouhen', 'mansei'] },
+];
+
+const fmt = n => (n === null || n === undefined) ? '—' : Math.round(n).toLocaleString('ja-JP');
+const pct = n => (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(1) + '%';
+const fmtYen = n => (n === null || n === undefined) ? '—' : fmt(n) + '円';
+
+function highzoneCount(m, key) {
+  return HIGHZONE_KEYS.reduce((s, k) => s + (m.items[k][key] || 0), 0);
+}
+
+function getAllKeys() { return GROUPS.flatMap(g => g.items.map(it => it.key)); }
+function currentMonthData() { return MONTH_DATA[MONTHS[selectedMonthIndex].key]; }
+function entityTotal(m, key) { return getAllKeys().reduce((s, k) => s + (m.items[k][key] || 0), 0); }
+
+function renderMonthButtons() {
+  const el = document.getElementById('month-buttons');
+  el.innerHTML = '';
+  MONTHS.forEach((mo, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'month-btn' + (mo.note ? ' month-btn--note' : '');
+    btn.textContent = mo.label;
+    btn.setAttribute('aria-pressed', i === selectedMonthIndex ? 'true' : 'false');
+    btn.addEventListener('click', () => { selectedMonthIndex = i; renderAll(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderPeriodNote() {
+  const mo = MONTHS[selectedMonthIndex];
+  const el = document.getElementById('period-note');
+  if (mo.note) {
+    el.hidden = false;
+    el.textContent = mo.noteText;
+  } else {
+    el.hidden = true;
+  }
+}
+
+function renderKpis() {
+  const m = currentMonthData();
+  const leadTotal = entityTotal(m, 'lead');
+  const leadRevenue = m.revenue.lead;
+  const leadAd = m.adSpend.lead;
+  const roas = leadAd ? (leadRevenue / leadAd) * 100 : null;
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-tile hero">
+      <div class="kpi-label">リード合計実績（受任数）</div>
+      <div class="kpi-value">${fmt(leadTotal)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計期待収益</div>
+      <div class="kpi-value">${fmtYen(leadRevenue)}</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計ROAS</div>
+      <div class="kpi-value">${pct(roas)}</div>
+    </div>
+  `;
+}
+
+function renderEntityToggle() {
+  const m = currentMonthData();
+  const el = document.getElementById('entity-toggle');
+  el.innerHTML = '';
+  ENTITIES.forEach(ent => {
+    const btn = document.createElement('button');
+    btn.className = 'agency-btn' + (ent.dashed ? ' all-btn' : '');
+    btn.style.color = ent.color;
+    btn.setAttribute('aria-pressed', ent.key === activeEntity ? 'true' : 'false');
+    btn.innerHTML = `<span class="swatch" style="background:${ent.color}"></span>${ent.label}<span class="cnt">${fmt(entityTotal(m, ent.key))}件</span>`;
+    btn.addEventListener('click', () => {
+      activeEntity = ent.key;
+      renderEntityToggle();
+      renderInflowBreakdown();
+      renderReservation();
+      renderRoas();
+      renderBreakdown();
+      renderHighzone();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderInflowBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const grandTotal = m.inflow.total[activeEntity] || 0;
+  const maxVal = grandTotal || 1;
+  const el = document.getElementById('inflow-breakdown');
+  el.innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>総流入件数</span><span class="grp-sub">計 ${fmt(grandTotal)}件</span></div>
+      ${INFLOW_CATS.map(cat => {
+        const cTotal = m.inflow[cat.key].total[activeEntity] || 0;
+        const cRatio = (m.inflowRatio[cat.key].total[activeEntity] || 0) * 100;
+        const newC = m.newCount[cat.key].total[activeEntity] || 0;
+        const newRraw = m.newRate[cat.key].total[activeEntity];
+        const newR = typeof newRraw === 'number' ? newRraw * 100 : null;
+        const w = maxVal ? cTotal / maxVal * 100 : 0;
+        const subRows = cat.symptoms ? cat.symptoms.map(sk => {
+          const sv = m.inflow[cat.key][sk][activeEntity] || 0;
+          const sRatio = (m.inflowRatio[cat.key][sk][activeEntity] || 0) * 100;
+          const snew = m.newCount[cat.key][sk][activeEntity] || 0;
+          const snewRraw = m.newRate[cat.key][sk][activeEntity];
+          const snewR = typeof snewRraw === 'number' ? snewRraw * 100 : null;
+          const sw = maxVal ? sv / maxVal * 100 : 0;
+          return `
+            <div class="bar-row bar-row--sub">
+              <div class="bar-cat">${SYMPTOM_LABELS[sk]}</div>
+              <div class="bar-lane"><div class="bar-fill" style="width:${sw}%;background:${ent.color}"></div></div>
+              <div class="bar-figs">${fmt(sv)}件（${pct(sRatio)}）<span class="bar-figs-sub">新規${fmt(snew)}件・新規率${pct(snewR)}</span></div>
+            </div>
+          `;
+        }).join('') : '';
+        return `
+          <div class="bar-row">
+            <div class="bar-cat">${cat.label.split('（')[0]}</div>
+            <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+            <div class="bar-figs"><strong>${fmt(cTotal)}</strong>件（流入構成比 ${pct(cRatio)}）<span class="bar-figs-sub">新規${fmt(newC)}件・新規率${pct(newR)}</span></div>
+          </div>
+          ${subRows}
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderReservation() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const total = m.reservation.total[activeEntity] || 0;
+  const maxVal = total || 1;
+  const cats = [
+    { key: 'byoutai_ari', label: '病態あり' },
+    { key: 'carrier', label: 'キャリア' },
+  ];
+  document.getElementById('reservation-breakdown').innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>予約数</span><span class="grp-sub">計 ${fmt(total)}件</span></div>
+      ${cats.map(c => {
+        const v = m.reservation[c.key][activeEntity] || 0;
+        const r = (m.reservationRatio[c.key][activeEntity] || 0) * 100;
+        const w = maxVal ? v / maxVal * 100 : 0;
+        return `
+          <div class="bar-row">
+            <div class="bar-cat">${c.label}</div>
+            <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+            <div class="bar-figs"><strong>${fmt(v)}</strong>件（予約構成比 ${pct(r)}）</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderRoas() {
+  const m = currentMonthData();
+  const el = document.getElementById('roas-row');
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+
+  const adSpend = m.adSpend[activeEntity];
+  const revenue = m.revenue[activeEntity];
+
+  if (!adSpend) {
+    el.innerHTML = `<p class="roas-note-box">${ent.label}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益：<strong>${fmtYen(revenue)}</strong>）。</p>`;
+    return;
+  }
+  const roas = (revenue / adSpend) * 100;
+  const roasClass = roas >= 250 ? 'style="color:var(--good)"' : (roas < 150 ? 'style="color:var(--critical)"' : '');
+  el.innerHTML = `
+    <div class="roas-row">
+      <div class="roas-tile">
+        <div class="roas-label">広告費</div>
+        <div class="roas-value">${fmtYen(adSpend)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">期待収益</div>
+        <div class="roas-value">${fmtYen(revenue)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">ROAS（期待収益 ÷ 広告費）</div>
+        <div class="roas-value" ${roasClass}>${pct(roas)}</div>
+        <div class="roas-note">目安：250%以上=良好／150%未満=要注意</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const denom = entityTotal(m, activeEntity);
+  const maxVal = Math.max(...getAllKeys().map(k => m.items[k][activeEntity] || 0), 1);
+
+  const el = document.getElementById('breakdown');
+  el.innerHTML = GROUPS.map(g => {
+    const groupTotal = g.items.reduce((a, it) => a + (m.items[it.key][activeEntity] || 0), 0);
+    const groupShare = denom ? (groupTotal / denom) * 100 : 0;
+    const headHtml = g.name
+      ? `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">計 ${fmt(groupTotal)}件（${pct(groupShare)}）</span></div>`
+      : '';
+    const rows = g.items.map(it => {
+      const v = m.items[it.key][activeEntity] || 0;
+      const w = (Math.max(0, v) / maxVal) * 100;
+      const share = denom ? (v / denom) * 100 : 0;
+      return `
+        <div class="bar-row">
+          <div class="bar-cat">${it.name}</div>
+          <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+          <div class="bar-figs"><strong>${fmt(v)}</strong>件（${pct(share)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="grp">${headHtml}${rows}</div>`;
+  }).join('');
+}
+
+function renderHighzone() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const hz = highzoneCount(m, activeEntity);
+  const total = entityTotal(m, activeEntity);
+  const ratio = total ? (hz / total) * 100 : 0;
+  document.getElementById('highzone-box').innerHTML = `
+    <span class="hz-label">高額ゾーン比率（${HIGHZONE_LABEL}）</span>
+    <span class="hz-value" style="color:${ent.color}">${pct(ratio)}</span>
+    <span class="hz-detail">（高額ゾーン ${fmt(hz)}件 ／ ${ent.label} ${fmt(total)}件）</span>
+    <span class="hz-note">※経路ごとに単価は異なりますが、高額ゾーン比率は事務所全体定義と同様の算出方法（高額ゾーン受任件数 ÷ 受任件数合計）です。</span>
+  `;
+}
+
+function renderTables() {
+  const m = currentMonthData();
+  const el = document.getElementById('tables');
+  const cols = [
+    { key: 'ashiro', label: 'アシロ' },
+    { key: 'self', label: 'セルフ' },
+    { key: 'organic', label: 'オーガニック' },
+    { key: 'lead', label: 'リード合計' },
+  ];
+  const headCols = cols.map(c => `<th>${c.label}</th>`).join('');
+
+  // --- inflow / new / reservation table ---
+  const inflowRowDef = [];
+  INFLOW_CATS.forEach(cat => {
+    inflowRowDef.push({ label: cat.label.split('（')[0], cat: cat.key, sym: 'total', head: true });
+    if (cat.symptoms) {
+      cat.symptoms.forEach(sk => inflowRowDef.push({ label: '　' + SYMPTOM_LABELS[sk], cat: cat.key, sym: sk, head: false }));
+    }
+  });
+  const inflowRows = inflowRowDef.map(r => {
+    const cells = cols.map(c => {
+      const v = m.inflow[r.cat][r.sym][c.key] || 0;
+      const nv = m.newCount[r.cat][r.sym][c.key] || 0;
+      return `<td>${fmt(v)}件 / 新規${fmt(nv)}件</td>`;
+    }).join('');
+    return `<tr${r.head ? ' class="grp-row"' : ''}><td>${r.label}</td>${cells}</tr>`;
+  }).join('');
+  const inflowTotalRow = `<tr class="total-row"><td>総流入計</td>${cols.map(c => `<td>${fmt(m.inflow.total[c.key])}件 / 新規${fmt(m.newCount.total[c.key])}件</td>`).join('')}</tr>`;
+
+  const reservationRows = `
+    <tr><td>病態あり</td>${cols.map(c => `<td>${fmt(m.reservation.byoutai_ari[c.key])}件（${pct((m.reservationRatio.byoutai_ari[c.key]||0)*100)}）</td>`).join('')}</tr>
+    <tr><td>キャリア</td>${cols.map(c => `<td>${fmt(m.reservation.carrier[c.key])}件（${pct((m.reservationRatio.carrier[c.key]||0)*100)}）</td>`).join('')}</tr>
+    <tr class="total-row"><td>予約計</td>${cols.map(c => `<td>${fmt(m.reservation.total[c.key])}件</td>`).join('')}</tr>
+  `;
+
+  // --- symptom cross table (existing) ---
+  const bodyRows = GROUPS.map(g => {
+    const groupHead = g.name
+      ? `<tr class="grp-row"><td>${g.name}</td>${cols.map(() => '<td></td>').join('')}</tr>`
+      : '';
+    const itemRows = g.items.map(it => {
+      const cells = cols.map(c => `<td>${fmt(m.items[it.key][c.key] || 0)}</td>`).join('');
+      return `<tr><td>${it.name}</td>${cells}</tr>`;
+    }).join('');
+    return groupHead + itemRows;
+  }).join('');
+  const totalRow = `
+    <tr class="total-row">
+      <td>合計</td>
+      ${cols.map(c => `<td>${fmt(entityTotal(m, c.key))}</td>`).join('')}
+    </tr>
+  `;
+  const highzoneRow = `
+    <tr class="highzone-row">
+      <td>高額ゾーン比率</td>
+      ${cols.map(c => {
+        const hz = highzoneCount(m, c.key);
+        const total = entityTotal(m, c.key);
+        const ratio = total ? (hz / total) * 100 : 0;
+        return `<td>${fmt(hz)}件（${pct(ratio)}）</td>`;
+      }).join('')}
+    </tr>
+  `;
+
+  const roasRows = cols.map(c => {
+    const ad = m.adSpend[c.key];
+    const rev = m.revenue[c.key];
+    if (!ad) {
+      return `<tr><td>${c.label}</td><td class="na">広告費なし</td><td>${fmtYen(rev)}</td><td class="na">－</td></tr>`;
+    }
+    const roas = (rev / ad) * 100;
+    const cls = roas >= 250 ? 'roas-good' : (roas < 150 ? 'roas-bad' : '');
+    return `<tr><td>${c.label}</td><td>${fmtYen(ad)}</td><td>${fmtYen(rev)}</td><td class="${cls}">${pct(roas)}</td></tr>`;
+  }).join('');
+
+  const priceRows = GROUPS.flatMap(g => g.items).map(it =>
+    `<tr><td>${it.name}</td><td>${fmtYen(PRICES[it.key])}</td></tr>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="table-block">
+      <h3>流入・対応可能新規数 クロス集計（${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>区分</th>${headCols}</tr></thead>
+        <tbody>${inflowRows}${inflowTotalRow}</tbody>
+      </table>
+      <p class="note">各セルは「総流入件数 / 対応可能新規数」。ありなし（キャリア）は区分自体がキャリアのみのため、サブ内訳はありません。</p>
+    </div>
+    <div class="table-block">
+      <h3>予約数 クロス集計（${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>区分</th>${headCols}</tr></thead>
+        <tbody>${reservationRows}</tbody>
+      </table>
+      <p class="note">（　）内は各経路合計に対する予約構成比率。</p>
+    </div>
+    <div class="table-block">
+      <h3>症状 × 流入経路 クロス集計（受任数・${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>症状</th>${headCols}</tr></thead>
+        <tbody>${bodyRows}${totalRow}${highzoneRow}</tbody>
+      </table>
+      <p class="note">高額ゾーン比率＝${HIGHZONE_LABEL}の受任件数 ÷ その経路の受任件数合計。</p>
+    </div>
+    <div class="table-block">
+      <h3>流入経路別 広告費・期待収益・ROAS（${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>流入経路</th><th>広告費</th><th>期待収益</th><th>ROAS</th></tr></thead>
+        <tbody>${roasRows}</tbody>
+      </table>
+      <p class="note">数値はご提供データの実績値をそのまま使用しています。</p>
+    </div>
+    <div class="table-block">
+      <h3>症状別 リージェネ単価表（参考）</h3>
+      <table class="data-table">
+        <thead><tr><th>症状</th><th>単価</th></tr></thead>
+        <tbody>${priceRows}</tbody>
+      </table>
+      <p class="note">※この単価はリード（代理店）経由の受任1件に用いられる単価です。参考情報であり、上表の期待収益は単価表からの逆算値ではなく、ご提供データの実績値を使用しています。</p>
+    </div>
+  `;
+}
+
+function renderRateSection() {
+  const m = currentMonthData();
+  const el = document.getElementById('rate-section');
+  el.innerHTML = GROUPS.map(g => {
+    const rows = ENTITIES.map(ent => {
+      const accepted = g.items.reduce((s, it) => s + (m.items[it.key][ent.key] || 0), 0);
+      const meetings = g.items.reduce((s, it) => s + (m.meetings[it.key][ent.key] || 0), 0);
+      const rate = meetings ? (accepted / meetings) * 100 : 0;
+      return `
+        <div class="rate-line">
+          <span class="rate-tag" style="color:${ent.color}">${ent.label}</span>
+          <div class="rate-track"><div class="rate-fill" style="width:${Math.max(0, rate)}%;background:${ent.color}"></div></div>
+          <div class="rate-val">受任率 <strong>${meetings ? pct(rate) : '－'}</strong>（受任${fmt(accepted)}／面談${fmt(meetings)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="rate-group"><div class="rate-group-head">${g.name}</div>${rows}</div>`;
+  }).join('');
+}
+
+function renderAll() {
+  renderMonthButtons();
+  renderPeriodNote();
+  renderKpis();
+  renderEntityToggle();
+  renderInflowBreakdown();
+  renderReservation();
+  renderRoas();
+  renderBreakdown();
+  renderHighzone();
+  renderTables();
+  renderRateSection();
+}
+
+document.getElementById('table-toggle').addEventListener('click', function () {
+  const t = document.getElementById('tables');
+  t.hidden = !t.hidden;
+  this.textContent = (t.hidden ? '＋ ' : '－ ') + '詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）';
+});
+
+renderAll();
+</script>
+
+</body>
+</html>
