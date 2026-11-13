@@ -285,6 +285,9 @@
     <div id="roas-row"></div>
     <div id="breakdown"></div>
     <div class="highzone-box" id="highzone-box"></div>
+    <div class="sub-head">症状別受任率</div>
+    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。選択した経路の症状別内訳です（経路切替は上のボタンと連動します）。</p>
+    <div id="symptom-rate-breakdown"></div>
     <button class="table-toggle" id="table-toggle">＋ 詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）</button>
     <div id="tables" hidden></div>
   </section>
@@ -442,6 +445,7 @@ function renderEntityToggle() {
       renderRoas();
       renderBreakdown();
       renderHighzone();
+      renderSymptomRateBreakdown();
     });
     el.appendChild(btn);
   });
@@ -636,6 +640,32 @@ function renderHighzone() {
     <span class="hz-detail">（高額ゾーン ${fmt(hz)}件 ／ ${ent.label} ${fmt(total)}件）</span>
     <span class="hz-note">※経路ごとに単価は異なりますが、高額ゾーン比率は事務所全体定義と同様の算出方法（高額ゾーン受任件数 ÷ 受任件数合計）です。</span>
   `;
+}
+
+function renderSymptomRateBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const el = document.getElementById('symptom-rate-breakdown');
+  el.innerHTML = GROUPS.map(g => {
+    const acceptedTotal = g.items.reduce((s, it) => s + (m.items[it.key][activeEntity] || 0), 0);
+    const meetingsTotal = g.items.reduce((s, it) => s + (m.meetings[it.key][activeEntity] || 0), 0);
+    const groupRate = meetingsTotal ? (acceptedTotal / meetingsTotal) * 100 : null;
+    const headHtml = `<div class="grp-head"><span>${g.name}</span><span class="grp-sub">受任率 ${pct(groupRate)}（受任${fmt(acceptedTotal)}／面談${fmt(meetingsTotal)}）</span></div>`;
+    const rows = g.items.map(it => {
+      const accepted = m.items[it.key][activeEntity] || 0;
+      const meetings = m.meetings[it.key][activeEntity] || 0;
+      const rate = meetings ? (accepted / meetings) * 100 : null;
+      const w = rate !== null ? Math.max(0, Math.min(100, rate)) : 0;
+      return `
+        <div class="bar-row">
+          <div class="bar-cat">${it.name}</div>
+          <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+          <div class="bar-figs"><strong>${pct(rate)}</strong>（受任${fmt(accepted)}／面談${fmt(meetings)}）</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="grp">${headHtml}${rows}</div>`;
+  }).join('');
 }
 
 function renderTables() {
@@ -845,6 +875,7 @@ function renderAll() {
   renderRoas();
   renderBreakdown();
   renderHighzone();
+  renderSymptomRateBreakdown();
   renderTables();
   renderRateSection();
   updateHeaderH();
