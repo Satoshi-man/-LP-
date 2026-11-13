@@ -814,6 +814,8 @@ function renderTables() {
   `;
 }
 
+const TREND_MONTHS = MONTHS.filter(mo => mo.key !== '11月');
+
 function renderTrendChart(chartElId, legendElId, metricFn) {
   const W = 1000, H = 280;
   const padL = 56, padR = 16, padT = 16, padB = 28;
@@ -822,12 +824,12 @@ function renderTrendChart(chartElId, legendElId, metricFn) {
 
   const series = ENTITIES.map(ent => ({
     ent,
-    values: MONTHS.map(mo => metricFn(MONTH_DATA[mo.key], ent.key) || 0),
+    values: TREND_MONTHS.map(mo => metricFn(MONTH_DATA[mo.key], ent.key) || 0),
   }));
   const maxVal = Math.max(...series.flatMap(s => s.values), 1);
   const niceMax = Math.ceil(maxVal / 100) * 100 || 1;
 
-  const n = MONTHS.length;
+  const n = TREND_MONTHS.length;
   const xAt = i => padL + (n > 1 ? (i / (n - 1)) * plotW : plotW / 2);
   const yAt = v => padT + plotH - (niceMax ? (Math.max(0, v) / niceMax) * plotH : 0);
 
@@ -839,11 +841,11 @@ function renderTrendChart(chartElId, legendElId, metricFn) {
             <text x="${padL - 8}" y="${y + 3}" text-anchor="end">${fmt(v)}</text>`;
   }).join('');
 
-  const xLabels = MONTHS.map((mo, i) => `<text x="${xAt(i)}" y="${H - padB + 16}" text-anchor="middle"${mo.note ? ' fill="var(--warning)" font-weight="700"' : ''}>${mo.key}</text>`).join('');
+  const xLabels = TREND_MONTHS.map((mo, i) => `<text x="${xAt(i)}" y="${H - padB + 16}" text-anchor="middle"${mo.note ? ' fill="var(--warning)" font-weight="700"' : ''}>${mo.key}</text>`).join('');
 
   const lines = series.map(s => {
     const pts = s.values.map((v, i) => `${xAt(i)},${yAt(v)}`).join(' ');
-    const dots = s.values.map((v, i) => `<circle class="series-dot" cx="${xAt(i)}" cy="${yAt(v)}" r="3.5" fill="${s.ent.color}"><title>${MONTHS[i].label}　${s.ent.label}：${fmt(v)}件</title></circle>`).join('');
+    const dots = s.values.map((v, i) => `<circle class="series-dot" cx="${xAt(i)}" cy="${yAt(v)}" r="3.5" fill="${s.ent.color}"><title>${TREND_MONTHS[i].label}　${s.ent.label}：${fmt(v)}件</title></circle>`).join('');
     return `<polyline class="series-line" points="${pts}" stroke="${s.ent.color}"></polyline>${dots}`;
   }).join('');
 
