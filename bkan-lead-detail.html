@@ -104,6 +104,16 @@
   .month-btn--note[aria-pressed="true"] { background: var(--warning); border-color: var(--warning); }
   .period-note { font-size: .78rem; color: var(--warning); font-weight: 700; margin: 0 0 16px; }
 
+  .entity-sticky-bar {
+    position: sticky; top: var(--header-h, 76px); z-index: 9;
+    background: var(--surface-card); border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+  }
+  .entity-sticky-inner {
+    max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .entity-sticky-inner .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+
   main { max-width: 1080px; margin: 0 auto; padding: 24px; }
 
   section.card {
@@ -218,7 +228,7 @@
 </head>
 <body>
 
-<header class="top">
+<header class="top" id="app-header">
   <h1>B型肝炎　リード詳細分析<span class="badge-demo">実績データ・草案</span></h1>
   <p>リードジェネレーション（WEB広告）経由の実績を、流入〜予約〜面談〜受任〜契約まで一気通貫で分析。プロパー・事務所全体は含まず、リード施策（アシロ・セルフ・オーガニック）のみを対象としています。</p>
   <div class="month-picker">
@@ -226,6 +236,13 @@
     <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
 </header>
+
+<div class="entity-sticky-bar">
+  <div class="entity-sticky-inner">
+    <span class="mp-label">表示経路</span>
+    <div class="agency-toggle" id="entity-toggle" style="margin-bottom:0;"></div>
+  </div>
+</div>
 
 <main>
 
@@ -237,10 +254,10 @@
   </section>
 
   <section class="card">
-    <div class="sub-head">表示切替（リード合計／アシロ／セルフ／オーガニック）</div>
-    <p class="sub-note">選択した経路の流入〜予約の内訳が下に表示されます。</p>
-    <div class="agency-toggle" id="entity-toggle"></div>
+    <div class="sub-head">流入〜予約の内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
     <div id="inflow-breakdown"></div>
+    <div id="newcount-breakdown"></div>
     <div id="reservation-breakdown"></div>
   </section>
 
@@ -390,6 +407,7 @@ function renderEntityToggle() {
       activeEntity = ent.key;
       renderEntityToggle();
       renderInflowBreakdown();
+      renderNewCountBreakdown();
       renderReservation();
       renderRoas();
       renderBreakdown();
@@ -411,22 +429,16 @@ function renderInflowBreakdown() {
       ${INFLOW_CATS.map(cat => {
         const cTotal = m.inflow[cat.key].total[activeEntity] || 0;
         const cRatio = (m.inflowRatio[cat.key].total[activeEntity] || 0) * 100;
-        const newC = m.newCount[cat.key].total[activeEntity] || 0;
-        const newRraw = m.newRate[cat.key].total[activeEntity];
-        const newR = typeof newRraw === 'number' ? newRraw * 100 : null;
         const w = maxVal ? cTotal / maxVal * 100 : 0;
         const subRows = cat.symptoms ? cat.symptoms.map(sk => {
           const sv = m.inflow[cat.key][sk][activeEntity] || 0;
           const sRatio = (m.inflowRatio[cat.key][sk][activeEntity] || 0) * 100;
-          const snew = m.newCount[cat.key][sk][activeEntity] || 0;
-          const snewRraw = m.newRate[cat.key][sk][activeEntity];
-          const snewR = typeof snewRraw === 'number' ? snewRraw * 100 : null;
           const sw = maxVal ? sv / maxVal * 100 : 0;
           return `
             <div class="bar-row bar-row--sub">
               <div class="bar-cat">${SYMPTOM_LABELS[sk]}</div>
               <div class="bar-lane"><div class="bar-fill" style="width:${sw}%;background:${ent.color}"></div></div>
-              <div class="bar-figs">${fmt(sv)}件（${pct(sRatio)}）<span class="bar-figs-sub">新規${fmt(snew)}件・新規率${pct(snewR)}</span></div>
+              <div class="bar-figs">${fmt(sv)}件（${pct(sRatio)}）</div>
             </div>
           `;
         }).join('') : '';
@@ -434,7 +446,49 @@ function renderInflowBreakdown() {
           <div class="bar-row">
             <div class="bar-cat">${cat.label.split('（')[0]}</div>
             <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
-            <div class="bar-figs"><strong>${fmt(cTotal)}</strong>件（流入構成比 ${pct(cRatio)}）<span class="bar-figs-sub">新規${fmt(newC)}件・新規率${pct(newR)}</span></div>
+            <div class="bar-figs"><strong>${fmt(cTotal)}</strong>件（流入構成比 ${pct(cRatio)}）</div>
+          </div>
+          ${subRows}
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderNewCountBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const grandTotal = m.newCount.total[activeEntity] || 0;
+  const maxVal = grandTotal || 1;
+  const el = document.getElementById('newcount-breakdown');
+  el.innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>対応可能新規数</span><span class="grp-sub">計 ${fmt(grandTotal)}件</span></div>
+      ${INFLOW_CATS.map(cat => {
+        const cNew = m.newCount[cat.key].total[activeEntity] || 0;
+        const cCompRatio = grandTotal ? (cNew / grandTotal * 100) : 0;
+        const cNewRateRaw = m.newRate[cat.key].total[activeEntity];
+        const cNewRate = typeof cNewRateRaw === 'number' ? cNewRateRaw * 100 : null;
+        const w = maxVal ? cNew / maxVal * 100 : 0;
+        const subRows = cat.symptoms ? cat.symptoms.map(sk => {
+          const sNew = m.newCount[cat.key][sk][activeEntity] || 0;
+          const sCompRatio = grandTotal ? (sNew / grandTotal * 100) : 0;
+          const sNewRateRaw = m.newRate[cat.key][sk][activeEntity];
+          const sNewRate = typeof sNewRateRaw === 'number' ? sNewRateRaw * 100 : null;
+          const sw = maxVal ? sNew / maxVal * 100 : 0;
+          return `
+            <div class="bar-row bar-row--sub">
+              <div class="bar-cat">${SYMPTOM_LABELS[sk]}</div>
+              <div class="bar-lane"><div class="bar-fill" style="width:${sw}%;background:${ent.color}"></div></div>
+              <div class="bar-figs">${fmt(sNew)}件（${pct(sCompRatio)}）<span class="bar-figs-sub">新規率${pct(sNewRate)}（対流入）</span></div>
+            </div>
+          `;
+        }).join('') : '';
+        return `
+          <div class="bar-row">
+            <div class="bar-cat">${cat.label.split('（')[0]}</div>
+            <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+            <div class="bar-figs"><strong>${fmt(cNew)}</strong>件（新規構成比 ${pct(cCompRatio)}）<span class="bar-figs-sub">新規率${pct(cNewRate)}（対流入）</span></div>
           </div>
           ${subRows}
         `;
@@ -696,12 +750,14 @@ function renderAll() {
   renderKpis();
   renderEntityToggle();
   renderInflowBreakdown();
+  renderNewCountBreakdown();
   renderReservation();
   renderRoas();
   renderBreakdown();
   renderHighzone();
   renderTables();
   renderRateSection();
+  updateHeaderH();
 }
 
 document.getElementById('table-toggle').addEventListener('click', function () {
@@ -709,6 +765,12 @@ document.getElementById('table-toggle').addEventListener('click', function () {
   t.hidden = !t.hidden;
   this.textContent = (t.hidden ? '＋ ' : '－ ') + '詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）';
 });
+
+function updateHeaderH() {
+  const h = document.getElementById('app-header');
+  if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+}
+window.addEventListener('resize', updateHeaderH);
 
 renderAll();
 </script>
