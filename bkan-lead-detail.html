@@ -206,9 +206,9 @@
   .bar-row--sub .bar-figs { font-size: .72rem; }
   .bar-row--sub .bar-figs-sub.newrate { font-size: .88rem; }
 
-  .newrate-hero { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--grid); }
-  .newrate-hero-label { font-size: .8rem; font-weight: 700; color: var(--text-muted); }
-  .newrate-hero-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .newrate-hero { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 2px 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--grid); }
+  .newrate-hero-label { font-size: .8rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+  .newrate-hero-value { font-size: 2rem; font-weight: 700; line-height: 1; white-space: nowrap; flex-shrink: 0; }
   .newrate-hero-note { flex-basis: 100%; font-size: .72rem; color: var(--text-muted); }
 
   /* ---- trend chart ---- */
@@ -221,6 +221,19 @@
   .trend-chart .grid-line { stroke: var(--grid); stroke-width: 1; }
   .trend-chart .series-line { fill: none; stroke-width: 2; }
   .trend-chart .series-dot { stroke: var(--surface-card); stroke-width: 1.5; }
+
+  /* ---- jump nav ---- */
+  .jump-nav {
+    position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 15;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .jump-btn {
+    font-family: inherit; font-size: .74rem; font-weight: 700; padding: 10px 8px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-card); color: var(--text-secondary); cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10); white-space: nowrap;
+  }
+  .jump-btn:hover { background: var(--s1); color: #fff; border-color: var(--s1); }
+  @media (max-width: 860px) { .jump-nav { display: none; } }
 
   /* ---- tables ---- */
   .table-toggle { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--s1); background: none; border: none; cursor: pointer; padding: 0; margin-top: 18px; }
@@ -262,6 +275,12 @@
   </div>
 </div>
 
+<nav class="jump-nav" id="jump-nav">
+  <button class="jump-btn" data-target="section-inflow">流入部分</button>
+  <button class="jump-btn" data-target="section-reservation">予約部分</button>
+  <button class="jump-btn" data-target="section-acceptance">受任部分</button>
+</nav>
+
 <main>
 
   <section class="card">
@@ -269,33 +288,6 @@
     <h2>リード合計サマリー</h2>
     <p class="card-sub">リード経由（アシロ＋セルフ＋オーガニック）合計の実績。</p>
     <div class="kpi-row" id="kpi-row"></div>
-  </section>
-
-  <section class="card">
-    <div class="sub-head">流入〜予約の内訳</div>
-    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
-    <div id="inflow-breakdown"></div>
-    <div id="newcount-breakdown"></div>
-    <div id="reservation-breakdown"></div>
-  </section>
-
-  <section class="card">
-    <div class="sub-head">症状別受任内訳</div>
-    <p class="sub-note">選択した経路の症状別の受任実績が表示されます（経路切替は上のボタンと連動します）。</p>
-    <div id="roas-row"></div>
-    <div id="breakdown"></div>
-    <div class="highzone-box" id="highzone-box"></div>
-    <div class="sub-head">症状別受任率</div>
-    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。選択した経路の症状別内訳です（経路切替は上のボタンと連動します）。</p>
-    <div id="symptom-rate-breakdown"></div>
-    <button class="table-toggle" id="table-toggle">＋ 詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）</button>
-    <div id="tables" hidden></div>
-  </section>
-
-  <section class="card">
-    <div class="sub-head">受任率（大カテ別・リード合計／アシロ／セルフ／オーガニック）</div>
-    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。いただいたデータの実績値から算出しています。</p>
-    <div id="rate-section"></div>
   </section>
 
   <section class="card">
@@ -308,6 +300,32 @@
     <div id="trend-legend-new"></div>
     <div id="trend-chart-new"></div>
     <p class="sub-note" style="margin-top:10px;">※11月は12日時点の速報値のため、他月と比べて件数が少なく表示されます（月末の確定実績ではありません）。</p>
+  </section>
+
+  <section class="card" id="section-inflow">
+    <div class="sub-head" style="margin-top:0;">流入の内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
+    <div id="inflow-breakdown"></div>
+    <div id="newcount-breakdown"></div>
+  </section>
+
+  <section class="card" id="section-reservation">
+    <div class="sub-head" style="margin-top:0;">予約の内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
+    <div id="reservation-breakdown"></div>
+  </section>
+
+  <section class="card" id="section-acceptance">
+    <div class="sub-head" style="margin-top:0;">症状別受任内訳</div>
+    <p class="sub-note">選択した経路の症状別の受任実績が表示されます（経路切替は上のボタンと連動します）。</p>
+    <div id="roas-row"></div>
+    <div id="breakdown"></div>
+    <div class="highzone-box" id="highzone-box"></div>
+    <div class="sub-head">症状別受任率</div>
+    <p class="sub-note">受任率 ＝ 受任数 ÷ 面談実施数。選択した経路の症状別内訳です（経路切替は上のボタンと連動します）。</p>
+    <div id="symptom-rate-breakdown"></div>
+    <button class="table-toggle" id="table-toggle">＋ 詳細クロス集計を表示（流入・新規・予約・症状別・広告費対効果）</button>
+    <div id="tables" hidden></div>
   </section>
 
 </main>
@@ -791,26 +809,6 @@ function renderTables() {
   `;
 }
 
-function renderRateSection() {
-  const m = currentMonthData();
-  const el = document.getElementById('rate-section');
-  el.innerHTML = GROUPS.map(g => {
-    const rows = ENTITIES.map(ent => {
-      const accepted = g.items.reduce((s, it) => s + (m.items[it.key][ent.key] || 0), 0);
-      const meetings = g.items.reduce((s, it) => s + (m.meetings[it.key][ent.key] || 0), 0);
-      const rate = meetings ? (accepted / meetings) * 100 : 0;
-      return `
-        <div class="rate-line">
-          <span class="rate-tag" style="color:${ent.color}">${ent.label}</span>
-          <div class="rate-track"><div class="rate-fill" style="width:${Math.max(0, rate)}%;background:${ent.color}"></div></div>
-          <div class="rate-val">受任率 <strong>${meetings ? pct(rate) : '－'}</strong>（受任${fmt(accepted)}／面談${fmt(meetings)}）</div>
-        </div>
-      `;
-    }).join('');
-    return `<div class="rate-group"><div class="rate-group-head">${g.name}</div>${rows}</div>`;
-  }).join('');
-}
-
 function renderTrendChart(chartElId, legendElId, metricFn) {
   const W = 1000, H = 280;
   const padL = 56, padR = 16, padT = 16, padB = 28;
@@ -877,7 +875,6 @@ function renderAll() {
   renderHighzone();
   renderSymptomRateBreakdown();
   renderTables();
-  renderRateSection();
   updateHeaderH();
 }
 
@@ -892,6 +889,20 @@ function updateHeaderH() {
   if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
 }
 window.addEventListener('resize', updateHeaderH);
+
+function scrollToSection(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  const header = document.getElementById('app-header');
+  const entityBar = document.querySelector('.entity-sticky-bar');
+  const offset = (header ? header.offsetHeight : 0) + (entityBar ? entityBar.offsetHeight : 0) + 12;
+  const top = window.scrollY + target.getBoundingClientRect().top - offset;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.jump-btn').forEach(btn => {
+  btn.addEventListener('click', () => scrollToSection(btn.dataset.target));
+});
 
 renderAll();
 renderTrendCharts();
