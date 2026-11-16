@@ -293,14 +293,13 @@
 
   <section class="card">
     <h2>総流入件数・対応可能新規数の推移（経路別・全期間）</h2>
-    <p class="card-sub">対象月の選択に関わらず、2026年4月〜11月（12日時点）の全期間を固定で表示します。</p>
+    <p class="card-sub">対象月の選択に関わらず、2026年4月〜10月の全期間を固定で表示します。</p>
     <div class="sub-head" style="margin-top:0;">総流入件数 推移</div>
     <div id="trend-legend-inflow"></div>
     <div id="trend-chart-inflow"></div>
     <div class="sub-head">対応可能新規数 推移</div>
     <div id="trend-legend-new"></div>
     <div id="trend-chart-new"></div>
-    <p class="sub-note" style="margin-top:10px;">※11月は12日時点の速報値のため、他月と比べて件数が少なく表示されます（月末の確定実績ではありません）。</p>
   </section>
 
   <section class="card" id="section-inflow">
@@ -364,10 +363,6 @@ const MONTHS = [
   { key: '8月', label: '2026年8月', note: false },
   { key: '9月', label: '2026年9月', note: false },
   { key: '10月', label: '2026年10月', note: false },
-  { key: '11月', label: '2026年11月（12日時点）', note: true,
-    noteText: '※2026年11月度は、12日時点までの速報値です（月末までの確定実績ではありません）。' },
-  { key: '11月予測', label: '2026年11月（着地予測）', note: true,
-    noteText: '※2026年11月（着地予測）は、12日時点の実績 ÷ 経過日数（12日）× 当月日数（30日）で算出した比例着地予測です（確定実績ではありません）。' },
 ];
 let selectedMonthIndex = (() => {
   for (let i = MONTHS.length - 1; i >= 0; i--) { if (!MONTHS[i].note) return i; }
