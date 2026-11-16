@@ -107,6 +107,16 @@
   }
   .month-btn[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
 
+  .entity-sticky-bar {
+    position: sticky; top: var(--header-h, 76px); z-index: 9;
+    background: var(--surface-card); border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+  }
+  .entity-sticky-inner {
+    max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .entity-sticky-inner .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+
   main { max-width: 1040px; margin: 0 auto; padding: 24px; }
 
   section.card {
@@ -223,7 +233,7 @@
 </head>
 <body>
 
-<header class="top">
+<header class="top" id="app-header">
   <h1>B型肝炎　リードジェネレーション実績サマリー<span class="badge-demo">実績データ・草案</span></h1>
   <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜10月度）。</p>
   <div class="month-picker">
@@ -231,6 +241,13 @@
     <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
 </header>
+
+<div class="entity-sticky-bar">
+  <div class="entity-sticky-inner">
+    <span class="mp-label">表示切替</span>
+    <div class="agency-toggle" id="entity-toggle" style="margin-bottom:0;"></div>
+  </div>
+</div>
 
 <main>
 
@@ -241,9 +258,8 @@
   </section>
 
   <section class="card">
-    <div class="sub-head">表示切替（全体実績／プロパー実績／リード合計実績／リード代理店）</div>
-    <p class="sub-note">選択した対象の症状別内訳が下に表示されます。</p>
-    <div class="agency-toggle" id="entity-toggle"></div>
+    <div class="sub-head">症状別受任内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。選択した対象の症状別内訳が下に表示されます。</p>
     <div class="comp-bar" id="comp-bar"></div>
     <div class="comp-legend" id="comp-legend"></div>
     <div id="roas-row"></div>
@@ -828,7 +844,14 @@ document.getElementById('table-toggle').addEventListener('click', function () {
   this.textContent = (t.hidden ? '＋ ' : '－ ') + '症状別クロス集計・広告費対効果を表示';
 });
 
+function updateHeaderH() {
+  const h = document.getElementById('app-header');
+  if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+}
+window.addEventListener('resize', updateHeaderH);
+
 renderAll();
+updateHeaderH();
 </script>
 
 </body>
