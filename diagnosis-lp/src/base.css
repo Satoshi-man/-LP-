@@ -1,0 +1,45 @@
+/* ===== REDESIGN: 共通（質問・ロジックには影響しない見た目だけの上書き） ===== */
+.rd-kv, .rd-kv * { box-sizing: border-box; }
+.rd-kv {
+  position: relative; overflow: hidden; width: 375px; margin: 0 auto;
+  padding: 18px 20px 12px; background: var(--rd-kv-bg);
+  font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; color: var(--rd-ink);
+}
+.rd-kv__art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rd-kv__body, .rd-kv__foot { position: relative; }
+.rd-kv__tag {
+  display: inline-block; margin: 0; padding: 4px 14px; border-radius: 999px;
+  background: #fff; color: var(--rd-ink-soft); font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+.rd-kv__tag b { color: var(--rd-accent-dark); }
+.rd-kv__title { margin: 10px 0 0; font-size: 27px; line-height: 1.42; font-weight: 900; letter-spacing: .02em; color: var(--rd-ink); }
+.rd-kv__lead { margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; font-weight: 500; color: var(--rd-ink-soft); }
+.rd-kv__lead b { color: var(--rd-accent-dark); font-weight: 900; background: linear-gradient(transparent 62%, var(--rd-marker) 62%); }
+.rd-kv__chips { display: flex; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.rd-kv__chips li {
+  flex: 1; padding: 6px 4px; border-radius: 12px; white-space: nowrap; background: rgba(255, 255, 255, .88);
+  border: 1px solid var(--rd-line); text-align: center; font-size: 12.5px; font-weight: 700; color: var(--rd-ink);
+}
+.rd-kv__chips b { color: var(--rd-accent-dark); font-size: 15px; }
+.rd-kv__foot { margin: 10px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--rd-ink-soft); text-align: center; }
+
+/* 診断見出し・注意書き */
+.diagnosis-section .diagnosis-heading { background-color: var(--rd-accent); font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; letter-spacing: .06em; }
+.diagnosis-section .diagnosis-heading .diagnosis-heading-label { color: var(--rd-accent-dark); }
+.diagnosis-section .diagnosis-remarks { background-color: var(--rd-soft); }
+.diagnosis-section .diagnosis-remarks .diagnosis-remarks-inner { border: 1px solid var(--rd-line); color: #555; }
+.diagnosis-section .diagnosis-remarks .alimony-infidelity-charged .text-link { color: var(--rd-link); font-weight: 700; }
+
+/* 進捗・設問・回答 */
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .progress-unit { background-color: var(--rd-soft); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .progress-unit .progress-bar-parent .progress-bar-inner { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .question-title .q-number { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .answers-wrapper .radio-group label .radio-appearance { border-color: var(--rd-line); border-radius: 10px; transition: background-color .15s, border-color .15s; }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .answers-wrapper .radio-group label .radio-input:checked+.radio-appearance { background-color: var(--rd-accent); border-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .input-info-heading { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .input-info-wrapper .accept-checkbox label .accept-checkbox-apperance::after { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .button-basic,
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button { background-color: var(--rd-cta); border-color: var(--rd-cta); box-shadow: 0 4px 0 var(--rd-cta-shadow); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button:disabled,
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button.inactive { box-shadow: none; }

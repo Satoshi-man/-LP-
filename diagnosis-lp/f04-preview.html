@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <base href="https://furinisharyo-madoguchi.com/">
+    <script>/* PREVIEW ONLY: 送信を止める */
+HTMLFormElement.prototype.submit = function () { alert('プレビューのため送信されません'); };
+document.addEventListener('submit', function (e) { e.preventDefault(); alert('プレビューのため送信されません'); }, true);
+</script>
+      
+
+
+    <title>不倫慰謝料を請求したい方 あなたの慰謝料は増額できる可能性があります｜不倫慰謝料の自動計算機</title>
+
+    <meta name="format-detection" content="telephone=no">
+        <meta name="viewport" content="width=375">
+
+      <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="" />
+
+    <link rel="stylesheet" media="all" href="/assets/front/application-4649ddbea48c8fa93476a657bf9dc28ccabc795daef604ebb37c6911726064c7.css" data-turbolinks-track="reload" />
+    <script src="/assets/front/application-4a9f9c1aacb8c942b15e39e57ddf245c29907c13ab55bfe12bb41c135f03b8f2.js" data-turbolinks-track="reload"></script>
+
+    
+
+    
+
+      <link rel="stylesheet" media="screen" href="/assets/f01/css/html5reset-1.6.1-879d7f5d955a475368565a95fb01ec93bd4e891624e6d8744929e614bfc6d540.css" />
+  <link rel="stylesheet" media="screen" href="/assets/f01/css/style-7d794e20b71cac317665fd308e619762a34102828aeb0555095678366f217818.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- REDESIGN: style -->
+  <style>
+/* ===== REDESIGN: 請求された方（f04）— 落ち着いて冷静になれるティール系 ===== */
+:root {
+  --rd-kv-bg: linear-gradient(180deg, #f1fafa 0%, #e5f4f3 100%);
+  --rd-ink: #22404a; --rd-ink-soft: #4c6670;
+  --rd-accent: #2f8f91; --rd-accent-dark: #1f6f72; --rd-marker: rgba(150, 214, 212, .75);
+  --rd-soft: #eef7f7; --rd-line: #cfe5e4; --rd-link: #1f6f72;
+  --rd-cta: #2f8f91; --rd-cta-shadow: #226d6f;
+}
+/* ===== REDESIGN: 共通（質問・ロジックには影響しない見た目だけの上書き） ===== */
+.rd-kv, .rd-kv * { box-sizing: border-box; }
+.rd-kv {
+  position: relative; overflow: hidden; width: 375px; margin: 0 auto;
+  padding: 18px 20px 12px; background: var(--rd-kv-bg);
+  font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; color: var(--rd-ink);
+}
+.rd-kv__art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rd-kv__body, .rd-kv__foot { position: relative; }
+.rd-kv__tag {
+  display: inline-block; margin: 0; padding: 4px 14px; border-radius: 999px;
+  background: #fff; color: var(--rd-ink-soft); font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+.rd-kv__tag b { color: var(--rd-accent-dark); }
+.rd-kv__title { margin: 10px 0 0; font-size: 27px; line-height: 1.42; font-weight: 900; letter-spacing: .02em; color: var(--rd-ink); }
+.rd-kv__lead { margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; font-weight: 500; color: var(--rd-ink-soft); }
+.rd-kv__lead b { color: var(--rd-accent-dark); font-weight: 900; background: linear-gradient(transparent 62%, var(--rd-marker) 62%); }
+.rd-kv__chips { display: flex; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.rd-kv__chips li {
+  flex: 1; padding: 6px 4px; border-radius: 12px; white-space: nowrap; background: rgba(255, 255, 255, .88);
+  border: 1px solid var(--rd-line); text-align: center; font-size: 12.5px; font-weight: 700; color: var(--rd-ink);
+}
+.rd-kv__chips b { color: var(--rd-accent-dark); font-size: 15px; }
+.rd-kv__foot { margin: 10px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--rd-ink-soft); text-align: center; }
+
+/* 診断見出し・注意書き */
+.diagnosis-section .diagnosis-heading { background-color: var(--rd-accent); font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; letter-spacing: .06em; }
+.diagnosis-section .diagnosis-heading .diagnosis-heading-label { color: var(--rd-accent-dark); }
+.diagnosis-section .diagnosis-remarks { background-color: var(--rd-soft); }
+.diagnosis-section .diagnosis-remarks .diagnosis-remarks-inner { border: 1px solid var(--rd-line); color: #555; }
+.diagnosis-section .diagnosis-remarks .alimony-infidelity-charged .text-link { color: var(--rd-link); font-weight: 700; }
+
+/* 進捗・設問・回答 */
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .progress-unit { background-color: var(--rd-soft); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .progress-unit .progress-bar-parent .progress-bar-inner { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .question-title .q-number { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .answers-wrapper .radio-group label .radio-appearance { border-color: var(--rd-line); border-radius: 10px; transition: background-color .15s, border-color .15s; }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .answers-wrapper .radio-group label .radio-input:checked+.radio-appearance { background-color: var(--rd-accent); border-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .input-info-heading { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .input-info-wrapper .accept-checkbox label .accept-checkbox-apperance::after { background-color: var(--rd-accent); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .button-basic,
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button { background-color: var(--rd-cta); border-color: var(--rd-cta); box-shadow: 0 4px 0 var(--rd-cta-shadow); }
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button:disabled,
+.diagnosis-section .diagnosis-content .diagnosis-content-inner .form-btn-unit .submit-button.inactive { box-shadow: none; }
+</style>
+  </head>
+
+  <!--  <body class="">-->
+  <body class="">
+      
+
+
+    
+
+
+
+  <header class="lp-header">
+  <div class="header-inner">
+<!--    <img src="./img/logo-adire.png" alt="アディーレ法律事務所" class="header-logo" width="154" height="16">-->
+    <img src="/assets/f01/img/logo-adire-3e54380c63b5fbb88d3eba570c53fa2789ee2de4d94737c942e9309cd8b14484.png" alt="アディーレ法律事務所" class="header-logo" width="154" height="16">
+<!--    <img src="./img/header-x.png" alt="" class="header-x" width="10" height="10">-->
+    <img src="/assets/f01/img/header-x-6757725272a9967f292e9bd027239ea090ab55ad932c75ee2132dadf4cd69882.png" alt="" class="header-x" width="10" height="10">
+<!--    <img src="./img/logo-furin.png" alt="ベンナビ不倫慰謝料の相談窓口" class="logo-furin" width="177" height="17">-->
+    <img src="/assets/f01/img/logo-furin-139bcad52ae9b024872e9878f8835c23b958743534950309df1a611bd24145c4.png" alt="ベンナビ不倫慰謝料の相談窓口" class="logo-furin" width="177" height="17">
+  </div>
+</header>
+
+
+  <form action="https://furinisharyo-madoguchi.com/lp/f04/" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="" />
+
+    <input type="hidden" name="ad_inquiry[referrer]" id="ad_inquiry_referrer" />
+    <input value="https://furinisharyo-madoguchi.com/lp/f04/" type="hidden" name="ad_inquiry[request_uri]" id="ad_inquiry_request_uri" />
+    <input value="" type="hidden" name="ad_inquiry[query_string]" id="ad_inquiry_query_string" />
+    <input value="177" type="hidden" name="ad_inquiry[client_landing_page_id]" id="ad_inquiry_client_landing_page_id" />
+
+
+    
+
+      <div id="q1">
+  <!-- REDESIGN: KV（請求された方） ここから -->
+  <div class="kv-section rd-kv rd-kv--claimed">
+    <svg class="rd-kv__art" viewBox="0 0 375 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="rdSunB" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#cfeef0"/><stop offset="1" stop-color="#cfeef0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="320" cy="64" r="120" fill="url(#rdSunB)"/>
+      <path d="M0 256 C 110 236, 220 270, 375 240 L375 300 L0 300Z" fill="#dcefee"/>
+      <path d="M0 274 C 120 258, 240 288, 375 262 L375 300 L0 300Z" fill="#c9e5e4"/>
+    </svg>
+    <div class="rd-kv__body">
+      <p class="rd-kv__tag">不倫慰謝料を<b>請求された方</b>へ</p>
+      <h1 class="rd-kv__title">その請求額、<br>払う前に一度確認を。</h1>
+      <p class="rd-kv__lead">突然の請求に、焦らなくて大丈夫です。<br>請求された金額が<b>相場と比べて妥当か</b>をチェック。<br>減額できる可能性もあります。</p>
+      <ul class="rd-kv__chips">
+        <li><b>無料</b>で診断</li>
+        <li>約<b>1</b>分で完了</li>
+        <li>全<b>7</b>問</li>
+      </ul>
+    </div>
+    <p class="rd-kv__foot">責めるためではなく、あなたのこれからを守るために。</p>
+  </div>
+  <!-- REDESIGN: KV ここまで -->
+
+  <div class="diagnosis-section">
+    <div class="diagnosis-heading">
+      <div class="diagnosis-heading-label">約1分で完了</div>
+      不倫慰謝料の自動計算機
+    </div>
+            <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+    <div class="diagnosis-content">
+      <div class="diagnosis-content-inner">
+        <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-1"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">1/7</div>
+  </div>
+</div>
+
+        <div class="question-container">
+          <div class="question-title">
+            <div class="q-number">Q<span>1</span></div>
+            <div>
+              <div class="question-title-text">
+                あなたが請求された金額を<br/>
+                ご記入ください
+              </div>
+              <span class="small">※半角数字</span>
+            </div>
+          </div>
+          <div class="answers-wrapper">
+            <div class="input-field">
+              <input placeholder="例）300" class="input-text" type="text" name="ad_inquiry[furin_answer_attributes][claimed_amount]" id="ad_inquiry_furin_answer_attributes_claimed_amount" />
+              <span class="input-text-label">万円</span>
+            </div>
+            <div class="form-btn-unit">
+              <button id="q1-submit" class="submit-button inactive" type="button">次へ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div id="q2" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-2"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">2/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>2</span></div>
+          慰謝料請求者の婚姻期間
+        </div>
+        <div class="answers-wrapper">
+          <div class="radio-group">
+            <label>
+              <input class="radio-input" type="radio" value="3年未満" name="ad_inquiry[furin_answer_attributes][q1]" id="ad_inquiry_furin_answer_attributes_q1_3年未満" />
+              <span class="radio-appearance">3年未満</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="3〜5年" name="ad_inquiry[furin_answer_attributes][q1]" id="ad_inquiry_furin_answer_attributes_q1_35年" />
+              <span class="radio-appearance">3〜5年</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="5〜10年" name="ad_inquiry[furin_answer_attributes][q1]" id="ad_inquiry_furin_answer_attributes_q1_510年" />
+              <span class="radio-appearance">5〜10年</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="10〜15年" name="ad_inquiry[furin_answer_attributes][q1]" id="ad_inquiry_furin_answer_attributes_q1_1015年" />
+              <span class="radio-appearance">10〜15年</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="15年以上" name="ad_inquiry[furin_answer_attributes][q1]" id="ad_inquiry_furin_answer_attributes_q1_15年以上" />
+              <span class="radio-appearance">15年以上</span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div id="q3" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-3"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">3/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>3</span></div>
+          慰謝料請求者のこれまでの婚姻生活
+        </div>
+        <div class="answers-wrapper">
+          <div class="radio-group">
+            <label>
+              <input class="radio-input" type="radio" value="破綻していたと思う" name="ad_inquiry[furin_answer_attributes][q2]" id="ad_inquiry_furin_answer_attributes_q2_破綻していたと思う" />
+              <span class="radio-appearance font-size-14">破綻していたと思う</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="円満だったと思う" name="ad_inquiry[furin_answer_attributes][q2]" id="ad_inquiry_furin_answer_attributes_q2_円満だったと思う" />
+              <span class="radio-appearance font-size-14">円満だったと思う</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="わからない" name="ad_inquiry[furin_answer_attributes][q2]" id="ad_inquiry_furin_answer_attributes_q2_わからない" />
+              <span class="radio-appearance font-size-14">わからない</span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+      <div id="q4" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-4"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">4/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>4</span></div>
+          あなたの不倫期間をお選びください
+        </div>
+        <div class="answers-wrapper">
+          <div class="radio-group">
+            <label>
+              <input class="radio-input" type="radio" value="3ヶ月以内" name="ad_inquiry[furin_answer_attributes][q3]" id="ad_inquiry_furin_answer_attributes_q3_3ヶ月以内" />
+              <span class="radio-appearance">3ヶ月以内</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="3ヶ月〜半年以内" name="ad_inquiry[furin_answer_attributes][q3]" id="ad_inquiry_furin_answer_attributes_q3_3ヶ月半年以内" />
+              <span class="radio-appearance">3ヶ月〜半年以内</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="半年〜1年以内" name="ad_inquiry[furin_answer_attributes][q3]" id="ad_inquiry_furin_answer_attributes_q3_半年1年以内" />
+              <span class="radio-appearance">半年〜1年以内</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="1年以上" name="ad_inquiry[furin_answer_attributes][q3]" id="ad_inquiry_furin_answer_attributes_q3_1年以上" />
+              <span class="radio-appearance">1年以上</span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div id="q5" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-5"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">5/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>5</span></div>
+          <div>
+            あなたの不倫回数をお選びください
+          </div>
+        </div>
+        <div class="answers-wrapper">
+          <div class="radio-group">
+            <label>
+              <input class="radio-input" type="radio" value="3回以下" name="ad_inquiry[furin_answer_attributes][q4]" id="ad_inquiry_furin_answer_attributes_q4_3回以下" />
+              <span class="radio-appearance">3回以下</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="3〜5回" name="ad_inquiry[furin_answer_attributes][q4]" id="ad_inquiry_furin_answer_attributes_q4_35回" />
+              <span class="radio-appearance">3〜5回</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="6〜10回" name="ad_inquiry[furin_answer_attributes][q4]" id="ad_inquiry_furin_answer_attributes_q4_610回" />
+              <span class="radio-appearance">6〜10回</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="10〜15回" name="ad_inquiry[furin_answer_attributes][q4]" id="ad_inquiry_furin_answer_attributes_q4_1015回" />
+              <span class="radio-appearance">10〜15回</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="15回以上" name="ad_inquiry[furin_answer_attributes][q4]" id="ad_inquiry_furin_answer_attributes_q4_15回以上" />
+              <span class="radio-appearance">15回以上</span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+      <div id="q6" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-6"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">6/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>6</span></div>
+          <div>
+            慰謝料請求者の子供の有無
+          </div>
+        </div>
+        <div class="answers-wrapper">
+          <div class="radio-group">
+            <label>
+              <input class="radio-input" type="radio" value="いると思う" name="ad_inquiry[furin_answer_attributes][q5]" id="ad_inquiry_furin_answer_attributes_q5_いると思う" />
+              <span class="radio-appearance">いると思う</span>
+            </label>
+            <label>
+              <input class="radio-input" type="radio" value="いないと思う" name="ad_inquiry[furin_answer_attributes][q5]" id="ad_inquiry_furin_answer_attributes_q5_いないと思う" />
+              <span class="radio-appearance">いないと思う</span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+      <div id="q7" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+          <div class="diagnosis-remarks">
+          <div class="diagnosis-remarks-inner" style="text-align: left;">
+            診断フォームの入力完了をもって、アディーレ法律事務所への無料法律相談のお申込みとなり、担当者よりお電話・SMS等にてご連絡させていただきます。 ご同意いただける方は以下の情報をご入力いただき計算結果をご確認ください。
+          </div>
+        </div>
+
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="progress-unit">
+  <div class="progress-bar-parent till-7">
+    <div class="progress-bar-inner bar-7"></div>
+  </div>
+  <div class="percentage-completed">
+    <div class="completed-text">質問項目</div>
+    <div class="percentage-number">7/7</div>
+  </div>
+</div>
+
+      <div class="question-container">
+        <div class="question-title">
+          <div class="q-number">Q<span>6</span></div>
+          反省の姿勢・今後の夫婦関係
+        </div>
+        <div class="answers-wrapper">
+          <div class="multiple-question">
+            <div class="question-sub-title">慰謝料請求者に対する反省の態度</div>
+            <div class="radio-group">
+              <label>
+                <input class="radio-input" type="radio" value="示した" name="ad_inquiry[furin_answer_attributes][contrite_attitude]" id="ad_inquiry_furin_answer_attributes_contrite_attitude_示した" />
+                <span class="radio-appearance">示した</span>
+              </label>
+              <label>
+                <input class="radio-input" type="radio" value="示していない" name="ad_inquiry[furin_answer_attributes][contrite_attitude]" id="ad_inquiry_furin_answer_attributes_contrite_attitude_示していない" />
+                <span class="radio-appearance">示していない</span>
+              </label>
+            </div>
+          </div>
+          <div class="multiple-question">
+            <div class="question-sub-title">慰謝料請求者の今後の夫婦関係</div>
+            <div class="radio-group">
+              <label>
+                <input class="radio-input" type="radio" value="離婚すると言っている" name="ad_inquiry[furin_answer_attributes][q7]" id="ad_inquiry_furin_answer_attributes_q7_離婚すると言っている" />
+                <span class="radio-appearance font-size-14 line-height-18">
+                  離婚すると<br/>
+                  言っている
+                </span>
+              </label>
+              <label>
+                <input class="radio-input" type="radio" value="別居すると言っている" name="ad_inquiry[furin_answer_attributes][q7]" id="ad_inquiry_furin_answer_attributes_q7_別居すると言っている" />
+                <span class="radio-appearance font-size-14 line-height-18">
+                  別居すると<br/>
+                  言っている
+                </span>
+              </label>
+              <label>
+                <input class="radio-input" type="radio" value="修復したい言っている" name="ad_inquiry[furin_answer_attributes][q7]" id="ad_inquiry_furin_answer_attributes_q7_修復したい言っている" />
+                <span class="radio-appearance font-size-14 line-height-18">
+                  修復したい<br/>
+                  言っている
+                </span>
+              </label>
+              <label>
+                <input class="radio-input" type="radio" value="わからない" name="ad_inquiry[furin_answer_attributes][q7]" id="ad_inquiry_furin_answer_attributes_q7_わからない" />
+                <span class="radio-appearance font-size-14">わからない</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-btn-unit">
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div id="form" class="diagnosis-section">
+  <div class="diagnosis-heading from-second-question">
+    不倫慰謝料の自動計算機
+  </div>
+  <div class="diagnosis-content">
+    <div class="diagnosis-content-inner">
+      <div class="input-info-heading">お客様情報入力</div>
+      <div class="question-container">
+        <div class="input-info-wrapper">
+
+          <div class="input-info-item">
+            <div class="info-title">氏名（カナ）</div>
+            <div class="input-info-field flex gap-8">
+              <label class="flex-1">
+                <input placeholder="セイ" class="input-text w-full" type="text" name="ad_inquiry[family_name_kana]" id="ad_inquiry_family_name_kana" />
+              </label>
+              <label class="flex-1">
+                <input placeholder="メイ" class="input-text w-full" type="text" name="ad_inquiry[given_name_kana]" id="ad_inquiry_given_name_kana" />
+              </label>
+            </div>
+          </div>
+          <div class="input-info-item">
+            <div class="info-title">電話番号</div>
+            <div class="input-info-field">
+              <label>
+                <input placeholder="（例）090(080)-XXXX-XXXX" class="input-text" type="text" name="ad_inquiry[phone_number]" id="ad_inquiry_phone_number" />
+              </label>
+            </div>
+          </div>
+          <div class="input-info-item">
+  <div class="info-title">他に依頼をご検討中の法律事務所などはございますか？</div>
+  <div class="input-info-field answers-wrapper" style="margin-top: 5px;">
+    <div class="radio-group">
+        <label>
+          <input class="radio-input" type="radio" value="ある" name="ad_inquiry[furin_answer_attributes][other_law_firm_consideration]" id="ad_inquiry_furin_answer_attributes_other_law_firm_consideration_ある" />
+          <span class="radio-appearance">ある</span>
+        </label>
+        <label>
+          <input class="radio-input" type="radio" value="ない" name="ad_inquiry[furin_answer_attributes][other_law_firm_consideration]" id="ad_inquiry_furin_answer_attributes_other_law_firm_consideration_ない" />
+          <span class="radio-appearance">ない</span>
+        </label>
+    </div>
+  </div>
+</div>
+
+
+          <div class="disclaimer-wrapper disclaimer-wrapper--pjid-6745">
+            免責事項<br>
+            「慰謝料計算機（以下、本ツール）」の診断結果は、入力された情報に基づき、一般的な基準に照らした不倫慰謝料の目安をお知らせするものです。実際の慰謝料の額は、事実関係（婚姻期間・不貞行為の態様・有責性の程度・双方の経済状況等）を総合的に考慮して個別具体的に異なります。 本ツールにてご提供する情報に関して、その正確性や有効性等のいかなる保証も行うものではありません。そのため、本ツールにてご提供する情報に関して、本ツールをご利用の方または第三者が損害を被った場合であっても、一切の責任を負担いたしません。 本ツールをご利用の方は、上記の内容をご承諾いただいたものとみなします。あらかじめご了承ください。
+          </div>
+
+          <div class="diagnosis-remarks diagnosis-remarks--pjid-6745">
+            こちらは、夫婦問題・男女トラブルに関する法律相談をご案内する前段階として、ご状況を簡易に確認するためのものです。詳しい見通しや方針は弁護士が直接ご案内します。情報を送信いただきますと、「<b>プライバシーポリシーへの同意</b>」及び「<b>法律相談のお申込み</b>」となり、日程調整等のご案内のためアディーレ法律事務所の受付担当者からお電話またはSMSでご連絡いたします。ご同意のうえ、結果をご確認ください。
+          </div>
+
+          <div class="accept-checkbox">
+            <label>
+              <input name="ad_inquiry[agree1]" type="hidden" value="0" /><input class="accept-checkbox-input" type="checkbox" value="1" checked="checked" name="ad_inquiry[agree1]" id="ad_inquiry_agree1" />
+              <span class="accept-checkbox-apperance a-c-appearance--asiro">
+                株式会社アシロの<a href="https://asiro.co.jp/privacy/" target="_blank">プライバシーポリシー</a>に記載の個人情報の取り扱いについて同意する
+              </span>
+            </label>
+            <label>
+              <input name="ad_inquiry[agree2]" type="hidden" value="0" /><input class="accept-checkbox-input" type="checkbox" value="1" checked="checked" name="ad_inquiry[agree2]" id="ad_inquiry_agree2" />
+              <span class="accept-checkbox-apperance a-c-appearance--asiro">
+                弁護士法人AdIre法律事務所の<a href="https://www.adire.jp/privacy/" target="_blank">プライバシーポリシー</a>に記載の個人情報の取り扱い及び法律相談のお申込みについて同意する
+              </span>
+            </label>
+          </div>
+          <div class="form-btn-unit">
+            <button id="submit-btn" type="submit" class="submit-button" disabled="disabled">診断結果を確認する</button>
+            <span class="back-btn"><i class="fa-solid fa-reply"></i>一つ前の質問に戻る</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</form>
+  <footer class="lp-footer">
+  <div class="footer-inner">
+    <div class="company-location">
+      <div class="company-location-title">運営者情報</div>
+      本サイトの運営者 | 株式会社アシロ<br>
+      〒160-0023　東京都新宿区西新宿7丁目22番12号<br>
+      TEL：03-6279-4581
+    </div>
+    <div class="office-info">
+      <b>対応事務所</b> | 弁護士法人AdIre法律事務所<br>
+      <b>所属弁護士会</b> | 第一東京弁護士会
+    </div>
+  </div>
+</footer>
+
+
+
+        <script>
+  $(function () {
+    const pages = [
+      $('#q1'),
+      $('#q2'),
+      $('#q3'),
+      $('#q4'),
+      $('#q5'),
+      $('#q6'),
+      $('#q7'),
+      $('#form'),
+    ];
+    const basicDuration = 0;
+    const hideAllPage = (duration) => {
+      pages.forEach((page, index) => {
+        page.hide(duration);
+      });
+    };
+    const showPage = (index, duration) => {
+      currentPage = index;
+      pages[index].show(duration);
+    };
+    let currentPage = 0;
+
+    hideAllPage(0);
+    if (false) {
+      showPage(7, 0);
+    } else {
+      showPage(0, 0);
+    }
+
+    $('.back-btn').click(function (e) {
+      hideAllPage(basicDuration);
+      showPage(--currentPage, basicDuration);
+    });
+
+    const q1Validation = () => {
+      const val = $('[name="ad_inquiry[furin_answer_attributes][claimed_amount]"]').val();
+      if (val === '') {
+        // alert('請求金額を入力してください。');
+        return '請求金額を入力してください。';
+      }
+      // 全角数字が含まれている
+      if (val.match(/[^0-9]/)) {
+        return '請求金額は半角数字で入力してください。';
+      }
+      if (val < 0) {
+        return '請求金額は0以上の数字を入力してください。';
+      }
+      if (val > 3000) {
+        return '請求金額は3000万円以下の数字を入力してください。';
+      }
+      return '';
+    }
+
+    $('#q1-submit').click(function () {
+      const val = $('[name="ad_inquiry[furin_answer_attributes][claimed_amount]"]').val();
+      const validationMessage = q1Validation();
+      if (validationMessage !== '') {
+        alert(validationMessage);
+        return;
+      }
+      hideAllPage(basicDuration);
+      showPage(1, basicDuration);
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q1]"]').click(function () {
+      hideAllPage(basicDuration);
+      showPage(2, basicDuration);
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q2]"]').click(function () {
+      hideAllPage(basicDuration);
+      showPage(3, basicDuration);
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q3]"]').click(function () {
+      hideAllPage(basicDuration);
+      showPage(4, basicDuration);
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q4]"]').click(function () {
+      hideAllPage(basicDuration);
+      showPage(5, basicDuration);
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q5]"]').click(function () {
+      hideAllPage(basicDuration);
+      showPage(6, basicDuration);
+    });
+    const page6NextPage = () => {
+      if ($('[name="ad_inquiry[furin_answer_attributes][contrite_attitude]"]:checked').val() !== undefined &&
+        $('[name="ad_inquiry[furin_answer_attributes][q7]"]:checked').val() !== undefined) {
+        hideAllPage(basicDuration);
+        showPage(7, basicDuration);
+      }
+    }
+    $('[name="ad_inquiry[furin_answer_attributes][contrite_attitude]"]').click(function () {
+      page6NextPage();
+    });
+    $('[name="ad_inquiry[furin_answer_attributes][q7]"]').click(function () {
+      page6NextPage();
+    });
+
+    $('input').on('input', function() {
+      const textFieldsFilled = ['family_name_kana', 'given_name_kana', 'phone_number'].map((name) => {
+        return $(`[name="ad_inquiry[${name}]"]`).val() !== '';
+      }).reduce((acc, cur) => acc && cur, true);
+      const checkboxesChecked = ['agree1', 'agree2'].map((name) => {
+        return $(`[name="ad_inquiry[${name}]"]:checked`).val() !== undefined;
+      }).reduce((acc, cur) => acc && cur, true);
+      const otherLawFirmConsiderationChecked =
+        $('[name="ad_inquiry[furin_answer_attributes][other_law_firm_consideration]"]:checked').val() !== undefined;
+
+      $('#submit-btn').prop('disabled', !(textFieldsFilled && checkboxesChecked && otherLawFirmConsiderationChecked));
+    });
+
+    $('input').on('input', function() {
+      const q1ErrorMessage = q1Validation();
+      if (q1ErrorMessage !== '') {
+        $('#q1-submit').addClass('inactive');
+      } else {
+        $('#q1-submit').removeClass('inactive');
+      }
+    });
+
+    $('input').trigger('input');
+
+    $("#submit-btn").on('click', function(event) {
+      event.preventDefault();
+      var tel = $('[name*="phone_number"]').val();
+      if (tel === '') {
+        alert('電話番号を入力してください。');
+        return false;
+      }
+      if (tel.indexOf("-") >= 0) {
+        alert('電話番号はハイフンなしで入力してください。');
+        return false;
+      }
+      if (tel.slice(0,1) !== '0') {
+        alert('有効な電話番号を入力してください。');
+        return false;
+      }
+      if (tel.match(/0123|1234|2345|3456|4567|5678|6789|7890|0000|1111|2222|3333|4444|5555|6666|7777|8888|9999/)) {
+        alert('有効な電話番号を入力してください。');
+        return false;
+      }
+      if (tel.length !== 10 && tel.length !== 11) {
+        alert('有効な電話番号を入力してください。');
+        return false;
+      }
+
+      // 連打防止
+      $(this)
+        .prop("disabled", true)
+        .addClass("disabled")
+        .css("height", "50px")
+        .html("送信中...");
+
+      console.log('submit');
+
+      $(this).closest('form').submit();
+    });
+  });
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,8 @@
+/* ===== REDESIGN: 請求された方（f04）— 落ち着いて冷静になれるティール系 ===== */
+:root {
+  --rd-kv-bg: linear-gradient(180deg, #f1fafa 0%, #e5f4f3 100%);
+  --rd-ink: #22404a; --rd-ink-soft: #4c6670;
+  --rd-accent: #2f8f91; --rd-accent-dark: #1f6f72; --rd-marker: rgba(150, 214, 212, .75);
+  --rd-soft: #eef7f7; --rd-line: #cfe5e4; --rd-link: #1f6f72;
+  --rd-cta: #2f8f91; --rd-cta-shadow: #226d6f;
+}

@@ -1,0 +1,8 @@
+/* ===== REDESIGN: 請求したい方（f01）— あたたかく寄り添うコーラル系 ===== */
+:root {
+  --rd-kv-bg: linear-gradient(180deg, #fff6ef 0%, #fdeee4 100%);
+  --rd-ink: #4a3a35; --rd-ink-soft: #6e5a52;
+  --rd-accent: #e0866a; --rd-accent-dark: #c4613f; --rd-marker: rgba(255, 196, 160, .7);
+  --rd-soft: #fdf3ec; --rd-line: #f0d9cb; --rd-link: #c4613f;
+  --rd-cta: #e0866a; --rd-cta-shadow: #c26a4f;
+}
