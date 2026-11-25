@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家事　リード詳細分析</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:    #fcfcfb;
+    --surface-2:    #f9f9f7;
+    --surface-card: #ffffff;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+
+    --s0: #898781; /* neutral (リード合計) */
+    --s1: #2a78d6; /* blue (アシロリード) */
+    --s2: #eb6834; /* orange (ダブルリスティング) */
+    --s3: #1baf7a; /* aqua (オーガニックリード) */
+
+    --good:     #0ca30c;
+    --warning:  #fab219;
+    --critical: #d03b3b;
+
+    --lane-bg: #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1:    #1a1a19;
+      --surface-2:    #0d0d0d;
+      --surface-card: #232322;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --border:    rgba(255,255,255,0.10);
+
+      --s0: #898781;
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+
+      --lane-bg: #2c2c2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:    #1a1a19;
+    --surface-2:    #0d0d0d;
+    --surface-card: #232322;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --border:    rgba(255,255,255,0.10);
+
+    --s0: #898781;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+
+    --lane-bg: #2c2c2a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    padding-bottom: 64px;
+  }
+
+  header.top {
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.top h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; }
+  header.top p { margin: 0 0 12px; font-size: .82rem; color: var(--text-muted); }
+  .badge-demo {
+    display: inline-block; font-size: .68rem; font-weight: 700; color: var(--s1);
+    border: 1px solid var(--s1); border-radius: 20px; padding: 1px 10px; margin-left: 8px; vertical-align: middle;
+  }
+
+  .month-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .month-picker .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); }
+  .month-btn {
+    font-family: inherit; font-size: .8rem; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+  }
+  .month-btn[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+
+  .entity-sticky-bar {
+    position: sticky; top: var(--header-h, 76px); z-index: 9;
+    background: var(--surface-card); border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+  }
+  .entity-sticky-inner {
+    max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .entity-sticky-inner .mp-label { font-size: .76rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+
+  section.card {
+    background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 22px; margin-bottom: 20px;
+  }
+  section.card h2 { font-size: .98rem; font-weight: 700; margin: 0 0 4px; }
+  section.card .card-sub { font-size: .78rem; color: var(--text-muted); margin: 0 0 16px; }
+
+  .sub-head { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin: 22px 0 10px; }
+  .sub-head:first-of-type { margin-top: 0; }
+  .sub-note { font-size: .74rem; color: var(--text-muted); margin: -6px 0 12px; }
+
+  /* ---- KPI tiles ---- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 4px; }
+  .kpi-tile { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .kpi-tile .kpi-label { font-size: .76rem; color: var(--text-muted); margin-bottom: 6px; }
+  .kpi-tile .kpi-value { font-size: 1.6rem; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+  .kpi-tile .kpi-unit { font-size: .82rem; font-weight: 400; color: var(--text-secondary); margin-left: 2px; }
+  .kpi-tile.hero .kpi-value { color: var(--s1); }
+
+  /* ---- entity toggle ---- */
+  .agency-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .agency-btn {
+    font-family: inherit; font-size: .82rem; font-weight: 700; padding: 8px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .agency-btn .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .agency-btn.all-btn { border-style: dashed; }
+  .agency-btn.all-btn .swatch { border-radius: 2px; }
+  .agency-btn .cnt { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .agency-btn[aria-pressed="true"] { border-color: currentColor; border-style: solid; background: var(--surface-card); color: var(--text-primary); box-shadow: 0 0 0 1px currentColor inset; }
+
+  /* ---- roas-style mini tiles ---- */
+  .roas-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 14px 0 4px; }
+  .roas-tile { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-1); }
+  .roas-tile .roas-label { font-size: .72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .roas-tile .roas-value { font-size: 1.3rem; font-weight: 700; }
+  .roas-tile .roas-note { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+  .roas-tile .roas-rate-note { font-size: .95rem; font-weight: 700; margin-top: 4px; }
+  .roas-note-box { font-size: .74rem; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* ---- hero rate ---- */
+  .newrate-hero { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 2px 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--grid); }
+  .newrate-hero-label { font-size: .8rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+  .newrate-hero-value { font-size: 2rem; font-weight: 700; line-height: 1; white-space: nowrap; flex-shrink: 0; }
+  .newrate-hero-note { flex-basis: 100%; font-size: .72rem; color: var(--text-muted); }
+
+  /* ---- breakdown bars ---- */
+  .grp { margin-bottom: 18px; }
+  .grp:last-child { margin-bottom: 0; }
+  .grp-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .82rem; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--grid); padding-bottom: 6px; margin-bottom: 10px; }
+  .grp-head .grp-sub { font-weight: 400; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-cat { width: 130px; flex-shrink: 0; font-size: .8rem; color: var(--text-primary); font-weight: 700; }
+  .bar-lane { flex: 1; height: 20px; background: var(--lane-bg); border-radius: 4px; position: relative; }
+  .bar-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .bar-figs { width: 240px; flex-shrink: 0; text-align: right; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .bar-figs strong { color: var(--text-primary); font-weight: 700; }
+  .bar-figs-sub { display: block; font-size: .7rem; color: var(--text-muted); margin-top: 1px; }
+  .bar-figs-sub.newrate { font-size: 1rem; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* ---- rate section ---- */
+  .rate-group { margin-bottom: 16px; }
+  .rate-group:last-child { margin-bottom: 0; }
+  .rate-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rate-line:last-child { margin-bottom: 0; }
+  .rate-tag { width: 120px; flex-shrink: 0; font-size: .74rem; font-weight: 700; }
+  .rate-track { flex: 1; height: 10px; border-radius: 4px; background: var(--lane-bg); overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 0 4px 4px 0; }
+  .rate-val { width: 230px; flex-shrink: 0; text-align: right; font-size: .74rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .rate-val strong { color: var(--text-primary); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .bar-cat { width: 90px; font-size: .74rem; }
+    .bar-figs { width: 170px; }
+    .rate-tag { width: 86px; font-size: .68rem; }
+    .rate-val { width: 160px; font-size: .68rem; }
+  }
+
+  /* ---- tables ---- */
+  .table-toggle { font-family: inherit; font-size: .8rem; font-weight: 700; color: var(--s1); background: none; border: none; cursor: pointer; padding: 0; margin-top: 18px; }
+  .table-block { overflow-x: auto; margin-top: 16px; }
+  .table-block h3 { font-size: .82rem; font-weight: 700; margin: 0 0 8px; }
+  .table-block p.note { font-size: .72rem; color: var(--text-muted); margin: 6px 0 0; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  table.data-table th, table.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.data-table thead th { color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--baseline); }
+  table.data-table tbody tr.total-row td { font-weight: 700; border-top: 1px solid var(--baseline); border-bottom: none; background: var(--surface-1); }
+  table.data-table td.roas-good { color: var(--good); font-weight: 700; }
+  table.data-table td.roas-bad { color: var(--critical); font-weight: 700; }
+  table.data-table td.na { color: var(--text-muted); }
+
+  /* ---- trend chart ---- */
+  .trend-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; font-size: .78rem; color: var(--text-secondary); }
+  .trend-legend .item { display: flex; align-items: center; gap: 6px; }
+  .trend-legend .item .swatch { width: 10px; height: 10px; border-radius: 2px; }
+  .trend-chart { width: 100%; height: auto; display: block; }
+  .trend-chart text { font-size: 10px; fill: var(--text-muted); font-family: inherit; }
+  .trend-chart .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .trend-chart .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .trend-chart .series-line { fill: none; stroke-width: 2; }
+  .trend-chart .series-dot { stroke: var(--surface-card); stroke-width: 1.5; }
+
+  /* ---- jump nav ---- */
+  .jump-nav {
+    position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 15;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .jump-btn {
+    font-family: inherit; font-size: .74rem; font-weight: 700; padding: 10px 8px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-card); color: var(--text-secondary); cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10); white-space: nowrap;
+  }
+  .jump-btn:hover { background: var(--s1); color: #fff; border-color: var(--s1); }
+  @media (max-width: 860px) { .jump-nav { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="top" id="app-header">
+  <h1>家事　リード詳細分析<span class="badge-demo">実績データ・草案</span></h1>
+  <p>リードジェネレーション（WEB広告）経由の実績を、流入〜予約〜面談〜受任まで一気通貫で分析。リード施策（アシロリード・オーガニックリード・ダブルリスティング）を対象としています。</p>
+  <div class="month-picker">
+    <span class="mp-label">対象月</span>
+    <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+</header>
+
+<div class="entity-sticky-bar">
+  <div class="entity-sticky-inner">
+    <span class="mp-label">表示経路</span>
+    <div class="agency-toggle" id="entity-toggle" style="margin-bottom:0;"></div>
+  </div>
+</div>
+
+<nav class="jump-nav" id="jump-nav">
+  <button class="jump-btn" data-target="section-inflow">流入部分</button>
+  <button class="jump-btn" data-target="section-reservation">予約部分</button>
+  <button class="jump-btn" data-target="section-acceptance">受任部分</button>
+</nav>
+
+<main>
+
+  <section class="card">
+    <h2>リード合計サマリー</h2>
+    <p class="card-sub">リード経由（アシロリード＋オーガニックリード＋ダブルリスティング）合計の実績。</p>
+    <div class="kpi-row" id="kpi-row"></div>
+  </section>
+
+  <section class="card">
+    <h2>総流入件数・追客対象数の推移（経路別・全期間）</h2>
+    <p class="card-sub">対象月の選択に関わらず、2026年4月〜10月の全期間を固定で表示します。</p>
+    <div class="sub-head" style="margin-top:0;">総流入件数 推移</div>
+    <div id="trend-legend-inflow"></div>
+    <div id="trend-chart-inflow"></div>
+    <div class="sub-head">追客対象数 推移</div>
+    <div id="trend-legend-target"></div>
+    <div id="trend-chart-target"></div>
+  </section>
+
+  <section class="card" id="section-inflow">
+    <div class="sub-head" style="margin-top:0;">流入の内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
+    <div id="inflow-breakdown"></div>
+  </section>
+
+  <section class="card" id="section-reservation">
+    <div class="sub-head" style="margin-top:0;">架電・通話・予約の内訳</div>
+    <p class="sub-note">上部の経路選択ボタンで切替可能です。</p>
+    <div id="call-breakdown"></div>
+  </section>
+
+  <section class="card" id="section-acceptance">
+    <div class="sub-head" style="margin-top:0;">受任内訳</div>
+    <p class="sub-note">選択した経路の面談〜受任の実績が表示されます（経路切替は上のボタンと連動します）。</p>
+    <div id="roas-row"></div>
+    <div id="acceptance-breakdown"></div>
+    <button class="table-toggle" id="table-toggle">＋ 詳細クロス集計を表示（ファネル全体・率サマリー・契約実績）</button>
+    <div id="tables" hidden></div>
+  </section>
+
+</main>
+
+<script>
+const MONTH_DATA = {"4月": {"lead": {"総流入": 632, "追客不可": 250, "追客対象": 382, "架電数": 2918, "架電率": 763.8743, "通話": 268, "連絡不通": 114, "リード予約": 177, "広告費": 4000000, "面談実施": 178, "受任": 53, "受任期待収益": 23489623, "未受任": 119, "受任ROAS": 587.240575, "キャンセル": 6, "契約数": 62, "契約期待収益": 27836963, "契約ROAS": 695.924075, "面談ポテ": 0, "追客対象対通話率": 0.701571, "通話対予約率": 0.660448, "面談実施対受任率": 0.30814, "追客対象対予約率": 0.463351, "追客対象対受任率": 0.138743}, "ashiro": {"総流入": 459, "追客不可": 178, "追客対象": 281, "架電数": 2351, "架電率": 836.6548, "通話": 196, "連絡不通": 85, "リード予約": 135, "広告費": 3500000, "面談実施": 135, "受任": 34, "受任期待収益": 15072474, "未受任": 98, "受任ROAS": 430.642114, "キャンセル": 3, "契約数": 30, "契約期待収益": 13262165, "契約ROAS": 378.919, "面談ポテ": 0, "追客対象対通話率": 0.697509, "通話対予約率": 0.688776, "面談実施対受任率": 0.257576, "追客対象対予約率": 0.480427, "追客対象対受任率": 0.120996}, "organic": {"総流入": 108, "追客不可": 48, "追客対象": 60, "架電数": 324, "架電率": 540.0, "通話": 46, "連絡不通": 14, "リード予約": 25, "広告費": 0, "面談実施": 24, "受任": 9, "受任期待収益": 4012589, "未受任": 15, "受任ROAS": null, "キャンセル": 0, "契約数": 24, "契約期待収益": 10570944, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.766667, "通話対予約率": 0.543478, "面談実施対受任率": 0.375, "追客対象対予約率": 0.416667, "追客対象対受任率": 0.15}, "double": {"総流入": 65, "追客不可": 24, "追客対象": 41, "架電数": 243, "架電率": 592.6829, "通話": 26, "連絡不通": 15, "リード予約": 17, "広告費": 500000, "面談実施": 19, "受任": 10, "受任期待収益": 4404560, "未受任": 6, "受任ROAS": 880.912, "キャンセル": 3, "契約数": 8, "契約期待収益": 4003854, "契約ROAS": 800.7708, "面談ポテ": 0, "追客対象対通話率": 0.634146, "通話対予約率": 0.653846, "面談実施対受任率": 0.625, "追客対象対予約率": 0.414634, "追客対象対受任率": 0.243902}}, "5月": {"lead": {"総流入": 668, "追客不可": 242, "追客対象": 426, "架電数": 3051, "架電率": 716.1972, "通話": 288, "連絡不通": 138, "リード予約": 166, "広告費": 3500000, "面談実施": 158, "受任": 61, "受任期待収益": 27348022, "未受任": 97, "受任ROAS": 781.372057, "キャンセル": 0, "契約数": 53, "契約期待収益": 23344168, "契約ROAS": 666.976229, "面談ポテ": 0, "追客対象対通話率": 0.676056, "通話対予約率": 0.576389, "面談実施対受任率": 0.386076, "追客対象対予約率": 0.389671, "追客対象対受任率": 0.143192}, "ashiro": {"総流入": 467, "追客不可": 174, "追客対象": 293, "架電数": 2392, "架電率": 816.3823, "通話": 191, "連絡不通": 102, "リード予約": 102, "広告費": 3000000, "面談実施": 102, "受任": 36, "受任期待収益": 16336622, "未受任": 66, "受任ROAS": 544.554067, "キャンセル": 0, "契約数": 25, "契約期待収益": 11011400, "契約ROAS": 367.046667, "面談ポテ": 0, "追客対象対通話率": 0.651877, "通話対予約率": 0.534031, "面談実施対受任率": 0.352941, "追客対象対予約率": 0.348123, "追客対象対受任率": 0.122867}, "organic": {"総流入": 144, "追客不可": 49, "追客対象": 95, "架電数": 382, "架電率": 402.1053, "通話": 73, "連絡不通": 22, "リード予約": 51, "広告費": 0, "面談実施": 50, "受任": 22, "受任期待収益": 9690032, "未受任": 28, "受任ROAS": null, "キャンセル": 0, "契約数": 21, "契約期待収益": 9249576, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.768421, "通話対予約率": 0.69863, "面談実施対受任率": 0.44, "追客対象対予約率": 0.536842, "追客対象対受任率": 0.231579}, "double": {"総流入": 57, "追客不可": 19, "追客対象": 38, "架電数": 277, "架電率": 728.9474, "通話": 24, "連絡不通": 14, "リード予約": 13, "広告費": 500000, "面談実施": 6, "受任": 3, "受任期待収益": 1321368, "未受任": 3, "受任ROAS": 264.2736, "キャンセル": 0, "契約数": 7, "契約期待収益": 3083192, "契約ROAS": 616.6384, "面談ポテ": 0, "追客対象対通話率": 0.631579, "通話対予約率": 0.541667, "面談実施対受任率": 0.5, "追客対象対予約率": 0.342105, "追客対象対受任率": 0.078947}}, "6月": {"lead": {"総流入": 558, "追客不可": 193, "追客対象": 365, "架電数": 3034, "架電率": 831.2329, "通話": 296, "連絡不通": 69, "リード予約": 213, "広告費": 4000000, "面談実施": 213, "受任": 68, "受任期待収益": 30479699, "未受任": 134, "受任ROAS": 761.992475, "キャンセル": 11, "契約数": 62, "契約期待収益": 27836963, "契約ROAS": 695.924075, "面談ポテ": 0, "追客対象対通話率": 0.810959, "通話対予約率": 0.719595, "面談実施対受任率": 0.336634, "追客対象対予約率": 0.583562, "追客対象対受任率": 0.186301}, "ashiro": {"総流入": 352, "追客不可": 121, "追客対象": 231, "架電数": 2433, "架電率": 1053.2468, "通話": 186, "連絡不通": 45, "リード予約": 131, "広告費": 3500000, "面談実施": 132, "受任": 31, "受任期待収益": 13702621, "未受任": 98, "受任ROAS": 391.503457, "キャンセル": 3, "契約数": 30, "契約期待収益": 13262165, "契約ROAS": 378.919, "面談ポテ": 0, "追客対象対通話率": 0.805195, "通話対予約率": 0.704301, "面談実施対受任率": 0.24031, "追客対象対予約率": 0.5671, "追客対象対受任率": 0.134199}, "organic": {"総流入": 146, "追客不可": 48, "追客対象": 98, "架電数": 335, "架電率": 341.8367, "通話": 86, "連絡不通": 12, "リード予約": 65, "広告費": 0, "面談実施": 64, "受任": 29, "受任期待収益": 12773224, "未受任": 30, "受任ROAS": null, "キャンセル": 5, "契約数": 24, "契約期待収益": 10570944, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.877551, "通話対予約率": 0.755814, "面談実施対受任率": 0.491525, "追客対象対予約率": 0.663265, "追客対象対受任率": 0.295918}, "double": {"総流入": 60, "追客不可": 24, "追客対象": 36, "架電数": 266, "架電率": 738.8889, "通話": 24, "連絡不通": 12, "リード予約": 17, "広告費": 500000, "面談実施": 17, "受任": 8, "受任期待収益": 4003854, "未受任": 6, "受任ROAS": 800.7708, "キャンセル": 3, "契約数": 8, "契約期待収益": 4003854, "契約ROAS": 800.7708, "面談ポテ": 0, "追客対象対通話率": 0.666667, "通話対予約率": 0.708333, "面談実施対受任率": 0.571429, "追客対象対予約率": 0.472222, "追客対象対受任率": 0.222222}}, "7月": {"lead": {"総流入": 459, "追客不可": 170, "追客対象": 289, "架電数": 2543, "架電率": 879.9308, "通話": 225, "連絡不通": 64, "リード予約": 161, "広告費": 3500000, "面談実施": 158, "受任": 61, "受任期待収益": 26867816, "未受任": 97, "受任ROAS": 767.651886, "キャンセル": 0, "契約数": 53, "契約期待収益": 23344168, "契約ROAS": 666.976229, "面談ポテ": 0, "追客対象対通話率": 0.778547, "通話対予約率": 0.715556, "面談実施対受任率": 0.386076, "追客対象対予約率": 0.557093, "追客対象対受任率": 0.211073}, "ashiro": {"総流入": 274, "追客不可": 106, "追客対象": 168, "架電数": 1964, "架電率": 1169.0476, "通話": 134, "連絡不通": 34, "リード予約": 94, "広告費": 3000000, "面談実施": 91, "受任": 25, "受任期待収益": 11011400, "未受任": 66, "受任ROAS": 367.046667, "キャンセル": 0, "契約数": 25, "契約期待収益": 11011400, "契約ROAS": 367.046667, "面談ポテ": 0, "追客対象対通話率": 0.797619, "通話対予約率": 0.701493, "面談実施対受任率": 0.274725, "追客対象対予約率": 0.559524, "追客対象対受任率": 0.14881}, "organic": {"総流入": 136, "追客不可": 50, "追客対象": 86, "架電数": 351, "架電率": 408.1395, "通話": 72, "連絡不通": 14, "リード予約": 54, "広告費": 0, "面談実施": 55, "受任": 27, "受任期待収益": 11892312, "未受任": 28, "受任ROAS": null, "キャンセル": 0, "契約数": 21, "契約期待収益": 9249576, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.837209, "通話対予約率": 0.75, "面談実施対受任率": 0.490909, "追客対象対予約率": 0.627907, "追客対象対受任率": 0.313953}, "double": {"総流入": 49, "追客不可": 14, "追客対象": 35, "架電数": 228, "架電率": 651.4286, "通話": 19, "連絡不通": 16, "リード予約": 13, "広告費": 500000, "面談実施": 12, "受任": 9, "受任期待収益": 3964104, "未受任": 3, "受任ROAS": 792.8208, "キャンセル": 0, "契約数": 7, "契約期待収益": 3083192, "契約ROAS": 616.6384, "面談ポテ": 0, "追客対象対通話率": 0.542857, "通話対予約率": 0.684211, "面談実施対受任率": 0.75, "追客対象対予約率": 0.371429, "追客対象対受任率": 0.257143}}, "8月": {"lead": {"総流入": 612, "追客不可": 224, "追客対象": 388, "架電数": 3153, "架電率": 812.6289, "通話": 262, "連絡不通": 126, "リード予約": 170, "広告費": 3500000, "面談実施": 174, "受任": 62, "受任期待収益": 27788478, "未受任": 102, "受任ROAS": 793.956514, "キャンセル": 10, "契約数": 55, "契約期待収益": 25907977, "契約ROAS": 740.227914, "面談ポテ": 0, "追客対象対通話率": 0.675258, "通話対予約率": 0.648855, "面談実施対受任率": 0.378049, "追客対象対予約率": 0.438144, "追客対象対受任率": 0.159794}, "ashiro": {"総流入": 423, "追客不可": 162, "追客対象": 261, "架電数": 2419, "架電率": 926.8199, "通話": 165, "連絡不通": 96, "リード予約": 94, "広告費": 3000000, "面談実施": 97, "受任": 31, "受任期待収益": 14134342, "未受任": 61, "受任ROAS": 471.144733, "キャンセル": 5, "契約数": 29, "契約期待収益": 14502485, "契約ROAS": 483.416167, "面談ポテ": 0, "追客対象対通話率": 0.632184, "通話対予約率": 0.569697, "面談実施対受任率": 0.336957, "追客対象対予約率": 0.360153, "追客対象対受任率": 0.118774}, "organic": {"総流入": 138, "追客不可": 48, "追客対象": 90, "架電数": 476, "架電率": 528.8889, "通話": 72, "連絡不通": 18, "リード予約": 62, "広告費": 0, "面談実施": 62, "受任": 25, "受任期待収益": 11011400, "未受任": 34, "受任ROAS": null, "キャンセル": 3, "契約数": 21, "契約期待収益": 9249576, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.8, "通話対予約率": 0.861111, "面談実施対受任率": 0.423729, "追客対象対予約率": 0.688889, "追客対象対受任率": 0.277778}, "double": {"総流入": 51, "追客不可": 14, "追客対象": 37, "架電数": 258, "架電率": 697.2973, "通話": 25, "連絡不通": 12, "リード予約": 14, "広告費": 500000, "面談実施": 15, "受任": 6, "受任期待収益": 2642736, "未受任": 7, "受任ROAS": 528.5472, "キャンセル": 2, "契約数": 5, "契約期待収益": 2155916, "契約ROAS": 431.1832, "面談ポテ": 0, "追客対象対通話率": 0.675676, "通話対予約率": 0.56, "面談実施対受任率": 0.461538, "追客対象対予約率": 0.378378, "追客対象対受任率": 0.162162}}, "9月": {"lead": {"総流入": 659, "追客不可": 257, "追客対象": 402, "架電数": 3745, "架電率": 931.592, "通話": 274, "連絡不通": 128, "リード予約": 172, "広告費": 3500000, "面談実施": 172, "受任": 70, "受任期待収益": 31409096, "未受任": 98, "受任ROAS": 897.402743, "キャンセル": 4, "契約数": 61, "契約期待収益": 27396507, "契約ROAS": 782.757343, "面談ポテ": 0, "追客対象対通話率": 0.681592, "通話対予約率": 0.627737, "面談実施対受任率": 0.416667, "追客対象対予約率": 0.427861, "追客対象対受任率": 0.174129}, "ashiro": {"総流入": 444, "追客不可": 168, "追客対象": 276, "架電数": 2961, "架電率": 1072.8261, "通話": 177, "連絡不通": 99, "リード予約": 98, "広告費": 3000000, "面談実施": 98, "受任": 33, "受任期待収益": 15063739, "未受任": 63, "受任ROAS": 502.124633, "キャンセル": 2, "契約数": 30, "契約期待収益": 13742371, "契約ROAS": 458.079033, "面談ポテ": 0, "追客対象対通話率": 0.641304, "通話対予約率": 0.553672, "面談実施対受任率": 0.34375, "追客対象対予約率": 0.355072, "追客対象対受任率": 0.119565}, "organic": {"総流入": 153, "追客不可": 65, "追客対象": 88, "架電数": 489, "架電率": 555.6818, "通話": 72, "連絡不通": 16, "リード予約": 59, "広告費": 0, "面談実施": 59, "受任": 28, "受任期待収益": 12332768, "未受任": 30, "受任ROAS": null, "キャンセル": 1, "契約数": 26, "契約期待収益": 11451856, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.818182, "通話対予約率": 0.819444, "面談実施対受任率": 0.482759, "追客対象対予約率": 0.670455, "追客対象対受任率": 0.318182}, "double": {"総流入": 62, "追客不可": 24, "追客対象": 38, "架電数": 295, "架電率": 776.3158, "通話": 25, "連絡不通": 13, "リード予約": 15, "広告費": 500000, "面談実施": 15, "受任": 9, "受任期待収益": 4012589, "未受任": 5, "受任ROAS": 802.5178, "キャンセル": 1, "契約数": 5, "契約期待収益": 2202280, "契約ROAS": 440.456, "面談ポテ": 0, "追客対象対通話率": 0.657895, "通話対予約率": 0.6, "面談実施対受任率": 0.642857, "追客対象対予約率": 0.394737, "追客対象対受任率": 0.236842}}, "10月": {"lead": {"総流入": 652, "追客不可": 253, "追客対象": 399, "架電数": 3985, "架電率": 998.7469, "通話": 265, "連絡不通": 134, "リード予約": 160, "広告費": 3500000, "面談実施": 160, "受任": 55, "受任期待収益": 24850741, "未受任": 96, "受任ROAS": 710.021171, "キャンセル": 9, "契約数": 56, "契約期待収益": 24810991, "契約ROAS": 708.885457, "面談ポテ": 0, "追客対象対通話率": 0.66416, "通話対予約率": 0.603774, "面談実施対受任率": 0.364238, "追客対象対予約率": 0.401003, "追客対象対受任率": 0.137845}, "ashiro": {"総流入": 428, "追客不可": 162, "追客対象": 266, "架電数": 3157, "架電率": 1186.8421, "通話": 166, "連絡不通": 100, "リード予約": 91, "広告費": 3000000, "面談実施": 91, "受任": 30, "受任期待収益": 13790856, "未受任": 57, "受任ROAS": 459.6952, "キャンセル": 4, "契約数": 28, "契約期待収益": 12381253, "契約ROAS": 412.708433, "面談ポテ": 0, "追客対象対通話率": 0.62406, "通話対予約率": 0.548193, "面談実施対受任率": 0.344828, "追客対象対予約率": 0.342105, "追客対象対受任率": 0.112782}, "organic": {"総流入": 163, "追客不可": 65, "追客対象": 98, "架電数": 525, "架電率": 535.7143, "通話": 79, "連絡不通": 19, "リード予約": 59, "広告費": 0, "面談実施": 59, "受任": 21, "受任期待収益": 9298061, "未受任": 35, "受任ROAS": null, "キャンセル": 3, "契約数": 22, "契約期待収益": 9738517, "契約ROAS": null, "面談ポテ": 0, "追客対象対通話率": 0.806122, "通話対予約率": 0.746835, "面談実施対受任率": 0.375, "追客対象対予約率": 0.602041, "追客対象対受任率": 0.214286}, "double": {"総流入": 61, "追客不可": 26, "追客対象": 35, "架電数": 303, "架電率": 865.7143, "通話": 20, "連絡不通": 15, "リード予約": 10, "広告費": 500000, "面談実施": 10, "受任": 4, "受任期待収益": 1761824, "未受任": 4, "受任ROAS": 352.3648, "キャンセル": 2, "契約数": 6, "契約期待収益": 2691221, "契約ROAS": 538.2442, "面談ポテ": 0, "追客対象対通話率": 0.571429, "通話対予約率": 0.5, "面談実施対受任率": 0.5, "追客対象対予約率": 0.285714, "追客対象対受任率": 0.114286}}};
+</script>
+<script>
+const ENTITIES = [
+  { key: 'lead', label: 'リード合計', color: 'var(--s0)', dashed: true },
+  { key: 'ashiro', label: 'アシロリード', color: 'var(--s1)', dashed: false },
+  { key: 'organic', label: 'オーガニックリード', color: 'var(--s3)', dashed: false },
+  { key: 'double', label: 'ダブルリスティング', color: 'var(--s2)', dashed: false },
+];
+
+const MONTHS = [
+  { key: '4月', label: '2026年4月' },
+  { key: '5月', label: '2026年5月' },
+  { key: '6月', label: '2026年6月' },
+  { key: '7月', label: '2026年7月' },
+  { key: '8月', label: '2026年8月' },
+  { key: '9月', label: '2026年9月' },
+  { key: '10月', label: '2026年10月' },
+];
+let selectedMonthIndex = MONTHS.length - 1;
+let activeEntity = 'lead';
+
+const fmt = n => (n === null || n === undefined) ? '—' : Math.round(n).toLocaleString('ja-JP');
+const pct = n => (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(1) + '%';
+const fmtYen = n => (n === null || n === undefined) ? '—' : fmt(n) + '円';
+
+function currentMonthData() { return MONTH_DATA[MONTHS[selectedMonthIndex].key]; }
+function entVal(m, field) { const e = m[activeEntity]; return e ? e[field] : null; }
+
+function renderMonthButtons() {
+  const el = document.getElementById('month-buttons');
+  el.innerHTML = '';
+  MONTHS.forEach((mo, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'month-btn';
+    btn.textContent = mo.label;
+    btn.setAttribute('aria-pressed', i === selectedMonthIndex ? 'true' : 'false');
+    btn.addEventListener('click', () => { selectedMonthIndex = i; renderAll(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderKpis() {
+  const m = currentMonthData();
+  const lead = m.lead;
+  const roas = lead.広告費 ? (lead.受任期待収益 / lead.広告費) * 100 : null;
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-tile hero">
+      <div class="kpi-label">リード合計実績（受任数）</div>
+      <div class="kpi-value">${fmt(lead.受任)}<span class="kpi-unit">件</span></div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計期待収益</div>
+      <div class="kpi-value">${fmtYen(lead.受任期待収益)}</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-label">リード合計ROAS</div>
+      <div class="kpi-value">${pct(roas)}</div>
+    </div>
+  `;
+}
+
+function renderEntityToggle() {
+  const m = currentMonthData();
+  const el = document.getElementById('entity-toggle');
+  el.innerHTML = '';
+  ENTITIES.forEach(ent => {
+    const btn = document.createElement('button');
+    btn.className = 'agency-btn' + (ent.dashed ? ' all-btn' : '');
+    btn.style.color = ent.color;
+    btn.setAttribute('aria-pressed', ent.key === activeEntity ? 'true' : 'false');
+    const cnt = m[ent.key] ? m[ent.key].受任 : 0;
+    btn.innerHTML = `<span class="swatch" style="background:${ent.color}"></span>${ent.label}<span class="cnt">${fmt(cnt)}件</span>`;
+    btn.addEventListener('click', () => {
+      activeEntity = ent.key;
+      renderEntityToggle();
+      renderInflowBreakdown();
+      renderCallBreakdown();
+      renderRoas();
+      renderAcceptanceBreakdown();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderInflowBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const total = entVal(m, '総流入') || 0;
+  const futsuka = entVal(m, '追客不可') || 0;
+  const target = entVal(m, '追客対象') || 0;
+  const targetRate = total ? (target / total) * 100 : null;
+  const maxVal = total || 1;
+
+  const rows = [
+    { label: '総流入', value: total },
+    { label: '追客不可', value: futsuka },
+    { label: '追客対象', value: target },
+  ];
+
+  document.getElementById('inflow-breakdown').innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>総流入件数</span><span class="grp-sub">計 ${fmt(total)}件</span></div>
+      <div class="newrate-hero">
+        <span class="newrate-hero-label">追客対象率（対総流入）</span>
+        <span class="newrate-hero-value" style="color:${ent.color}">${pct(targetRate)}</span>
+        <span class="newrate-hero-note">追客対象率＝追客対象数 ÷ 総流入件数。重複・追客不可を除いた対応可能な新規問い合わせの比率です。</span>
+      </div>
+      ${rows.map(r => {
+        const w = maxVal ? Math.max(0, r.value) / maxVal * 100 : 0;
+        return `
+          <div class="bar-row">
+            <div class="bar-cat">${r.label}</div>
+            <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+            <div class="bar-figs"><strong>${fmt(r.value)}</strong>件</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderCallBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const target = entVal(m, '追客対象') || 0;
+  const calls = entVal(m, '架電数') || 0;
+  const talks = entVal(m, '通話') || 0;
+  const reserve = entVal(m, 'リード予約') || 0;
+  const callRate = entVal(m, '架電率');
+  const talkRate = calls ? (talks / calls) * 100 : null;
+  const reserveRate = entVal(m, '追客対象対予約率');
+  const reserveRatePct = typeof reserveRate === 'number' ? reserveRate * 100 : null;
+
+  document.getElementById('call-breakdown').innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>架電数・通話数・予約数</span></div>
+      <div class="roas-row">
+        <div class="roas-tile">
+          <div class="roas-label">架電数</div>
+          <div class="roas-value">${fmt(calls)}件</div>
+          <div class="roas-rate-note" style="color:${ent.color}">架電率 ${pct(callRate)}</div>
+          <div class="roas-note">架電率＝架電数 ÷ 追客対象数</div>
+        </div>
+        <div class="roas-tile">
+          <div class="roas-label">通話数</div>
+          <div class="roas-value">${fmt(talks)}件</div>
+          <div class="roas-rate-note" style="color:${ent.color}">通話率 ${pct(talkRate)}</div>
+          <div class="roas-note">通話率＝通話数 ÷ 架電数</div>
+        </div>
+        <div class="roas-tile">
+          <div class="roas-label">リード予約数</div>
+          <div class="roas-value">${fmt(reserve)}件</div>
+          <div class="roas-rate-note" style="color:${ent.color}">予約率 ${pct(reserveRatePct)}</div>
+          <div class="roas-note">予約率＝予約数 ÷ 追客対象数</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRoas() {
+  const m = currentMonthData();
+  const el = document.getElementById('roas-row');
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const adSpend = entVal(m, '広告費');
+  const revenue = entVal(m, '受任期待収益');
+
+  if (!adSpend) {
+    el.innerHTML = `<p class="roas-note-box">${ent.label}は広告費をかけていない流入経路のため、広告費・ROASの算出対象外です（期待収益：<strong>${fmtYen(revenue)}</strong>）。</p>`;
+    return;
+  }
+  const roas = (revenue / adSpend) * 100;
+  const roasClass = roas >= 250 ? 'style="color:var(--good)"' : (roas < 150 ? 'style="color:var(--critical)"' : '');
+  el.innerHTML = `
+    <div class="roas-row">
+      <div class="roas-tile">
+        <div class="roas-label">広告費</div>
+        <div class="roas-value">${fmtYen(adSpend)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">期待収益</div>
+        <div class="roas-value">${fmtYen(revenue)}</div>
+      </div>
+      <div class="roas-tile">
+        <div class="roas-label">ROAS（期待収益 ÷ 広告費）</div>
+        <div class="roas-value" ${roasClass}>${pct(roas)}</div>
+        <div class="roas-note">目安：250%以上=良好／150%未満=要注意</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAcceptanceBreakdown() {
+  const m = currentMonthData();
+  const ent = ENTITIES.find(e => e.key === activeEntity);
+  const meetings = entVal(m, '面談実施') || 0;
+  const accepted = entVal(m, '受任') || 0;
+  const notAccepted = entVal(m, '未受任') || 0;
+  const cancel = entVal(m, 'キャンセル') || 0;
+  const acceptRateRaw = entVal(m, '面談実施対受任率');
+  const acceptRate = typeof acceptRateRaw === 'number' ? acceptRateRaw * 100 : null;
+  const maxVal = meetings || 1;
+
+  const rows = [
+    { label: '面談実施', value: meetings },
+    { label: '受任', value: accepted },
+    { label: '未受任', value: notAccepted },
+    { label: 'キャンセル', value: cancel },
+  ];
+
+  document.getElementById('acceptance-breakdown').innerHTML = `
+    <div class="grp">
+      <div class="grp-head"><span>面談〜受任</span><span class="grp-sub">計 ${fmt(meetings)}件</span></div>
+      <div class="newrate-hero">
+        <span class="newrate-hero-label">受任率（対面談実施）</span>
+        <span class="newrate-hero-value" style="color:${ent.color}">${pct(acceptRate)}</span>
+        <span class="newrate-hero-note">受任率＝受任数 ÷ 面談実施数。いただいたデータの実績値から算出しています。</span>
+      </div>
+      ${rows.map(r => {
+        const w = maxVal ? Math.max(0, r.value) / maxVal * 100 : 0;
+        return `
+          <div class="bar-row">
+            <div class="bar-cat">${r.label}</div>
+            <div class="bar-lane"><div class="bar-fill" style="width:${w}%;background:${ent.color}"></div></div>
+            <div class="bar-figs"><strong>${fmt(r.value)}</strong>件</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderTrendChart(chartElId, legendElId, field) {
+  const W = 1000, H = 280;
+  const padL = 56, padR = 40, padT = 16, padB = 28;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const series = ENTITIES.map(ent => ({
+    ent,
+    values: MONTHS.map(mo => (MONTH_DATA[mo.key][ent.key] ? MONTH_DATA[mo.key][ent.key][field] : 0) || 0),
+  }));
+  const maxVal = Math.max(...series.flatMap(s => s.values), 1);
+  const niceMax = Math.ceil(maxVal / 100) * 100 || 1;
+
+  const n = MONTHS.length;
+  const xAt = i => padL + (n > 1 ? (i / (n - 1)) * plotW : plotW / 2);
+  const yAt = v => padT + plotH - (niceMax ? (Math.max(0, v) / niceMax) * plotH : 0);
+
+  const gridCount = 4;
+  const gridLines = Array.from({ length: gridCount + 1 }, (_, i) => {
+    const v = niceMax * i / gridCount;
+    const y = yAt(v);
+    return `<line class="grid-line" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"></line>
+            <text x="${padL - 8}" y="${y + 3}" text-anchor="end">${fmt(v)}</text>`;
+  }).join('');
+
+  const xLabels = MONTHS.map((mo, i) => `<text x="${xAt(i)}" y="${H - padB + 16}" text-anchor="middle">${mo.key}</text>`).join('');
+
+  const lines = series.map(s => {
+    const pts = s.values.map((v, i) => `${xAt(i)},${yAt(v)}`).join(' ');
+    const dots = s.values.map((v, i) => `<circle class="series-dot" cx="${xAt(i)}" cy="${yAt(v)}" r="3.5" fill="${s.ent.color}"><title>${MONTHS[i].label}　${s.ent.label}：${fmt(v)}件</title></circle>`).join('');
+    return `<polyline class="series-line" points="${pts}" stroke="${s.ent.color}"></polyline>${dots}`;
+  }).join('');
+
+  document.getElementById(chartElId).innerHTML = `
+    <svg class="trend-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">
+      <line class="axis-line" x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}"></line>
+      ${gridLines}
+      ${xLabels}
+      ${lines}
+    </svg>
+  `;
+  document.getElementById(legendElId).innerHTML = `
+    <div class="trend-legend">
+      ${ENTITIES.map(ent => `<div class="item"><span class="swatch" style="background:${ent.color}"></span>${ent.label}</div>`).join('')}
+    </div>
+  `;
+}
+
+function renderTrendCharts() {
+  renderTrendChart('trend-chart-inflow', 'trend-legend-inflow', '総流入');
+  renderTrendChart('trend-chart-target', 'trend-legend-target', '追客対象');
+}
+
+function renderTables() {
+  const m = currentMonthData();
+  const el = document.getElementById('tables');
+  const cols = ENTITIES;
+  const headCols = cols.map(c => `<th>${c.label}</th>`).join('');
+
+  const funnelRows = [
+    ['総流入', v => fmt(v.総流入)],
+    ['追客不可', v => fmt(v.追客不可)],
+    ['追客対象', v => fmt(v.追客対象)],
+    ['架電数', v => fmt(v.架電数)],
+    ['架電率', v => pct(v.架電率)],
+    ['通話', v => fmt(v.通話)],
+    ['連絡不通', v => fmt(v.連絡不通)],
+    ['リード予約', v => fmt(v.リード予約)],
+    ['面談実施', v => fmt(v.面談実施)],
+    ['受任', v => fmt(v.受任)],
+    ['未受任', v => fmt(v.未受任)],
+    ['キャンセル', v => fmt(v.キャンセル)],
+    ['広告費', v => fmtYen(v.広告費)],
+    ['受任期待収益', v => fmtYen(v.受任期待収益)],
+    ['受任ROAS', v => pct(v.受任ROAS)],
+  ];
+  const funnelBody = funnelRows.map(([label, f]) => {
+    const cells = cols.map(c => `<td>${m[c.key] ? f(m[c.key]) : '<span class="na">—</span>'}</td>`).join('');
+    return `<tr><td>${label}</td>${cells}</tr>`;
+  }).join('');
+
+  const rateRows = [
+    ['追客対象 対 通話 率', v => pct(v.追客対象対通話率 * 100)],
+    ['通話 対 予約 率', v => pct(v.通話対予約率 * 100)],
+    ['面談実施 対 受任 率', v => pct(v.面談実施対受任率 * 100)],
+    ['追客対象 対 予約 率', v => pct(v.追客対象対予約率 * 100)],
+    ['追客対象 対 受任 率', v => pct(v.追客対象対受任率 * 100)],
+  ];
+  const rateBody = rateRows.map(([label, f]) => {
+    const cells = cols.map(c => `<td>${m[c.key] ? f(m[c.key]) : '<span class="na">—</span>'}</td>`).join('');
+    return `<tr><td>${label}</td>${cells}</tr>`;
+  }).join('');
+
+  const contractRows = [
+    ['契約数', v => fmt(v.契約数)],
+    ['契約期待収益', v => fmtYen(v.契約期待収益)],
+    ['契約ROAS', v => pct(v.契約ROAS)],
+  ];
+  const contractBody = contractRows.map(([label, f]) => {
+    const cells = cols.map(c => `<td>${m[c.key] ? f(m[c.key]) : '<span class="na">—</span>'}</td>`).join('');
+    return `<tr><td>${label}</td>${cells}</tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="table-block">
+      <h3>ファネル実績 クロス集計（${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>項目</th>${headCols}</tr></thead>
+        <tbody>${funnelBody}</tbody>
+      </table>
+      <p class="note">数値はご提供データの実績値をそのまま使用しています。</p>
+    </div>
+    <div class="table-block">
+      <h3>率サマリー（${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>項目</th>${headCols}</tr></thead>
+        <tbody>${rateBody}</tbody>
+      </table>
+    </div>
+    <div class="table-block">
+      <h3>契約実績（参考・${MONTHS[selectedMonthIndex].label}）</h3>
+      <table class="data-table">
+        <thead><tr><th>項目</th>${headCols}</tr></thead>
+        <tbody>${contractBody}</tbody>
+      </table>
+      <p class="note">※契約数は受任後に正式契約に至った件数で、受任数とは別集計です。契約ROAS＝契約期待収益 ÷ 広告費。</p>
+    </div>
+  `;
+}
+
+function renderAll() {
+  renderMonthButtons();
+  renderKpis();
+  renderEntityToggle();
+  renderInflowBreakdown();
+  renderCallBreakdown();
+  renderRoas();
+  renderAcceptanceBreakdown();
+  renderTables();
+  updateHeaderH();
+}
+
+document.getElementById('table-toggle').addEventListener('click', function () {
+  const t = document.getElementById('tables');
+  t.hidden = !t.hidden;
+  this.textContent = (t.hidden ? '＋ ' : '－ ') + '詳細クロス集計を表示（ファネル全体・率サマリー・契約実績）';
+});
+
+function updateHeaderH() {
+  const h = document.getElementById('app-header');
+  if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+}
+window.addEventListener('resize', updateHeaderH);
+
+function scrollToSection(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  const header = document.getElementById('app-header');
+  const entityBar = document.querySelector('.entity-sticky-bar');
+  const offset = (header ? header.offsetHeight : 0) + (entityBar ? entityBar.offsetHeight : 0) + 12;
+  const top = window.scrollY + target.getBoundingClientRect().top - offset;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.jump-btn').forEach(btn => {
+  btn.addEventListener('click', () => scrollToSection(btn.dataset.target));
+});
+
+renderAll();
+renderTrendCharts();
+</script>
+
+</body>
+</html>
