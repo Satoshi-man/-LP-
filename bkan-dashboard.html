@@ -106,6 +106,9 @@
     border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer;
   }
   .month-btn[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+  .month-btn--note { border-style: dashed; }
+  .month-btn--note[aria-pressed="true"] { background: var(--warning); border-color: var(--warning); color: #fff; }
+  .period-note { font-size: .78rem; color: var(--warning); font-weight: 700; margin: 8px 0 0; }
 
   .entity-sticky-bar {
     position: sticky; top: var(--header-h, 76px); z-index: 9;
@@ -235,11 +238,12 @@
 
 <header class="top" id="app-header">
   <h1>B型肝炎　リードジェネレーション実績サマリー<span class="badge-demo">実績データ・草案</span></h1>
-  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜10月度）。</p>
+  <p>症状別・流入経路別の受任実績を分析。件数・広告費・期待収益・面談実施数・受任率はご提供いただいたデータに基づく実績値です（2026年4月度〜10月度確定実績、11月度は24日時点速報値・着地予測）。</p>
   <div class="month-picker">
     <span class="mp-label">対象月</span>
     <div id="month-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
+  <p class="period-note" id="period-note" hidden></p>
 </header>
 
 <div class="entity-sticky-bar">
@@ -306,8 +310,15 @@ const MONTHS = [
   { key: '2026-08', label: '2026年8月' },
   { key: '2026-09', label: '2026年9月' },
   { key: '2026-10', label: '2026年10月' },
+  { key: '2026-11', label: '2026年11月（24日時点）', note: true,
+    noteText: '※2026年11月度は、24日時点までの速報値です（月末までの確定実績ではありません）。' },
+  { key: '2026-11f', label: '2026年11月（着地予測）', note: true,
+    noteText: '※2026年11月（着地予測）は、24日時点の実績 ÷ 経過日数（24日）× 当月日数（30日）で算出した比例着地予測です（確定実績ではありません）。' },
 ];
-let selectedMonthIndex = MONTHS.length - 1;
+let selectedMonthIndex = (() => {
+  for (let i = MONTHS.length - 1; i >= 0; i--) { if (!MONTHS[i].note) return i; }
+  return MONTHS.length - 1;
+})(); // default to latest confirmed actual month
 
 const MONTH_DATA = {
   '2026-04': {
@@ -520,6 +531,66 @@ const MONTH_DATA = {
     adSpend: { all: 134000000, proper: 74000000, lead: 60000000, ashiro: 20000000, self: 40000000, organic: 0 },
     revenue: { all: 502930797, proper: 324921598, lead: 178009199, ashiro: 48580546, self: 106483883, organic: 22944770 },
   },
+  '2026-11': {
+    items: {
+      shibou: { all: 77, proper: 35, lead: 42, ashiro: 4, self: 36, organic: 2 },
+      shibou_j: { all: 55, proper: 30, lead: 25, ashiro: 4, self: 21, organic: 0 },
+      kangan: { all: 28, proper: 18, lead: 10, ashiro: 2, self: 6, organic: 2 },
+      kangan_j: { all: 8, proper: 5, lead: 3, ashiro: 0, self: 3, organic: 0 },
+      kankouhen: { all: 23, proper: 14, lead: 9, ashiro: 3, self: 6, organic: 0 },
+      kankouhen_j_ari: { all: 3, proper: 1, lead: 2, ashiro: 1, self: 0, organic: 1 },
+      kankouhen_j_nashi: { all: 6, proper: 5, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      mansei: { all: 44, proper: 26, lead: 18, ashiro: 7, self: 8, organic: 3 },
+      mansei_j_ari: { all: 38, proper: 27, lead: 11, ashiro: 5, self: 5, organic: 1 },
+      mansei_j_nashi: { all: 3, proper: 2, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 126, proper: 86, lead: 40, ashiro: 19, self: 19, organic: 2 },
+    },
+    meetings: {
+      shibou: { all: 93, proper: 36, lead: 57, ashiro: 10, self: 44, organic: 3 },
+      shibou_j: { all: 64, proper: 37, lead: 27, ashiro: 4, self: 23, organic: 0 },
+      kangan: { all: 35, proper: 22, lead: 13, ashiro: 2, self: 9, organic: 2 },
+      kangan_j: { all: 10, proper: 6, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      kankouhen: { all: 25, proper: 14, lead: 11, ashiro: 3, self: 8, organic: 0 },
+      kankouhen_j_ari: { all: 4, proper: 1, lead: 3, ashiro: 1, self: 1, organic: 1 },
+      kankouhen_j_nashi: { all: 8, proper: 5, lead: 3, ashiro: 0, self: 3, organic: 0 },
+      mansei: { all: 56, proper: 27, lead: 29, ashiro: 12, self: 14, organic: 3 },
+      mansei_j_ari: { all: 46, proper: 32, lead: 14, ashiro: 6, self: 7, organic: 1 },
+      mansei_j_nashi: { all: 5, proper: 4, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 286, proper: 233, lead: 53, ashiro: 25, self: 26, organic: 2 },
+    },
+    adSpend: { all: 104080000, proper: 56080000, lead: 48000000, ashiro: 16000000, self: 32000000, organic: 0 },
+    revenue: { all: 371828587, proper: 233920529, lead: 137908058, ashiro: 32070919, self: 94007161, organic: 11829978 },
+  },
+  '2026-11f': {
+    items: {
+      shibou: { all: 96, proper: 44, lead: 52, ashiro: 5, self: 45, organic: 2 },
+      shibou_j: { all: 69, proper: 38, lead: 31, ashiro: 5, self: 26, organic: 0 },
+      kangan: { all: 35, proper: 22, lead: 12, ashiro: 2, self: 8, organic: 2 },
+      kangan_j: { all: 10, proper: 6, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      kankouhen: { all: 29, proper: 18, lead: 11, ashiro: 4, self: 8, organic: 0 },
+      kankouhen_j_ari: { all: 4, proper: 1, lead: 2, ashiro: 1, self: 0, organic: 1 },
+      kankouhen_j_nashi: { all: 8, proper: 6, lead: 1, ashiro: 0, self: 1, organic: 0 },
+      mansei: { all: 55, proper: 32, lead: 22, ashiro: 9, self: 10, organic: 4 },
+      mansei_j_ari: { all: 48, proper: 34, lead: 14, ashiro: 6, self: 6, organic: 1 },
+      mansei_j_nashi: { all: 4, proper: 2, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 158, proper: 108, lead: 50, ashiro: 24, self: 24, organic: 2 },
+    },
+    meetings: {
+      shibou: { all: 116, proper: 45, lead: 71, ashiro: 12, self: 55, organic: 4 },
+      shibou_j: { all: 80, proper: 46, lead: 34, ashiro: 5, self: 29, organic: 0 },
+      kangan: { all: 44, proper: 28, lead: 16, ashiro: 2, self: 11, organic: 2 },
+      kangan_j: { all: 12, proper: 8, lead: 5, ashiro: 0, self: 5, organic: 0 },
+      kankouhen: { all: 31, proper: 18, lead: 14, ashiro: 4, self: 10, organic: 0 },
+      kankouhen_j_ari: { all: 5, proper: 1, lead: 4, ashiro: 1, self: 1, organic: 1 },
+      kankouhen_j_nashi: { all: 10, proper: 6, lead: 4, ashiro: 0, self: 4, organic: 0 },
+      mansei: { all: 70, proper: 34, lead: 36, ashiro: 15, self: 18, organic: 4 },
+      mansei_j_ari: { all: 58, proper: 40, lead: 18, ashiro: 8, self: 9, organic: 1 },
+      mansei_j_nashi: { all: 6, proper: 5, lead: 1, ashiro: 1, self: 0, organic: 0 },
+      carrier: { all: 358, proper: 291, lead: 66, ashiro: 31, self: 32, organic: 2 },
+    },
+    adSpend: { all: 130100000, proper: 82100000, lead: 48000000, ashiro: 16000000, self: 32000000, organic: 0 },
+    revenue: { all: 466653571, proper: 294268499, lead: 172385072, ashiro: 40088649, self: 117508951, organic: 14787472 },
+  },
 };
 
 const ENTITIES = [
@@ -553,12 +624,23 @@ function renderMonthButtons() {
   el.innerHTML = '';
   MONTHS.forEach((mo, i) => {
     const btn = document.createElement('button');
-    btn.className = 'month-btn';
+    btn.className = 'month-btn' + (mo.note ? ' month-btn--note' : '');
     btn.textContent = mo.label;
     btn.setAttribute('aria-pressed', i === selectedMonthIndex ? 'true' : 'false');
     btn.addEventListener('click', () => { selectedMonthIndex = i; renderAll(); });
     el.appendChild(btn);
   });
+}
+
+function renderPeriodNote() {
+  const mo = MONTHS[selectedMonthIndex];
+  const el = document.getElementById('period-note');
+  if (mo.note) {
+    el.hidden = false;
+    el.textContent = mo.noteText;
+  } else {
+    el.hidden = true;
+  }
 }
 
 function renderKpis() {
@@ -828,6 +910,7 @@ function renderRateSection() {
 
 function renderAll() {
   renderMonthButtons();
+  renderPeriodNote();
   renderKpis();
   renderEntityToggle();
   renderComposition();
